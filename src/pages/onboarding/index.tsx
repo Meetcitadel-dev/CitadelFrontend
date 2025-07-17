@@ -1,18 +1,18 @@
-"use client"
-
-import ConnectStudentsScreen from "@/components/Onboarding/connect-students-screen"
-import DateOfBirthScreen from "@/components/Onboarding/date-of-birth-screen"
-import EmailInputScreen from "@/components/Onboarding/email-input-screen"
-import NameInputScreen from "@/components/Onboarding/name-input-screen"
-import OTPInputScreen from "@/components/Onboarding/otp-input-screen"
-import SkillsetsScreen from "@/components/Onboarding/skillsets-screen"
-import SlideToStartScreen from "@/components/Onboarding/slide-to-start-screen"
-import SplashScreen1 from "@/components/Onboarding/splash-screen-1"
-import SplashScreen2 from "@/components/Onboarding/splash-screen-2"
-import SplashScreen3 from "@/components/Onboarding/splash-screen-3"
-import UniversitySelectionScreen from "@/components/Onboarding/university-selection-screen"
 import { useState, useEffect } from "react"
-
+import { useNavigate } from "react-router-dom"
+import SplashScreen1 from "../../components/Onboarding/splash-screen-1"
+import SplashScreen2 from "../../components/Onboarding/splash-screen-2"
+import SplashScreen3 from "../../components/Onboarding/splash-screen-3"
+import SlideToStartScreen from "../../components/Onboarding/slide-to-start-screen"
+import ConnectStudentsScreen from "../../components/Onboarding/connect-students-screen"
+import UniversitySelectionScreen from "../../components/Onboarding/university-selection-screen"
+import EmailInputScreen from "../../components/Onboarding/email-input-screen"
+import OTPInputScreen from "../../components/Onboarding/otp-input-screen"
+import NameInputScreen from "../../components/Onboarding/name-input-screen"
+import DateOfBirthScreen from "../../components/Onboarding/date-of-birth-screen"
+import SkillsetsScreen from "../../components/Onboarding/skillsets-screen"
+import BestFriendsScreen from "../../components/Onboarding/best-friends-screen"
+import SuccessScreen from "../../components/Onboarding/success-screen"
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState(0)
@@ -24,6 +24,10 @@ export default function App() {
   const [showNameScreen, setShowNameScreen] = useState(false)
   const [showDateScreen, setShowDateScreen] = useState(false)
   const [showSkillsScreen, setShowSkillsScreen] = useState(false)
+  const [showBestFriendsScreen, setShowBestFriendsScreen] = useState(false)
+  const [showSuccessScreen, setShowSuccessScreen] = useState(false)
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (currentScreen < 3) {
@@ -68,7 +72,29 @@ export default function App() {
   }
 
   const handleSkillsComplete = () => {
-    console.log("Onboarding completed!")
+    setShowBestFriendsScreen(true)
+  }
+
+  const handleBestFriendsComplete = () => {
+    setShowSuccessScreen(true)
+  }
+
+  // After success, redirect to /profile after 3 seconds
+  useEffect(() => {
+    if (showSuccessScreen) {
+      const timer = setTimeout(() => {
+        navigate("/profile");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessScreen, navigate]);
+
+  if (showSuccessScreen) {
+    return <SuccessScreen onComplete={() => {}} />
+  }
+
+  if (showBestFriendsScreen) {
+    return <BestFriendsScreen onContinue={handleBestFriendsComplete} />
   }
 
   if (showSkillsScreen) {
