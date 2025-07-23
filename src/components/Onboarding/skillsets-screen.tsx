@@ -6,7 +6,8 @@ import { useState } from "react"
 import { ChevronLeft, Search, X } from "lucide-react"
 
 interface SkillsetsScreenProps {
-  onContinue: () => void
+  value?: string[]
+  onContinue: (skills: string[]) => void
 }
 
 const availableSkills = [
@@ -56,9 +57,9 @@ const availableSkills = [
   "MUJ",
 ]
 
-export default function SkillsetsScreen({ onContinue }: SkillsetsScreenProps) {
+export default function SkillsetsScreen({ value, onContinue }: SkillsetsScreenProps) {
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([])
+  const [selectedSkills, setSelectedSkills] = useState<string[]>(value || [])
   const [showDropdown, setShowDropdown] = useState(false)
 
   const filteredSkills = availableSkills.filter(
@@ -193,7 +194,7 @@ export default function SkillsetsScreen({ onContinue }: SkillsetsScreenProps) {
       {/* Continue Button */}
       <div style={{ position: 'sticky', bottom: 0, left: 0, right: 0, padding: 16, background: 'transparent', zIndex: 20 }}>
         <button
-          onClick={onContinue}
+          onClick={() => onContinue(selectedSkills)}
           disabled={!isSkillsValid}
           style={{
             width: '100%',

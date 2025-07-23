@@ -6,7 +6,8 @@ import { useState, useEffect } from "react"
 import { ChevronLeft, Search, X } from "lucide-react"
 
 interface BestFriendsScreenProps {
-  onContinue: () => void
+  value?: string[]
+  onContinue: (friends: string[]) => void
 }
 
 // Mock contacts data - in real app, this would come from device contacts
@@ -53,9 +54,9 @@ const mockContacts = [
   "Victoria Campbell",
 ]
 
-export default function BestFriendsScreen({ onContinue }: BestFriendsScreenProps) {
+export default function BestFriendsScreen({ value, onContinue }: BestFriendsScreenProps) {
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedFriends, setSelectedFriends] = useState<string[]>([])
+  const [selectedFriends, setSelectedFriends] = useState<string[]>(value || [])
   const [showDropdown, setShowDropdown] = useState(false)
   const [contacts, setContacts] = useState<string[]>([])
   const [hasContactPermission, setHasContactPermission] = useState(false)
@@ -228,7 +229,7 @@ export default function BestFriendsScreen({ onContinue }: BestFriendsScreenProps
       {/* Continue Button */}
       <div style={{ position: 'sticky', bottom: 0, left: 0, right: 0, padding: 16, background: 'transparent', zIndex: 20 }}>
         <button
-          onClick={onContinue}
+          onClick={() => onContinue(selectedFriends)}
           disabled={!isFriendsValid}
           style={{
             width: '100%',

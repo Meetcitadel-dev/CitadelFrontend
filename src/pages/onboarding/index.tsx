@@ -13,6 +13,8 @@ import DateOfBirthScreen from "../../components/Onboarding/date-of-birth-screen"
 import SkillsetsScreen from "../../components/Onboarding/skillsets-screen"
 import BestFriendsScreen from "../../components/Onboarding/best-friends-screen"
 import SuccessScreen from "../../components/Onboarding/success-screen"
+import DegreeSelection from "../../components/Onboarding/degree-selection"
+import { submitOnboardingData } from "@/lib/api";
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState(0)
@@ -26,6 +28,9 @@ export default function App() {
   const [showSkillsScreen, setShowSkillsScreen] = useState(false)
   const [showBestFriendsScreen, setShowBestFriendsScreen] = useState(false)
   const [showSuccessScreen, setShowSuccessScreen] = useState(false)
+  const [showDegreeScreen, setShowDegreeScreen] = useState(false)
+  const [userEmail, setUserEmail] = useState("");
+  const [onboardingData, setOnboardingData] = useState<any>({});
 
   const navigate = useNavigate();
 
@@ -44,40 +49,62 @@ export default function App() {
   }, [currentScreen])
 
   const handleSlideComplete = () => {
-    setShowConnectScreen(true)
+    setShowSlideScreen(false);
+    setShowConnectScreen(true);
   }
 
   const handleConnectComplete = () => {
-    setShowUniversityScreen(true)
+    setShowConnectScreen(false);
+    setShowUniversityScreen(true);
   }
 
-  const handleUniversityComplete = () => {
-    setShowEmailScreen(true)
-  }
-
-  const handleEmailComplete = () => {
-    setShowOTPScreen(true)
-  }
-
+  // Update handlers to collect data from each step
+  const handleUniversityComplete = (university: any) => {
+    setOnboardingData((prev: any) => ({ ...prev, university }));
+    setShowUniversityScreen(false);
+    setShowEmailScreen(true);
+  };
+  const handleEmailComplete = (email: string) => {
+    setOnboardingData((prev: any) => ({ ...prev, email }));
+    setShowEmailScreen(false);
+    setUserEmail(email);
+    setShowOTPScreen(true);
+  };
   const handleOTPComplete = () => {
-    setShowNameScreen(true)
-  }
-
-  const handleNameComplete = () => {
-    setShowDateScreen(true)
-  }
-
-  const handleDateComplete = () => {
-    setShowSkillsScreen(true)
-  }
-
-  const handleSkillsComplete = () => {
-    setShowBestFriendsScreen(true)
-  }
-
-  const handleBestFriendsComplete = () => {
-    setShowSuccessScreen(true)
-  }
+    setShowOTPScreen(false);
+    setShowNameScreen(true);
+  };
+  const handleNameComplete = (name: string) => {
+    setOnboardingData((prev: any) => ({ ...prev, name }));
+    setShowNameScreen(false);
+    setShowDateScreen(true);
+  };
+  const handleDateComplete = (dob: { day: string; month: string; year: string }) => {
+    setOnboardingData((prev: any) => ({ ...prev, dob }));
+    setShowDateScreen(false);
+    setShowDegreeScreen(true);
+  };
+  const handleDegreeComplete = (degree: string, year: string) => {
+    setOnboardingData((prev: any) => ({ ...prev, degree, year }));
+    setShowDegreeScreen(false);
+    setShowSkillsScreen(true);
+  };
+  const handleSkillsComplete = (skills: string[]) => {
+    setOnboardingData((prev: any) => ({ ...prev, skills }));
+    setShowSkillsScreen(false);
+    setShowBestFriendsScreen(true);
+  };
+  const handleBestFriendsComplete = async (friends: string[]) => {
+    setOnboardingData((prev: any) => ({ ...prev, friends }));
+    setShowBestFriendsScreen(false);
+    setShowSuccessScreen(true);
+    // Submit all data to backend
+    try {
+      await submitOnboardingData({ ...onboardingData, friends });
+    } catch (e) {
+      // Optionally handle error
+    }
+  };
 
   // After success, redirect to /profile after 3 seconds
   useEffect(() => {
@@ -94,39 +121,34 @@ export default function App() {
   }
 
   if (showBestFriendsScreen) {
-    return <BestFriendsScreen onContinue={handleBestFriendsComplete} />
+    return <BestFriendsScreen value={onboardingData.friends} onContinue={handleBestFriendsComplete} />;
   }
-
   if (showSkillsScreen) {
-    return <SkillsetsScreen onContinue={handleSkillsComplete} />
+    return <SkillsetsScreen value={onboardingData.skills} onContinue={handleSkillsComplete} />;
   }
-
   if (showDateScreen) {
-    return <DateOfBirthScreen onContinue={handleDateComplete} />
+    return <DateOfBirthScreen value={onboardingData.dob} onContinue={handleDateComplete} />;
   }
-
   if (showNameScreen) {
-    return <NameInputScreen onContinue={handleNameComplete} />
+    return <NameInputScreen value={onboardingData.name || ""} onContinue={handleNameComplete} />;
   }
-
   if (showOTPScreen) {
-    return <OTPInputScreen onContinue={handleOTPComplete} />
+    return <OTPInputScreen email={userEmail} onContinue={handleOTPComplete} />;
   }
-
   if (showEmailScreen) {
-    return <EmailInputScreen onContinue={handleEmailComplete} />
+    return <EmailInputScreen value={onboardingData.email} onContinue={handleEmailComplete} />;
   }
-
   if (showUniversityScreen) {
-    return <UniversitySelectionScreen onContinue={handleUniversityComplete} />
+    return <UniversitySelectionScreen value={onboardingData.university} onContinue={handleUniversityComplete} />;
   }
-
+  if (showDegreeScreen) {
+    return <DegreeSelection value={{ degree: onboardingData.degree, year: onboardingData.year }} onContinue={handleDegreeComplete} />;
+  }
   if (showConnectScreen) {
-    return <ConnectStudentsScreen onContinue={handleConnectComplete} />
+    return <ConnectStudentsScreen onContinue={handleConnectComplete} />;
   }
-
   if (showSlideScreen) {
-    return <SlideToStartScreen onSlideComplete={handleSlideComplete} />
+    return <SlideToStartScreen onSlideComplete={handleSlideComplete} />;
   }
 
   const screens = [<SplashScreen1 key="screen1" />, <SplashScreen2 key="screen2" />, <SplashScreen3 key="screen3" />]

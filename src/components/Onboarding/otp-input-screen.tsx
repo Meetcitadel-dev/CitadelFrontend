@@ -3,13 +3,18 @@ import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
 import { ChevronLeft } from "lucide-react"
+import { verifyOTP } from '@/lib/api'
 
 interface OTPInputScreenProps {
+  email: string
   onContinue: () => void
 }
 
-export default function OTPInputScreen({ onContinue }: OTPInputScreenProps) {
+export default function OTPInputScreen({ email, onContinue }: OTPInputScreenProps) {
   const [otp, setOtp] = useState(["", "", "", ""])
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
+  const [loading, setLoading] = useState(false)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   const handleInputChange = (index: number, value: string) => {
@@ -19,6 +24,8 @@ export default function OTPInputScreen({ onContinue }: OTPInputScreenProps) {
     newOtp[index] = value
 
     setOtp(newOtp)
+    setError("")
+    setSuccess("")
 
     // Auto-focus next input
     if (value && index < 3) {
@@ -37,6 +44,29 @@ export default function OTPInputScreen({ onContinue }: OTPInputScreenProps) {
   useEffect(() => {
     inputRefs.current[0]?.focus()
   }, [])
+
+  const handleContinue = async () => {
+    setError("")
+    setSuccess("")
+    setLoading(true)
+    try {
+      const code = otp.join("")
+      const res = await verifyOTP(email, code)
+      if (res.success) {
+        setSuccess("OTP verified!")
+        setTimeout(() => {
+          setSuccess("")
+          onContinue()
+        }, 1000)
+      } else {
+        setError(res.message || "Invalid OTP. Try again.")
+      }
+    } catch (err: any) {
+      setError(err.message || "Invalid OTP. Try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif" }}>
@@ -87,13 +117,16 @@ export default function OTPInputScreen({ onContinue }: OTPInputScreenProps) {
             />
           ))}
         </div>
+        {/* Notification */}
+        {error && <div style={{ color: '#ff5555', marginTop: 8 }}>{error}</div>}
+        {success && <div style={{ color: '#22c55e', marginTop: 8 }}>{success}</div>}
       </div>
 
       {/* Continue Button */}
       <div style={{ position: 'absolute', bottom: 24, left: 16, right: 16 }}>
         <button
-          onClick={onContinue}
-          disabled={!isOTPComplete}
+          onClick={handleContinue}
+          disabled={!isOTPComplete || loading}
           style={{
             width: '100%',
             padding: '16px 0',
@@ -101,16 +134,16 @@ export default function OTPInputScreen({ onContinue }: OTPInputScreenProps) {
             fontSize: 18,
             fontWeight: 600,
             fontFamily: "'Roboto Serif', serif",
-            background: isOTPComplete ? '#22FF88' : '#232323',
-            color: isOTPComplete ? '#000' : '#888',
+            background: isOTPComplete && !loading ? '#22FF88' : '#232323',
+            color: isOTPComplete && !loading ? '#000' : '#888',
             border: 'none',
-            opacity: isOTPComplete ? 1 : 0.7,
+            opacity: isOTPComplete && !loading ? 1 : 0.7,
             transition: 'background 0.2s',
-            cursor: isOTPComplete ? 'pointer' : 'not-allowed',
+            cursor: isOTPComplete && !loading ? 'pointer' : 'not-allowed',
             boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           }}
         >
-          Continue
+          {loading ? 'Verifying...' : 'Continue'}
         </button>
       </div>
     </div>

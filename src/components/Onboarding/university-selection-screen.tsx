@@ -1,85 +1,39 @@
 
 import type React from "react"
-
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import { ChevronLeft, Search } from "lucide-react"
+import { useQuery } from '@tanstack/react-query'
+import { fetchUniversities } from '@/lib/api'
+// import { fetchUniversities } from '@/lib/apiClient'
 
 interface UniversitySelectionScreenProps {
-  onContinue: () => void
+  value?: any
+  onContinue: (university: any) => void
 }
 
-const universities = [
-  "Masters' Union",
-  "IIT Delhi",
-  "IIT Bombay",
-  "IIT Madras",
-  "IIT Kanpur",
-  "IIT Kharagpur",
-  "IIT Roorkee",
-  "IIT Guwahati",
-  "Plaksha University",
-  "IIM Indore",
-  "IIM Ahmedabad",
-  "IIM Bangalore",
-  "IIM Calcutta",
-  "IIM Lucknow",
-  "MUJ",
-  "Delhi University",
-  "Jawaharlal Nehru University",
-  "Banaras Hindu University",
-  "University of Mumbai",
-  "University of Pune",
-  "Jadavpur University",
-  "Anna University",
-  "VIT University",
-  "SRM University",
-  "Amity University",
-  "Lovely Professional University",
-  "Chandigarh University",
-  "Thapar University",
-  "PEC University of Technology",
-  "NIT Trichy",
-  "NIT Warangal",
-  "NIT Surathkal",
-  "BITS Pilani",
-  "IIIT Hyderabad",
-  "ISI Kolkata",
-]
-
-export default function UniversitySelectionScreen({ onContinue }: UniversitySelectionScreenProps) {
+export default function UniversitySelectionScreen({ value, onContinue }: UniversitySelectionScreenProps) {
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedUniversity, setSelectedUniversity] = useState("")
+  const [selectedUniversity, setSelectedUniversity] = useState<any | null>(value || null)
   const [showDropdown, setShowDropdown] = useState(false)
-  const [filteredUniversities, setFilteredUniversities] = useState(universities)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    if (searchTerm) {
-      const filtered = universities
-        .filter((uni) => uni.toLowerCase().includes(searchTerm.toLowerCase()))
-        .sort((a, b) => {
-          // Prioritize exact matches and matches at the beginning
-          const aIndex = a.toLowerCase().indexOf(searchTerm.toLowerCase())
-          const bIndex = b.toLowerCase().indexOf(searchTerm.toLowerCase())
-          if (aIndex !== bIndex) return aIndex - bIndex
-          return a.localeCompare(b)
-        })
-      setFilteredUniversities(filtered)
-    } else {
-      setFilteredUniversities(universities)
-    }
-  }, [searchTerm])
+  // Fetch universities from backend
+  const { data: universities = [], isLoading, isError } = useQuery({
+    queryKey: ['universities', searchTerm],
+    queryFn: () => fetchUniversities({ search: searchTerm, limit: 20 }),
+    staleTime: 5 * 60 * 1000,
+  })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSearchTerm(value)
-    setSelectedUniversity("")
+    setSelectedUniversity(null)
     setShowDropdown(true)
   }
 
-  const handleUniversitySelect = (university: string) => {
+  const handleUniversitySelect = (university: any) => {
     setSelectedUniversity(university)
-    setSearchTerm(university)
+    setSearchTerm(university.name)
     setShowDropdown(false)
   }
 
@@ -88,7 +42,6 @@ export default function UniversitySelectionScreen({ onContinue }: UniversitySele
   }
 
   const handleInputBlur = () => {
-    // Delay hiding dropdown to allow for selection
     setTimeout(() => setShowDropdown(false), 150)
   }
 
@@ -115,7 +68,7 @@ export default function UniversitySelectionScreen({ onContinue }: UniversitySele
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search colleges"
+            placeholder="Search universities"
             value={searchTerm}
             onChange={handleInputChange}
             onFocus={handleInputFocus}
@@ -141,9 +94,12 @@ export default function UniversitySelectionScreen({ onContinue }: UniversitySele
         {/* Dropdown */}
         {showDropdown && (
           <div style={{ position: 'absolute', left: 16, right: 16, background: '#232323', borderRadius: 12, marginTop: 8, maxHeight: 320, overflowY: 'auto', zIndex: 10 }}>
-            {filteredUniversities.map((university, index) => (
+            {isLoading && <div style={{ color: '#888', padding: 16 }}>Loading...</div>}
+            {isError && <div style={{ color: 'red', padding: 16 }}>Failed to load universities</div>}
+            {!isLoading && !isError && universities.length === 0 && <div style={{ color: '#888', padding: 16 }}>No universities found</div>}
+            {universities.map((university: any) => (
               <button
-                key={index}
+                key={university.id}
                 onClick={() => handleUniversitySelect(university)}
                 style={{
                   width: '100%',
@@ -154,11 +110,11 @@ export default function UniversitySelectionScreen({ onContinue }: UniversitySele
                   border: 'none',
                   fontFamily: "'Roboto Serif', serif",
                   fontSize: 17,
-                  borderBottom: index !== filteredUniversities.length - 1 ? '1px solid #333' : 'none',
+                  borderBottom: '1px solid #333',
                   cursor: 'pointer',
                 }}
               >
-                {university}
+                {university.name}
               </button>
             ))}
           </div>
@@ -168,7 +124,7 @@ export default function UniversitySelectionScreen({ onContinue }: UniversitySele
       {/* Continue Button */}
       <div style={{ position: 'absolute', bottom: 24, left: 16, right: 16 }}>
         <button
-          onClick={onContinue}
+          onClick={() => onContinue(selectedUniversity)}
           disabled={!selectedUniversity}
           style={{
             width: '100%',

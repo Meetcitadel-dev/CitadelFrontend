@@ -6,11 +6,12 @@ import { useState } from "react"
 import { ChevronLeft } from "lucide-react"
 
 interface NameInputScreenProps {
-  onContinue: () => void
+  value: string
+  onContinue: (name: string) => void
 }
 
-export default function NameInputScreen({ onContinue }: NameInputScreenProps) {
-  const [name, setName] = useState("")
+export default function NameInputScreen({ value, onContinue }: NameInputScreenProps) {
+  const [name, setName] = useState(value || "")
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value)
@@ -60,7 +61,7 @@ export default function NameInputScreen({ onContinue }: NameInputScreenProps) {
       {/* Continue Button */}
       <div style={{ position: 'absolute', bottom: 24, left: 16, right: 16 }}>
         <button
-          onClick={onContinue}
+          onClick={() => onContinue(name)}
           disabled={!isNameValid}
           style={{
             width: '100%',

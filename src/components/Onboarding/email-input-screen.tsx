@@ -2,24 +2,62 @@ import type React from "react"
 
 import { useState } from "react"
 import { ChevronLeft } from "lucide-react"
+import { sendEmailOTP } from '@/lib/api'
 
 interface EmailInputScreenProps {
-  onContinue: () => void
+  value?: string
+  onContinue: (email: string) => void
 }
 
-export default function EmailInputScreen({ onContinue }: EmailInputScreenProps) {
-  const [email, setEmail] = useState("")
+export default function EmailInputScreen({ value, onContinue }: EmailInputScreenProps) {
+  const [email, setEmail] = useState(value || "")
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
+  const [loading, setLoading] = useState(false)
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
   }
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value)
+  // Now: .edu or .org can be anywhere in the email
+  const isCollegeEmail = (email: string) => {
+    return isValidEmail(email) && (email.includes('.edu') || email.includes('.org'))
   }
 
-  const isEmailComplete = email && isValidEmail(email)
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value)
+    setError("")
+    setSuccess("")
+  }
+
+  const handleContinue = async () => {
+    setError("")
+    setSuccess("")
+    if (!isCollegeEmail(email)) {
+      setError("Please use your university email (.edu or .org)")
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await sendEmailOTP(email)
+      if (res.success) {
+        setSuccess("OTP sent to your university email.")
+        setTimeout(() => {
+          setSuccess("")
+          onContinue(email)
+        }, 1000)
+      } else {
+        setError(res.message || "Failed to send OTP. Try again.")
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to send OTP. Try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const isEmailComplete = email && isCollegeEmail(email)
 
   return (
     <div style={{ minHeight: '100vh', background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif" }}>
@@ -39,7 +77,7 @@ export default function EmailInputScreen({ onContinue }: EmailInputScreenProps) 
       <div style={{ padding: '0 16px', marginBottom: 0 }}>
         <input
           type="email"
-          placeholder="Enter your email"
+          placeholder="Sign up with your university email ID"
           value={email}
           onChange={handleEmailChange}
           style={{
@@ -58,13 +96,16 @@ export default function EmailInputScreen({ onContinue }: EmailInputScreenProps) 
             letterSpacing: '-0.2px',
           }}
         />
+        {/* Notification */}
+        {error && <div style={{ color: '#ff5555', marginTop: 8 }}>{error}</div>}
+        {success && <div style={{ color: '#22c55e', marginTop: 8 }}>{success}</div>}
       </div>
 
       {/* Continue Button */}
       <div style={{ position: 'absolute', bottom: 24, left: 16, right: 16 }}>
         <button
-          onClick={onContinue}
-          disabled={!isEmailComplete}
+          onClick={handleContinue}
+          disabled={!isEmailComplete || loading}
           style={{
             width: '100%',
             padding: '16px 0',
@@ -72,16 +113,16 @@ export default function EmailInputScreen({ onContinue }: EmailInputScreenProps) 
             fontSize: 18,
             fontWeight: 600,
             fontFamily: "'Roboto Serif', serif",
-            background: isEmailComplete ? '#22FF88' : '#232323',
-            color: isEmailComplete ? '#000' : '#888',
+            background: isEmailComplete && !loading ? '#22FF88' : '#232323',
+            color: isEmailComplete && !loading ? '#000' : '#888',
             border: 'none',
-            opacity: isEmailComplete ? 1 : 0.7,
+            opacity: isEmailComplete && !loading ? 1 : 0.7,
             transition: 'background 0.2s',
-            cursor: isEmailComplete ? 'pointer' : 'not-allowed',
+            cursor: isEmailComplete && !loading ? 'pointer' : 'not-allowed',
             boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           }}
         >
-          Continue
+          {loading ? 'Sending OTP...' : 'Continue'}
         </button>
       </div>
     </div>
