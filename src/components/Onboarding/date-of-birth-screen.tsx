@@ -6,13 +6,14 @@ import { useState } from "react"
 import { ChevronLeft } from "lucide-react"
 
 interface DateOfBirthScreenProps {
-  onContinue: () => void
+  value?: { day: string; month: string; year: string }
+  onContinue: (dob: { day: string; month: string; year: string }) => void
 }
 
-export default function DateOfBirthScreen({ onContinue }: DateOfBirthScreenProps) {
-  const [day, setDay] = useState("")
-  const [month, setMonth] = useState("")
-  const [year, setYear] = useState("")
+export default function DateOfBirthScreen({ value, onContinue }: DateOfBirthScreenProps) {
+  const [day, setDay] = useState(value?.day || "")
+  const [month, setMonth] = useState(value?.month || "")
+  const [year, setYear] = useState(value?.year || "")
 
   const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -148,7 +149,7 @@ export default function DateOfBirthScreen({ onContinue }: DateOfBirthScreenProps
       {/* Continue Button */}
       <div style={{ position: 'absolute', bottom: 24, left: 16, right: 16 }}>
         <button
-          onClick={onContinue}
+          onClick={() => onContinue({ day, month, year })}
           disabled={!isDateValid()}
           style={{
             width: '100%',
