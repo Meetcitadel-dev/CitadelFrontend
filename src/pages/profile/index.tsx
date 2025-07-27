@@ -1,109 +1,340 @@
-import { useState } from "react"
-import { ChevronLeft } from "lucide-react"
-import ProfileImageUpload from "@/components/Profile/profile-image-upload"
-import ProfileForm from "@/components/Profile/profile-form"
 
-interface EditProfileScreenProps {
-  onSave: () => void
+import {
+  Briefcase,
+  GraduationCap,
+  Search,
+  Calendar,
+  MessageCircle,
+  Bell,
+  User,
+  Settings,
+  MoreVertical,
+} from "lucide-react"
+import { useNavigate, useLocation } from "react-router-dom"
+import { useState, useEffect } from "react"
+import ProfileImage from "@/assets/657e5f166ffee2019c3aa97b2117a5c1144d080e.png"
+import Navbar from "@/components/Common/navbar"
+import ForestProfile from "@/assets/man, forest background behind.png"
+import Realisticprofile from "@/assets/man, realsitic background behind.png"
+import Oceanprofile from "@/assets/man, ocean background behind.png"
+import Buildingprofile from "@/assets/man, building background behind.png"
+import { getCurrentUserProfile } from "@/lib/api"
+import { getAuthToken } from "@/lib/utils"
+
+// Add Inter font import for this page only
+const interFont = {
+  fontFamily: "Inter, sans-serif",
 }
 
-export default function EditProfileScreen({ onSave }: EditProfileScreenProps) {
-  const [profileData, setProfileData] = useState({
-    mainPhoto: null as File | null,
-    additionalPhotos: [null, null, null, null] as (File | null)[],
-    fullName: "",
-    universityEmail: "",
-    phoneNumber: "",
-    dateOfBirth: { day: "", month: "", year: "" },
-  })
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  university: string;
+  degree: string;
+  year: string;
+  skills: string[];
+  aboutMe?: string;
+  sports?: string;
+  movies?: string;
+  tvShows?: string;
+  teams?: string;
+  portfolioLink?: string;
+  profileImage?: string;
+  uploadedImages?: string[];
+  friendsCount?: number;
+}
 
-  const handleSave = () => {
-    // Validate and save profile data
-    console.log("Saving profile data:", profileData)
-    onSave()
+export default function MobileProfileScreen() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  const navItems = [
+    { icon: Search, label: "Explore", onClick: () => navigate("/explore"), active: location.pathname === "/explore" },
+    { icon: Calendar, label: "Events", onClick: () => navigate("/events"), active: location.pathname === "/events" },
+    { icon: MessageCircle, label: "Chats", onClick: () => navigate("/chats"), active: location.pathname === "/chats" },
+    { icon: Bell, label: "Notifications", onClick: () => navigate("/notification"), active: location.pathname === "/notification" },
+    { icon: User, label: "Profile", onClick: () => navigate("/profile"), active: location.pathname === "/profile" },
+  ]
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = getAuthToken()
+        if (!token) {
+          console.error('No authentication token found')
+          return
+        }
+
+        // Fetch user profile data
+        const profileResponse = await getCurrentUserProfile(token)
+        if (profileResponse.success) {
+          // Map the API response to our expected format
+          const profileData = profileResponse.data
+          console.log('Profile data received:', profileData)
+          console.log('Images from API:', profileData.images)
+          
+          const mappedProfile = {
+            id: profileData.id.toString(),
+            name: profileData.name,
+            email: profileData.email,
+            university: profileData.university?.name || '',
+            degree: profileData.degree || '',
+            year: profileData.year || '',
+            skills: profileData.skills || [],
+            aboutMe: undefined, // Not in API response yet
+            sports: undefined, // Not in API response yet
+            movies: undefined, // Not in API response yet
+            tvShows: undefined, // Not in API response yet
+            teams: undefined, // Not in API response yet
+            portfolioLink: undefined, // Not in API response yet
+            profileImage: profileData.images?.[0]?.cloudfrontUrl, // Use first image as profile
+            uploadedImages: profileData.images?.map((img: any) => img.cloudfrontUrl) || [],
+            friendsCount: profileData.friends?.length || 0
+          }
+          
+          console.log('Mapped profile:', mappedProfile)
+          console.log('Profile image URL:', mappedProfile.profileImage)
+          console.log('Gallery images:', mappedProfile.uploadedImages)
+          
+          setUserProfile(mappedProfile)
+        }
+
+        // No need to fetch images separately since they're included in profile response
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUserData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="relative w-full h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-lg">Loading...</div>
+      </div>
+    )
   }
 
-  const updateProfileData = (updates: Partial<typeof profileData>) => {
-    setProfileData((prev) => ({ ...prev, ...updates }))
+  // Use user data or fallback to defaults
+  const profile = userProfile || {
+    name: "Your Name",
+    university: "Your University",
+    degree: "Your Degree",
+    year: "1",
+    skills: [],
+    aboutMe: undefined,
+    sports: undefined,
+    movies: undefined,
+    tvShows: undefined,
+    teams: undefined,
+    portfolioLink: undefined,
+    profileImage: undefined,
+    uploadedImages: [],
+    friendsCount: 0
   }
+
+  // Get profile image (user's uploaded image or default)
+  const profileImageUrl = profile.profileImage || ProfileImage
+
+  // Get gallery images (user's uploaded images or defaults)
+  const galleryImages = profile.uploadedImages || [ForestProfile, Realisticprofile, Oceanprofile, Buildingprofile]
+
+  // Function to proxy S3 URLs to bypass CORS (for development)
+  const proxyImageUrl = (url: string) => {
+    if (url && url.includes('meetcitadel.s3.ap-south-1.amazonaws.com')) {
+      // Use a CORS proxy for development - try multiple options
+      try {
+        // Option 1: Use a public CORS proxy
+        return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+      } catch (error) {
+        // Option 2: Fallback to direct URL (might work if CORS is fixed)
+        return url
+      }
+    }
+    return url
+  }
+
+  console.log('Render - Profile image URL:', profileImageUrl)
+  console.log('Render - Gallery images:', galleryImages)
+  console.log('Render - Profile data:', profile)
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000', color: '#fff', fontFamily: "'Roboto Serif', serif" }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', paddingTop: 32, height: 56 }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <button style={{ background: 'none', border: 'none', padding: 0, marginRight: 16 }}>
-            <ChevronLeft size={24} color="white" />
+    <div className="relative w-full h-screen bg-black overflow-hidden">
+      {/* Hide scrollbar globally for this page */}
+      <style>{`
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+      `}</style>
+      {/* Scrollable Content Container */}
+      <div className="h-full overflow-y-auto pb-20 hide-scrollbar">
+        {/* Top Icons */}
+        <div className="absolute top-4 right-4 z-20 flex gap-3">
+          <button onClick={() => navigate("/settings")}>
+            <Settings className="w-6 h-6 text-white" />
           </button>
-          <h1 style={{ color: '#fff', fontSize: 24, fontWeight: 700, fontFamily: "'Roboto Serif', serif", margin: 0 }}>Profile</h1>
         </div>
-        <button onClick={handleSave} style={{ color: '#22FF88', fontSize: 18, fontWeight: 700, background: 'none', border: 'none', fontFamily: "'Roboto Serif', serif", cursor: 'pointer' }}>
-          Save
-        </button>
+
+        {/* Profile Image with Gradient Overlay and Info Block */}
+        <div className="relative h-[65vh] w-full">
+          <img
+            src={proxyImageUrl(profileImageUrl) || "/placeholder.svg"}
+            alt="Profile"
+            className="object-cover absolute inset-0 w-full h-full"
+            onLoad={() => console.log('Profile image loaded successfully:', profileImageUrl)}
+            onError={(e) => console.error('Profile image failed to load:', profileImageUrl, e)}
+          />
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90" />
+
+          {/* Profile Info Block */}
+          <div className="absolute bottom-0 left-0 right-0 z-10">
+            <div className="w-full flex flex-col px-4" style={interFont}>
+              {/* Name and Year Row */}
+              <div className="flex justify-between items-start">
+                <div className="flex-1 pr-4">
+                  <h1 className="text-white text-2xl font-bold leading-tight">{profile.name}</h1>
+                  {/* Skills */}
+                  <div className="flex items-center gap-2 mt-2">
+                    <Briefcase className="w-4 h-4 text-white/80" />
+                    <span className="text-white/90 text-sm">
+                      {profile.skills && profile.skills.length > 0 ? profile.skills.join(', ') : '--'}
+                    </span>
+                  </div>
+                  {/* Education */}
+                  <div className="flex items-center gap-2 mt-1">
+                    <GraduationCap className="w-4 h-4 text-white/80" />
+                    <span className="text-white/90 text-sm">
+                      {profile.university && profile.degree ? `${profile.university} • ${profile.degree}` : '--'}
+                    </span>
+                  </div>
+                </div>
+                {/* Year Badge */}
+                <div className="bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2">
+                  <div className="text-white/60 text-xs font-medium">Year</div>
+                  <div className="text-white text-2xl font-bold">{profile.year || '--'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Scrollable Bottom Content Section */}
+        <div className="px-4 pt-4 space-y-4" style={interFont}>
+          {/* Three Dots Menu, Edit Profile Button, and Friends Count */}
+          <div className="flex items-center gap-3">
+            {/* Three Dots Menu */}
+            <button className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20">
+              <MoreVertical className="w-5 h-5 text-white" />
+            </button>
+
+            {/* Edit Profile Button */}
+            <button 
+              className="flex-1 bg-green-500 rounded-2xl py-3 px-6"
+              onClick={() => navigate("/edit-profile")}
+            >
+              <span className="text-black text-base font-semibold">Edit Profile</span>
+            </button>
+
+            {/* Friends Count */}
+            <div className="text-right">
+              <div className="text-white text-xl font-bold">{profile.friendsCount || 0}</div>
+              <div className="text-white/60 text-sm">Friends</div>
+            </div>
+          </div>
+
+          {/* User Link Section */}
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <span className="text-green-400 text-base">
+              {profile.portfolioLink || '--'}
+            </span>
+          </div>
+
+          {/* About Me Section */}
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <h3 className="text-white text-xl font-bold mb-3">About me</h3>
+            <div className="space-y-3">
+              <p className="text-white/80 text-sm leading-relaxed">
+                {profile.aboutMe || '--'}
+              </p>
+            </div>
+          </div>
+
+          {/* Sports I Play Section */}
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <h3 className="text-white text-xl font-bold mb-3">Sports I play</h3>
+            <p className="text-green-400 text-lg font-medium">{profile.sports || '--'}</p>
+          </div>
+
+          {/* Photo Gallery Section */}
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <img
+              src={proxyImageUrl(galleryImages[0]) || ForestProfile}
+              alt="Profile Gallery"
+              className="w-full h-auto object-contain rounded-xl"
+              onLoad={() => console.log('Gallery image 1 loaded:', galleryImages[0])}
+              onError={(e) => console.error('Gallery image 1 failed to load:', galleryImages[0], e)}
+            />
+          </div>
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <h3 className="text-white text-xl font-bold mb-3">Movies I like</h3>
+            <p className="text-green-400 text-lg font-medium">{profile.movies || '--'}</p>
+          </div>
+
+          {/* Photo Gallery Section */}
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <img
+              src={proxyImageUrl(galleryImages[1]) || Realisticprofile}
+              alt="Profile Gallery"
+              className="w-full h-auto object-contain rounded-xl"
+              onLoad={() => console.log('Gallery image 2 loaded:', galleryImages[1])}
+              onError={(e) => console.error('Gallery image 2 failed to load:', galleryImages[1], e)}
+            />
+          </div>
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <h3 className="text-white text-xl font-bold mb-3">TV Shows I watch</h3>
+            <p className="text-green-400 text-lg font-medium">{profile.tvShows || '--'}</p>
+          </div>
+
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <img
+              src={proxyImageUrl(galleryImages[2]) || Oceanprofile}
+              alt="Profile Gallery"
+              className="w-full h-auto object-contain rounded-xl"
+              onLoad={() => console.log('Gallery image 3 loaded:', galleryImages[2])}
+              onError={(e) => console.error('Gallery image 3 failed to load:', galleryImages[2], e)}
+            />
+          </div>
+
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <h3 className="text-white text-xl font-bold mb-3">Teams I support</h3>
+            <p className="text-green-400 text-lg font-medium">{profile.teams || '--'}</p>
+          </div>
+
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <img
+              src={proxyImageUrl(galleryImages[3]) || Buildingprofile}
+              alt="Profile Gallery"
+              className="w-full h-auto object-contain rounded-xl"
+              onLoad={() => console.log('Gallery image 4 loaded:', galleryImages[3])}
+              onError={(e) => console.error('Gallery image 4 failed to load:', galleryImages[3], e)}
+            />
+          </div>
+          
+
+          {/* Extra spacing for scroll */}
+          <div className="h-4"></div>
+        </div>
       </div>
 
-      {/* Content */}
-      <div style={{ maxWidth: 425, margin: '0 auto', padding: '0 16px', marginTop: 16 }}>
-        {/* Main Profile Photo */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 16 }}>
-          <button
-            onClick={() => document.getElementById('main-photo-input')?.click()}
-            style={{ width: 120, height: 120, border: '2px dashed #22FF88', borderRadius: 16, background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}
-          >
-            {profileData.mainPhoto ? (
-              <img
-                src={URL.createObjectURL(profileData.mainPhoto) || "/placeholder.svg"}
-                alt="Main profile"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 16 }}
-              />
-            ) : (
-              <span style={{ color: '#22FF88', fontSize: 48, fontWeight: 700, lineHeight: 1 }}>+</span>
-            )}
-          </button>
-          <input id="main-photo-input" type="file" accept="image/*" onChange={e => {
-            const file = e.target.files?.[0];
-            if (file) updateProfileData({ mainPhoto: file });
-          }} style={{ display: 'none' }} />
-          <span style={{ color: '#aaa', fontSize: 14, marginTop: 4 }}>Choose image</span>
-        </div>
-
-        {/* Additional Photos */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 24, justifyContent: 'center' }}>
-          {[0, 1, 2, 3].map((index) => (
-            <button
-              key={index}
-              onClick={() => document.getElementById(`additional-photo-input-${index}`)?.click()}
-              style={{ width: 56, height: 56, border: '2px dashed #444', borderRadius: 12, background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
-            >
-              {profileData.additionalPhotos[index] ? (
-                <img
-                  src={URL.createObjectURL(profileData.additionalPhotos[index]!) || "/placeholder.svg"}
-                  alt={`Additional photo ${index + 1}`}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }}
-                />
-              ) : (
-                <span style={{ color: '#22FF88', fontSize: 28, fontWeight: 700, lineHeight: 1 }}>+</span>
-              )}
-              <input
-                id={`additional-photo-input-${index}`}
-                type="file"
-                accept="image/*"
-                onChange={e => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const newPhotos = [...profileData.additionalPhotos];
-                    newPhotos[index] = file;
-                    updateProfileData({ additionalPhotos: newPhotos });
-                  }
-                }}
-                style={{ display: 'none' }}
-              />
-            </button>
-          ))}
-        </div>
-
-        {/* Profile Form */}
-        <ProfileForm profileData={profileData} updateProfileData={updateProfileData} />
+      {/* Fixed Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-30">
+        <Navbar navItems={navItems} />
       </div>
     </div>
   )

@@ -11,6 +11,7 @@ import OTPInputScreen from "../../components/Onboarding/otp-input-screen"
 import NameInputScreen from "../../components/Onboarding/name-input-screen"
 import DateOfBirthScreen from "../../components/Onboarding/date-of-birth-screen"
 import SkillsetsScreen from "../../components/Onboarding/skillsets-screen"
+import UploadScreen from "../../components/Onboarding/UploadProfile/uploadscreen"
 import BestFriendsScreen from "../../components/Onboarding/best-friends-screen"
 import SuccessScreen from "../../components/Onboarding/success-screen"
 import DegreeSelection from "../../components/Onboarding/degree-selection"
@@ -26,6 +27,7 @@ export default function App() {
   const [showNameScreen, setShowNameScreen] = useState(false)
   const [showDateScreen, setShowDateScreen] = useState(false)
   const [showSkillsScreen, setShowSkillsScreen] = useState(false)
+  const [showUploadScreen, setShowUploadScreen] = useState(false)
   const [showBestFriendsScreen, setShowBestFriendsScreen] = useState(false)
   const [showSuccessScreen, setShowSuccessScreen] = useState(false)
   const [showDegreeScreen, setShowDegreeScreen] = useState(false)
@@ -74,8 +76,9 @@ export default function App() {
     setShowOTPScreen(false);
     setShowNameScreen(true);
   };
-  const handleNameComplete = (name: string) => {
-    setOnboardingData((prev: any) => ({ ...prev, name }));
+  const handleNameComplete = (name: string, gender: string) => {
+    console.log('Name and gender collected:', { name, gender });
+    setOnboardingData((prev: any) => ({ ...prev, name, gender }));
     setShowNameScreen(false);
     setShowDateScreen(true);
   };
@@ -85,6 +88,7 @@ export default function App() {
     setShowDegreeScreen(true);
   };
   const handleDegreeComplete = (degree: string, year: string) => {
+    console.log('Degree and year collected:', { degree, year });
     setOnboardingData((prev: any) => ({ ...prev, degree, year }));
     setShowDegreeScreen(false);
     setShowSkillsScreen(true);
@@ -92,25 +96,69 @@ export default function App() {
   const handleSkillsComplete = (skills: string[]) => {
     setOnboardingData((prev: any) => ({ ...prev, skills }));
     setShowSkillsScreen(false);
+    setShowUploadScreen(true);
+  };
+  
+  const handleUploadComplete = (images?: any[]) => {
+    if (images) {
+      setOnboardingData((prev: any) => ({ ...prev, uploadedImages: images }));
+    }
+    setShowUploadScreen(false);
     setShowBestFriendsScreen(true);
   };
+  
+  const handleUploadBack = () => {
+    setShowUploadScreen(false);
+    setShowSkillsScreen(true);
+  };
   const handleBestFriendsComplete = async (friends: string[]) => {
+    const finalData = { ...onboardingData, friends };
     setOnboardingData((prev: any) => ({ ...prev, friends }));
     setShowBestFriendsScreen(false);
-    setShowSuccessScreen(true);
+    
+    // Debug: Log the complete data structure
+    console.log('=== ONBOARDING DATA DEBUG ===');
+    console.log('Complete onboarding data:', finalData);
+    console.log('Data structure:', {
+      university: finalData.university,
+      email: finalData.email,
+      name: finalData.name,
+      gender: finalData.gender,
+      dob: finalData.dob,
+      degree: finalData.degree,
+      year: finalData.year,
+      skills: finalData.skills,
+      uploadedImages: finalData.uploadedImages,
+      friends: finalData.friends
+    });
+    console.log('=== END DEBUG ===');
+    
     // Submit all data to backend
     try {
-      await submitOnboardingData({ ...onboardingData, friends });
-    } catch (e) {
-      // Optionally handle error
+      const result = await submitOnboardingData(finalData);
+      console.log('Onboarding API response:', result);
+      if (result.success) {
+        setShowSuccessScreen(true);
+      } else {
+        // Handle error - show error message or retry
+        console.error('Onboarding failed:', result.message);
+        alert('Onboarding failed. Please try again.');
+        // Stay on the current screen to allow retry
+        setShowBestFriendsScreen(true);
+      }
+    } catch (e: any) {
+      console.error('Onboarding error:', e);
+      alert('Onboarding failed. Please try again.');
+      // Stay on the current screen to allow retry
+      setShowBestFriendsScreen(true);
     }
   };
 
-  // After success, redirect to /profile after 3 seconds
+  // After success, redirect to /explore after 3 seconds
   useEffect(() => {
     if (showSuccessScreen) {
       const timer = setTimeout(() => {
-        navigate("/profile");
+        navigate("/explore");
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -123,6 +171,9 @@ export default function App() {
   if (showBestFriendsScreen) {
     return <BestFriendsScreen value={onboardingData.friends} onContinue={handleBestFriendsComplete} />;
   }
+  if (showUploadScreen) {
+    return <UploadScreen onComplete={handleUploadComplete} onBack={handleUploadBack} />;
+  }
   if (showSkillsScreen) {
     return <SkillsetsScreen value={onboardingData.skills} onContinue={handleSkillsComplete} />;
   }
@@ -130,7 +181,7 @@ export default function App() {
     return <DateOfBirthScreen value={onboardingData.dob} onContinue={handleDateComplete} />;
   }
   if (showNameScreen) {
-    return <NameInputScreen value={onboardingData.name || ""} onContinue={handleNameComplete} />;
+    return <NameInputScreen value={onboardingData.name || ""} gender={onboardingData.gender} onContinue={handleNameComplete} />;
   }
   if (showOTPScreen) {
     return <OTPInputScreen email={userEmail} onContinue={handleOTPComplete} />;

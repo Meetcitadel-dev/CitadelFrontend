@@ -4,20 +4,21 @@ import { useState } from "react"
 import NotificationTabs from "@/components/Notification/NotificationTabs"
 import Navbar from "@/components/Common/navbar";
 import { Search, Calendar, MessageCircle, Bell, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import NotificationItem from "@/components/Notification/NotificationItem"
 import RequestItem from "@/components/Notification/RequestItem"
 
 export default function NotificationsScreen() {
   const [activeTab, setActiveTab] = useState<"requests" | "likes">("likes")
   const navigate = useNavigate();
+  const location = useLocation();
 
   const navItems = [
-    { icon: Search, label: "Explore", onClick: () => navigate("/explore"), active: false },
-    { icon: Calendar, label: "Events", onClick: () => navigate("/events"), active: false },
-    { icon: MessageCircle, label: "Chats", onClick: () => navigate("/chats"), active: false },
-    { icon: Bell, label: "Notifications", onClick: () => navigate("/notification"), active: true },
-    { icon: User, label: "Profile", onClick: () => navigate("/profile"), active: false },
+    { icon: Search, label: "Explore", onClick: () => navigate("/explore"), active: location.pathname === "/explore" },
+    { icon: Calendar, label: "Events", onClick: () => navigate("/events"), active: location.pathname === "/events" },
+    { icon: MessageCircle, label: "Chats", onClick: () => navigate("/chats"), active: location.pathname === "/chats" },
+    { icon: Bell, label: "Notifications", onClick: () => navigate("/notification"), active: location.pathname === "/notification" },
+    { icon: User, label: "Profile", onClick: () => navigate("/profile"), active: location.pathname === "/profile" },
   ];
 
   const notifications = [

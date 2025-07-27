@@ -33,9 +33,27 @@ export async function apiClient<T = any>(
     fetchOptions.body = JSON.stringify(options.body);
   }
   const apiUrl = getApiUrl(url);
+  
+  // Debug: Log the request details
+  console.log('API Request:', {
+    url: apiUrl,
+    method: fetchOptions.method,
+    headers: headers,
+    body: options.body
+  });
+  
   const res = await fetch(apiUrl, fetchOptions);
+  
+  // Debug: Log the response
+  console.log('API Response:', {
+    status: res.status,
+    statusText: res.statusText,
+    headers: Object.fromEntries(res.headers.entries())
+  });
+  
   if (!res.ok) {
     const error = await res.text();
+    console.error('API Error:', error);
     throw new Error(error || res.statusText);
   }
   // Try to parse JSON, fallback to text

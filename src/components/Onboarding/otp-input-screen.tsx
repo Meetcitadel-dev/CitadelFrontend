@@ -4,6 +4,7 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { ChevronLeft } from "lucide-react"
 import { verifyOTP } from '@/lib/api'
+import { setAuthToken } from '@/lib/utils'
 
 interface OTPInputScreenProps {
   email: string
@@ -45,7 +46,7 @@ export default function OTPInputScreen({ email, onContinue }: OTPInputScreenProp
     inputRefs.current[0]?.focus()
   }, [])
 
-  const handleContinue = async () => {
+        const handleContinue = async () => {
     setError("")
     setSuccess("")
     setLoading(true)
@@ -53,6 +54,10 @@ export default function OTPInputScreen({ email, onContinue }: OTPInputScreenProp
       const code = otp.join("")
       const res = await verifyOTP(email, code)
       if (res.success) {
+        // Store the access token from the tokens object
+        if (res.tokens && res.tokens.accessToken) {
+          setAuthToken(res.tokens.accessToken)
+        }
         setSuccess("OTP verified!")
         setTimeout(() => {
           setSuccess("")

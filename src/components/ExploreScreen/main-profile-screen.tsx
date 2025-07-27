@@ -1,7 +1,8 @@
 import { Grid3X3, Info, Briefcase, GraduationCap, Search, Calendar, MessageCircle, Bell, User, LayoutGrid } from "lucide-react"
 import { useState } from "react"
 import Navbar from "../Common/navbar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import ProfileImage from "@/assets/657e5f166ffee2019c3aa97b2117a5c1144d080e.png"
 
 // Add Inter font import for this page only
 const interFont = {
@@ -11,28 +12,31 @@ const interFont = {
 export default function MobileProfileScreen() {
   const [selectedTrait, setSelectedTrait] = useState("")
   const navigate = useNavigate();
+  const location = useLocation();
 
   const traits = [{ name: "Creative" }, { name: "Intelligent" }, { name: "Handsome" }, { name: "Smart" }]
 
   const navItems = [
-    { icon: Search, label: "Explore", onClick: () => navigate("/explore"), active: true },
-    { icon: Calendar, label: "Events", onClick: () => navigate("/events"), active: false },
-    { icon: MessageCircle, label: "Chats", onClick: () => navigate("/chats"), active: false },
-    { icon: Bell, label: "Notifications", onClick: () => navigate("/notification"), active: false },
-    { icon: User, label: "Profile", onClick: () => navigate("/profile"), active: false },
+    { icon: Search, label: "Explore", onClick: () => navigate("/explore"), active: location.pathname === "/explore" },
+    { icon: Calendar, label: "Events", onClick: () => navigate("/events"), active: location.pathname === "/events" },
+    { icon: MessageCircle, label: "Chats", onClick: () => navigate("/chats"), active: location.pathname === "/chats" },
+    { icon: Bell, label: "Notifications", onClick: () => navigate("/notification"), active: location.pathname === "/notification" },
+    { icon: User, label: "Profile", onClick: () => navigate("/profile"), active: location.pathname === "/profile" },
   ];
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
       {/* Top Icons */}
       <div className="absolute top-4 right-4 z-20 flex gap-3">
-        <LayoutGrid className="w-6 h-6 text-white" />
+        <button onClick={() => navigate('/search')}>
+          <LayoutGrid className="w-6 h-6 text-white" />
+        </button>
         <Info className="w-6 h-6 text-white" />
       </div>
 
       {/* Profile Image with Gradient Overlay and Info Block */}
       <div className="relative h-[65%] w-full"> {/* Further reduced height to free more space */}
-        <img src="/profile-image.png" alt="Profile" className="object-cover absolute inset-0 w-full h-full" />
+        <img src={ProfileImage} alt="Profile" className="object-cover absolute inset-0 w-full h-full" />
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90" />
         {/* Profile Info Block */}
@@ -68,7 +72,7 @@ export default function MobileProfileScreen() {
       </div>
 
       {/* Personality Traits */}
-      <div className="px-6 -mt-12 mb-24"> {/* Pulled up further with -mt-12 */}
+      <div className="px-6 mt-2 mb-24"> {/* Changed from -mt-12 to mt-4 for a small gap */}
         <div className="grid grid-cols-2 gap-3">
           {traits.map((trait) => (
             <button
