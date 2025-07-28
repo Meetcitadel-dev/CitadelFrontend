@@ -96,15 +96,15 @@ export default function ProfileForm({ profileData, updateProfileData }: ProfileF
         <input
           type="email"
           value={profileData.universityEmail}
-          onChange={(e) => handleInputChange("universityEmail", e.target.value)}
+          disabled={true}
           placeholder="nisarg.patel@example.edu"
           style={{
             width: '100%',
-            background: '#232323',
+            background: '#1a1a1a',
             borderRadius: 12,
             border: 'none',
             padding: '14px 16px',
-            color: '#fff',
+            color: '#666',
             fontFamily: "'Roboto Serif', serif",
             fontSize: 17,
             marginBottom: 0,
@@ -112,8 +112,12 @@ export default function ProfileForm({ profileData, updateProfileData }: ProfileF
             boxSizing: 'border-box',
             fontWeight: 500,
             letterSpacing: '-0.2px',
+            cursor: 'not-allowed',
           }}
         />
+        <div style={{ color: '#666', fontSize: 12, marginTop: 4, fontFamily: "'Roboto Serif', serif" }}>
+          Email cannot be changed
+        </div>
       </div>
 
       {/* Phone Number */}

@@ -1,4 +1,5 @@
 import { apiClient } from './apiClient';
+import type { ExploreResponse, ConnectionRequest, AdjectiveSelection, AdjectiveMatchResponse } from '@/types';
 
 // Fetch list of universities with optional search, limit, offset
 export async function fetchUniversities(params?: { search?: string; limit?: number; offset?: number }) {
@@ -141,6 +142,13 @@ export function getCurrentUserProfile(token?: string) {
       friends: string[];
       isProfileComplete: boolean;
       isEmailVerified: boolean;
+      aboutMe?: string;
+      sports?: string;
+      movies?: string;
+      tvShows?: string;
+      teams?: string;
+      portfolioLink?: string;
+      phoneNumber?: string;
       images: Array<{
         id: number;
         cloudfrontUrl: string;
@@ -154,6 +162,98 @@ export function getCurrentUserProfile(token?: string) {
     };
   }>(
     '/api/v1/profile/me',
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+// Update user profile data
+export function updateUserProfile(data: {
+  name?: string;
+  gender?: string;
+  degree?: string;
+  year?: string;
+  skills?: string[];
+  aboutMe?: string;
+  sports?: string;
+  movies?: string;
+  tvShows?: string;
+  teams?: string;
+  portfolioLink?: string;
+  phoneNumber?: string;
+  dateOfBirth?: string;
+}, token?: string) {
+  return apiClient<{ success: boolean; message: string; data?: any }>(
+    '/api/v1/profile/update',
+    {
+      method: 'PUT',
+      body: data,
+      token,
+    }
+  );
+}
+
+// Explore Section API Functions
+
+// Fetch explore profiles with pagination and matching algorithm
+export function fetchExploreProfiles(params?: {
+  limit?: number;
+  offset?: number;
+  token?: string;
+}) {
+  const query = new URLSearchParams();
+  if (params?.limit) query.append('limit', params.limit.toString());
+  if (params?.offset) query.append('offset', params.offset.toString());
+  
+  const url = '/api/v1/explore/profiles' + (query.toString() ? `?${query.toString()}` : '');
+  
+  return apiClient<ExploreResponse>(url, {
+    method: 'GET',
+    token: params?.token,
+  });
+}
+
+// Manage connection requests (connect, accept, reject, remove, block, unblock)
+export function manageConnection(request: ConnectionRequest, token?: string) {
+  return apiClient<{ success: boolean; message: string; connectionState?: any }>(
+    '/api/v1/connections/manage',
+    {
+      method: 'POST',
+      body: request,
+      token,
+    }
+  );
+}
+
+// Select adjective for a profile
+export function selectAdjective(selection: AdjectiveSelection, token?: string) {
+  return apiClient<AdjectiveMatchResponse>(
+    '/api/v1/explore/adjectives/select',
+    {
+      method: 'POST',
+      body: selection,
+      token,
+    }
+  );
+}
+
+// Get adjective matches for current user
+export function getAdjectiveMatches(token?: string) {
+  return apiClient<{ success: boolean; matches: any[] }>(
+    '/api/v1/explore/adjectives/matches',
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+// Get connection status with a specific user
+export function getConnectionStatus(targetUserId: string, token?: string) {
+  return apiClient<{ success: boolean; connectionState: any }>(
+    `/api/v1/connections/status/${targetUserId}`,
     {
       method: 'GET',
       token,

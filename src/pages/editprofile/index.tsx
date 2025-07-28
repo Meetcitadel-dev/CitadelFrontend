@@ -1,13 +1,19 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronLeft } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import ProfileImageUpload from "@/components/EditProfile/profile-image-upload"
 import ProfileForm from "@/components/EditProfile/profile-form"
+import { getCurrentUserProfile, updateUserProfile } from "@/lib/api"
+import { getAuthToken } from "@/lib/utils"
 
 interface EditProfileScreenProps {
-  onSave: () => void
+  onSave?: () => void
 }
 
 export default function EditProfileScreen({ onSave }: EditProfileScreenProps) {
+  const navigate = useNavigate()
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [profileData, setProfileData] = useState({
     mainPhoto: null as File | null,
     additionalPhotos: [null, null, null, null] as (File | null)[],
@@ -15,16 +21,129 @@ export default function EditProfileScreen({ onSave }: EditProfileScreenProps) {
     universityEmail: "",
     phoneNumber: "",
     dateOfBirth: { day: "", month: "", year: "" },
+    gender: "",
+    college: "",
+    degree: "",
+    enrolmentYear: "",
+    portfolioLink: "",
+    aboutMe: "",
+    extraCurricular: [] as string[],
+    sports: "",
+    movies: "",
+    tvShows: "",
+    teams: "",
   })
 
-  const handleSave = () => {
-    // Validate and save profile data
-    console.log("Saving profile data:", profileData)
-    onSave()
+  // Load current user data
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const token = getAuthToken()
+        if (!token) {
+          console.error('No authentication token found')
+          navigate('/onboarding')
+          return
+        }
+
+        const response = await getCurrentUserProfile(token)
+        if (response.success) {
+          const userData = response.data
+          
+          // Parse date of birth
+          let day = "", month = "", year = ""
+          if (userData.dateOfBirth) {
+            const date = new Date(userData.dateOfBirth)
+            day = date.getDate().toString().padStart(2, '0')
+            month = (date.getMonth() + 1).toString().padStart(2, '0')
+            year = date.getFullYear().toString()
+          }
+
+          setProfileData({
+            mainPhoto: null,
+            additionalPhotos: [null, null, null, null],
+            fullName: userData.name || "",
+            universityEmail: userData.email || "",
+            phoneNumber: userData.phoneNumber || "",
+            dateOfBirth: { day, month, year },
+            gender: userData.gender || "",
+            college: userData.university?.name || "",
+            degree: userData.degree || "",
+            enrolmentYear: userData.year || "",
+            portfolioLink: userData.portfolioLink || "",
+            aboutMe: userData.aboutMe || "",
+            extraCurricular: userData.skills || [],
+            sports: userData.sports || "",
+            movies: userData.movies || "",
+            tvShows: userData.tvShows || "",
+            teams: userData.teams || "",
+          })
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadUserData()
+  }, [navigate])
+
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+      const token = getAuthToken()
+      if (!token) {
+        console.error('No authentication token found')
+        return
+      }
+
+      // Prepare data for API
+      const updateData = {
+        name: profileData.fullName,
+        gender: profileData.gender,
+        degree: profileData.degree,
+        year: profileData.enrolmentYear,
+        skills: profileData.extraCurricular,
+        // Add new fields that need to be added to backend
+        aboutMe: profileData.aboutMe,
+        sports: profileData.sports,
+        movies: profileData.movies,
+        tvShows: profileData.tvShows,
+        teams: profileData.teams,
+        portfolioLink: profileData.portfolioLink,
+        phoneNumber: profileData.phoneNumber,
+        dateOfBirth: profileData.dateOfBirth.day && profileData.dateOfBirth.month && profileData.dateOfBirth.year 
+          ? `${profileData.dateOfBirth.year}-${profileData.dateOfBirth.month}-${profileData.dateOfBirth.day}`
+          : undefined,
+      }
+
+      // Call the update profile API
+      const response = await updateUserProfile(updateData, token)
+      if (response.success) {
+        console.log("Profile updated successfully")
+        navigate('/profile')
+        if (onSave) onSave()
+      } else {
+        console.error('Failed to update profile:', response.message)
+        // You might want to show an error message to the user here
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const updateProfileData = (updates: Partial<typeof profileData>) => {
     setProfileData((prev) => ({ ...prev, ...updates }))
+  }
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div>Loading...</div>
+      </div>
+    )
   }
 
   return (
@@ -32,13 +151,28 @@ export default function EditProfileScreen({ onSave }: EditProfileScreenProps) {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', paddingTop: 32, height: 56 }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <button style={{ background: 'none', border: 'none', padding: 0, marginRight: 16 }}>
+          <button 
+            style={{ background: 'none', border: 'none', padding: 0, marginRight: 16, cursor: 'pointer' }}
+            onClick={() => navigate('/profile')}
+          >
             <ChevronLeft size={24} color="white" />
           </button>
           <h1 style={{ color: '#fff', fontSize: 24, fontWeight: 700, fontFamily: "'Roboto Serif', serif", margin: 0 }}>Profile</h1>
         </div>
-        <button onClick={handleSave} style={{ color: '#22FF88', fontSize: 18, fontWeight: 700, background: 'none', border: 'none', fontFamily: "'Roboto Serif', serif", cursor: 'pointer' }}>
-          Save
+        <button 
+          onClick={handleSave} 
+          disabled={saving}
+          style={{ 
+            color: saving ? '#666' : '#22FF88', 
+            fontSize: 18, 
+            fontWeight: 700, 
+            background: 'none', 
+            border: 'none', 
+            fontFamily: "'Roboto Serif', serif", 
+            cursor: saving ? 'not-allowed' : 'pointer' 
+          }}
+        >
+          {saving ? 'Saving...' : 'Save'}
         </button>
       </div>
 

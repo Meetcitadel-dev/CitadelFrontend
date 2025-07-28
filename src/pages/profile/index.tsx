@@ -40,6 +40,7 @@ interface UserProfile {
   tvShows?: string;
   teams?: string;
   portfolioLink?: string;
+  phoneNumber?: string;
   profileImage?: string;
   uploadedImages?: string[];
   friendsCount?: number;
@@ -84,12 +85,13 @@ export default function MobileProfileScreen() {
             degree: profileData.degree || '',
             year: profileData.year || '',
             skills: profileData.skills || [],
-            aboutMe: undefined, // Not in API response yet
-            sports: undefined, // Not in API response yet
-            movies: undefined, // Not in API response yet
-            tvShows: undefined, // Not in API response yet
-            teams: undefined, // Not in API response yet
-            portfolioLink: undefined, // Not in API response yet
+            aboutMe: profileData.aboutMe || undefined,
+            sports: profileData.sports || undefined,
+            movies: profileData.movies || undefined,
+            tvShows: profileData.tvShows || undefined,
+            teams: profileData.teams || undefined,
+            portfolioLink: profileData.portfolioLink || undefined,
+            phoneNumber: profileData.phoneNumber || undefined,
             profileImage: profileData.images?.[0]?.cloudfrontUrl, // Use first image as profile
             uploadedImages: profileData.images?.map((img: any) => img.cloudfrontUrl) || [],
             friendsCount: profileData.friends?.length || 0
