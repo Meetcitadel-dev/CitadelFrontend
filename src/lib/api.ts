@@ -217,7 +217,20 @@ export function fetchExploreProfiles(params?: {
 
 // Manage connection requests (connect, accept, reject, remove, block, unblock)
 export function manageConnection(request: ConnectionRequest, token?: string) {
-  return apiClient<{ success: boolean; message: string; connectionState?: any }>(
+  return apiClient<{ 
+    success: boolean; 
+    message: string; 
+    connectionState?: {
+      id: string | number;
+      requesterId?: string | number;
+      targetId?: string | number;
+      userId1?: string | number;
+      userId2?: string | number;
+      status: 'not_connected' | 'requested' | 'connected' | 'blocked' | 'pending';
+      createdAt: string;
+      updatedAt: string;
+    }
+  }>(
     '/api/v1/connections/manage',
     {
       method: 'POST',
@@ -256,6 +269,65 @@ export function getConnectionStatus(targetUserId: string, token?: string) {
     `/api/v1/connections/status/${targetUserId}`,
     {
       method: 'GET',
+      token,
+    }
+  );
+}
+
+// Track profile view interaction
+export function trackProfileView(targetUserId: string, token?: string) {
+  return apiClient<{ success: boolean; message: string }>(
+    '/api/v1/explore/track-view',
+    {
+      method: 'POST',
+      body: { targetUserId },
+      token,
+    }
+  );
+}
+
+// Check if user has already selected an adjective for a specific profile
+export function checkAdjectiveSelection(targetUserId: string, token?: string) {
+  return apiClient<{ success: boolean; hasSelectedAdjective: boolean; message: string }>(
+    `/api/v1/explore/adjectives/check/${targetUserId}`,
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+// Notification API Functions
+
+// Fetch all notifications (connection requests and adjective notifications)
+export function fetchNotifications(token?: string) {
+  return apiClient<NotificationResponse>(
+    '/api/v1/notifications',
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+// Accept or reject a connection request
+export function handleConnectionRequest(request: AcceptRejectRequest, token?: string) {
+  return apiClient<{ success: boolean; message: string; connectionState?: any }>(
+    '/api/v1/notifications/connection-request',
+    {
+      method: 'POST',
+      body: request,
+      token,
+    }
+  );
+}
+
+// Mark notification as read
+export function markNotificationAsRead(notificationId: string, token?: string) {
+  return apiClient<{ success: boolean; message: string }>(
+    `/api/v1/notifications/${notificationId}/read`,
+    {
+      method: 'POST',
       token,
     }
   );

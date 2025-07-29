@@ -67,9 +67,11 @@ export interface AdjectiveMatch {
 
 export interface ConnectionState {
   id: string;
-  userId1: string;
-  userId2: string;
-  status: 'not_connected' | 'requested' | 'connected' | 'blocked';
+  userId1?: string;
+  userId2?: string;
+  requesterId?: string;
+  targetId?: string;
+  status: 'not_connected' | 'requested' | 'connected' | 'blocked' | 'pending';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -115,4 +117,39 @@ export interface AdjectiveMatchResponse {
   success: boolean;
   matched: boolean;
   matchData?: AdjectiveMatch;
+  message?: string;
+}
+
+// Notification Types
+export interface ConnectionRequestNotification {
+  id: string;
+  requesterId: string;
+  requesterName: string;
+  requesterLocation: string;
+  requesterProfileImage?: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: Date;
+}
+
+export interface AdjectiveNotification {
+  id: string;
+  adjective: string;
+  count: number;
+  userIds: string[];
+  userNames: string[];
+  userProfileImages?: string[];
+  timeAgo: string;
+  createdAt: Date;
+}
+
+export interface NotificationResponse {
+  success: boolean;
+  connectionRequests: ConnectionRequestNotification[];
+  adjectiveNotifications: AdjectiveNotification[];
+  requestCount: number;
+}
+
+export interface AcceptRejectRequest {
+  requestId: string;
+  action: 'accept' | 'reject';
 } 
