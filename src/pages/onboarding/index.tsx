@@ -15,6 +15,7 @@ import UploadScreen from "../../components/Onboarding/UploadProfile/uploadscreen
 import BestFriendsScreen from "../../components/Onboarding/best-friends-screen"
 import SuccessScreen from "../../components/Onboarding/success-screen"
 import DegreeSelection from "../../components/Onboarding/degree-selection"
+import LoginEmailScreen from "../../components/Onboarding/login-email-screen"
 import { submitOnboardingData } from "@/lib/api";
 
 export default function App() {
@@ -31,6 +32,8 @@ export default function App() {
   const [showBestFriendsScreen, setShowBestFriendsScreen] = useState(false)
   const [showSuccessScreen, setShowSuccessScreen] = useState(false)
   const [showDegreeScreen, setShowDegreeScreen] = useState(false)
+  const [showLoginEmailScreen, setShowLoginEmailScreen] = useState(false)
+  const [isLoginMode, setIsLoginMode] = useState(false)
   const [userEmail, setUserEmail] = useState("");
   const [onboardingData, setOnboardingData] = useState<any>({});
 
@@ -60,6 +63,12 @@ export default function App() {
     setShowUniversityScreen(true);
   }
 
+  const handleLoginClick = () => {
+    setShowConnectScreen(false);
+    setIsLoginMode(true);
+    setShowLoginEmailScreen(true);
+  }
+
   // Update handlers to collect data from each step
   const handleUniversityComplete = (university: any) => {
     setOnboardingData((prev: any) => ({ ...prev, university }));
@@ -72,9 +81,26 @@ export default function App() {
     setUserEmail(email);
     setShowOTPScreen(true);
   };
+
+  const handleLoginEmailComplete = (email: string) => {
+    setUserEmail(email);
+    setShowLoginEmailScreen(false);
+    setShowOTPScreen(true);
+  };
+
+  const handleLoginEmailBack = () => {
+    setShowLoginEmailScreen(false);
+    setShowConnectScreen(true);
+  };
   const handleOTPComplete = () => {
     setShowOTPScreen(false);
-    setShowNameScreen(true);
+    // If we came from login flow, redirect to explore
+    if (isLoginMode) {
+      navigate("/explore");
+    } else {
+      // If we came from signup flow, continue to name screen
+      setShowNameScreen(true);
+    }
   };
   const handleNameComplete = (name: string, gender: string) => {
     console.log('Name and gender collected:', { name, gender });
@@ -189,6 +215,9 @@ export default function App() {
   if (showEmailScreen) {
     return <EmailInputScreen value={onboardingData.email} onContinue={handleEmailComplete} />;
   }
+  if (showLoginEmailScreen) {
+    return <LoginEmailScreen onContinue={handleLoginEmailComplete} onBack={handleLoginEmailBack} />;
+  }
   if (showUniversityScreen) {
     return <UniversitySelectionScreen value={onboardingData.university} onContinue={handleUniversityComplete} />;
   }
@@ -196,7 +225,7 @@ export default function App() {
     return <DegreeSelection value={{ degree: onboardingData.degree, year: onboardingData.year }} onContinue={handleDegreeComplete} />;
   }
   if (showConnectScreen) {
-    return <ConnectStudentsScreen onContinue={handleConnectComplete} />;
+    return <ConnectStudentsScreen onContinue={handleConnectComplete} onLogin={handleLoginClick} />;
   }
   if (showSlideScreen) {
     return <SlideToStartScreen onSlideComplete={handleSlideComplete} />;

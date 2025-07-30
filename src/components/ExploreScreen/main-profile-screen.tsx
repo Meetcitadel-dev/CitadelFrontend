@@ -367,7 +367,9 @@ export default function MobileProfileScreen() {
         <button onClick={() => navigate('/gridview')}>
           <LayoutGrid className="w-6 h-6 text-white" />
         </button>
-        <Info className="w-6 h-6 text-white" />
+        <button onClick={() => navigate(`/${currentProfile.name.toLowerCase().replace(/\s+/g, '')}`)}>
+          <Info className="w-6 h-6 text-white" />
+        </button>
       </div>
 
       {/* Profile Image with Gradient Overlay and Info Block */}

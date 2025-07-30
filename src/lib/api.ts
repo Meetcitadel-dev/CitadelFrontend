@@ -18,6 +18,25 @@ export function fetchColleges(university: string) {
   return apiClient<string[]>(`/api/v1/colleges?university=${encodeURIComponent(university)}`);
 }
 
+// Check if user exists
+export function checkUserExists(email: string) {
+  return apiClient<{ 
+    success: boolean; 
+    message: string; 
+    user?: {
+      id: number;
+      email: string;
+      isProfileComplete: boolean;
+    };
+  }>(
+    '/api/v1/auth/check-user',
+    {
+      method: 'POST',
+      body: { email },
+    }
+  );
+}
+
 // Send email for OTP
 export function sendEmailOTP(email: string) {
   return apiClient<{ success: boolean; message?: string }>(
@@ -328,6 +347,179 @@ export function markNotificationAsRead(notificationId: string, token?: string) {
     `/api/v1/notifications/${notificationId}/read`,
     {
       method: 'POST',
+      token,
+    }
+  );
+} 
+
+// Fetch user profile by username/name
+export function fetchUserProfileByName(username: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    data?: {
+      id: string;
+      name: string;
+      email: string;
+      university?: {
+        id: number;
+        name: string;
+        domain: string;
+        country: string;
+      };
+      degree?: string;
+      year?: string;
+      skills?: string[];
+      aboutMe?: string;
+      sports?: string;
+      movies?: string;
+      tvShows?: string;
+      teams?: string;
+      portfolioLink?: string;
+      phoneNumber?: string;
+      images?: Array<{
+        id: string;
+        cloudfrontUrl: string;
+      }>;
+      friends?: Array<{
+        id: string;
+        name: string;
+      }>;
+      mutualFriends?: Array<{
+        id: string;
+        name: string;
+      }>;
+      connectionState?: {
+        id: string;
+        status: 'connected' | 'requested' | 'not_connected' | 'blocked';
+        requesterId?: string;
+        targetId?: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+    };
+    message?: string;
+  }>(
+    `/api/v1/users/${encodeURIComponent(username)}`,
+    {
+      method: 'GET',
+      token,
+    }
+  );
+} 
+
+// Chat API Functions
+
+// Fetch active conversations (connected users)
+export function fetchActiveConversations(token?: string) {
+  return apiClient<{
+    success: boolean;
+    conversations: Array<{
+      id: string;
+      userId: string;
+      name: string;
+      profileImage?: string;
+      lastMessage?: string;
+      lastMessageTime?: string;
+      isOnline: boolean;
+      unreadCount: number;
+    }>;
+  }>(
+    '/api/v1/chats/active',
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+// Fetch matched conversations (matched users)
+export function fetchMatchedConversations(token?: string) {
+  return apiClient<{
+    success: boolean;
+    conversations: Array<{
+      id: string;
+      userId: string;
+      name: string;
+      profileImage?: string;
+      lastMessage?: string;
+      lastMessageTime?: string;
+      isOnline: boolean;
+      unreadCount: number;
+    }>;
+  }>(
+    '/api/v1/chats/matches',
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+// Fetch messages for a specific conversation
+export function fetchConversationMessages(conversationId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    messages: Array<{
+      id: string;
+      text: string;
+      isSent: boolean;
+      timestamp: string;
+      status: 'sent' | 'delivered' | 'read';
+    }>;
+  }>(
+    `/api/v1/chats/${conversationId}/messages`,
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+// Send a message
+export function sendMessage(conversationId: string, message: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    message: {
+      id: string;
+      text: string;
+      timestamp: string;
+      status: 'sent';
+    };
+  }>(
+    `/api/v1/chats/${conversationId}/messages`,
+    {
+      method: 'POST',
+      body: { message },
+      token,
+    }
+  );
+}
+
+// Mark messages as read
+export function markMessagesAsRead(conversationId: string, token?: string) {
+  return apiClient<{ success: boolean }>(
+    `/api/v1/chats/${conversationId}/read`,
+    {
+      method: 'POST',
+      token,
+    }
+  );
+}
+
+// Get conversation by user ID
+export function getConversationByUserId(userId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    conversation?: {
+      id: string;
+      userId: string;
+      name: string;
+      profileImage?: string;
+    };
+  }>(
+    `/api/v1/chats/conversation/${userId}`,
+    {
+      method: 'GET',
       token,
     }
   );

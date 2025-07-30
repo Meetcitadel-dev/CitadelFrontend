@@ -2,9 +2,10 @@ import Connecting1 from '@/assets/sign up animation 1 (1).png'
 
 interface ConnectStudentsScreenProps {
   onContinue: () => void
+  onLogin: () => void
 }
 
-export default function ConnectStudentsScreen({ onContinue }: ConnectStudentsScreenProps) {
+export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectStudentsScreenProps) {
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
       {/* Profile Images */}
@@ -41,13 +42,26 @@ export default function ConnectStudentsScreen({ onContinue }: ConnectStudentsScr
         </div>
 
         {/* Let's go Button */}
-        <div className="px-6 mb-8">
+        <div className="px-6 mb-4">
           <button
             onClick={onContinue}
             className="w-full bg-green-400 hover:bg-green-500 text-black text-xl font-semibold py-4 rounded-full transition-colors duration-200"
           >
             Let's go
           </button>
+        </div>
+
+        {/* Login Link */}
+        <div className="px-6 mb-8 text-center">
+          <span className="text-gray-300 text-base">
+            Already a user?{" "}
+            <button
+              onClick={onLogin}
+              className="text-white underline font-medium hover:text-green-400 transition-colors duration-200"
+            >
+              Login
+            </button>
+          </span>
         </div>
 
         {/* Green wavy bottom design */}

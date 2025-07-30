@@ -1,4 +1,5 @@
 import Connecting2 from '@/assets/sign up animation 1.png'
+import CitadelIcon from '@/assets/Star 1 (1).png'
 
 import type React from "react"
 
@@ -113,7 +114,7 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
       <div className="absolute bottom-0 left-0 right-0 p-6">
         {/* Citadel Icon */}
         <div className="text-center mb-4">
-          <img src="/citadel-icon.png" alt="Citadel" width={40} height={40} className="mx-auto" />
+          <img src={CitadelIcon} alt="Citadel" width={40} height={40} className="mx-auto" />
         </div>
 
         {/* Main Text */}

@@ -8,6 +8,7 @@ import ChatApp from "./pages/chats";
 import SettingsPage from "./pages/settings";
 import EventsPage from "./pages/events";
 import UserProfilePage from "./pages/profile";
+import UserProfileScreen from "./pages/user-profile";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/search" element={<ProfilesPage />} />
         <Route path="/profile" element={<UserProfilePage />} />
+        <Route path="/:name" element={<UserProfileScreen />} />
         {/* Default route: redirect to onboarding */}
         <Route path="*" element={<Navigate to="/onboarding" replace />} />
       </Routes>
