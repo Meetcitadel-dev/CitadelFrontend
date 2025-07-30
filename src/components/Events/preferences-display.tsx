@@ -27,7 +27,7 @@ export function PreferencesDisplay({ onBack, onEditPreferences, onContinue }: Pr
           {/* Budget */}
           <div className="mb-8">
             <h3 className="text-green-400 text-lg font-medium mb-2">Budget</h3>
-            <p className="text-white text-2xl font-bold">$</p>
+            <p className="text-white text-2xl font-bold">500 Rs</p>
           </div>
 
           {/* Dietary Preferences */}
