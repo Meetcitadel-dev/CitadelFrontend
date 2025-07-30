@@ -198,7 +198,7 @@ export default function DinnerBooking() {
 
         {/* Location Header Content */}
         <div className="relative z-10 h-full flex flex-col justify-center">
-          <LocationHeader city="New Delhi" venue="Chanakyapuri" />
+          <LocationHeader city="New Delhi" venue="Select Location" />
         </div>
       </div>
 
