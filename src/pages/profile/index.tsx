@@ -18,7 +18,7 @@ import ForestProfile from "@/assets/man, forest background behind.png"
 import Realisticprofile from "@/assets/man, realsitic background behind.png"
 import Oceanprofile from "@/assets/man, ocean background behind.png"
 import Buildingprofile from "@/assets/man, building background behind.png"
-import { getCurrentUserProfile } from "@/lib/api"
+import { getCurrentUserProfile, getUserConnectionsCount } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
 
 // Add Inter font import for this page only
@@ -50,6 +50,7 @@ export default function MobileProfileScreen() {
   const navigate = useNavigate()
   const location = useLocation()
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [connectionsCount, setConnectionsCount] = useState<number>(0)
   const [loading, setLoading] = useState(true)
 
   const navItems = [
@@ -94,7 +95,7 @@ export default function MobileProfileScreen() {
             phoneNumber: profileData.phoneNumber || undefined,
             profileImage: profileData.images?.[0]?.cloudfrontUrl, // Use first image as profile
             uploadedImages: profileData.images?.map((img: any) => img.cloudfrontUrl) || [],
-            friendsCount: profileData.friends?.length || 0
+            friendsCount: 0 // We'll update this with actual connections count
           }
           
           console.log('Mapped profile:', mappedProfile)
@@ -102,6 +103,16 @@ export default function MobileProfileScreen() {
           console.log('Gallery images:', mappedProfile.uploadedImages)
           
           setUserProfile(mappedProfile)
+        }
+
+        // Fetch actual connections count
+        const connectionsResponse = await getUserConnectionsCount(token)
+        if (connectionsResponse.success) {
+          setConnectionsCount(connectionsResponse.connectionsCount)
+          console.log('Connections count:', connectionsResponse.connectionsCount)
+        } else {
+          console.error('Failed to fetch connections count:', connectionsResponse.message)
+          setConnectionsCount(0)
         }
 
         // No need to fetch images separately since they're included in profile response
@@ -245,7 +256,7 @@ export default function MobileProfileScreen() {
 
             {/* Friends Count */}
             <div className="text-right">
-              <div className="text-white text-xl font-bold">{profile.friendsCount || 0}</div>
+              <div className="text-white text-xl font-bold">{connectionsCount}</div>
               <div className="text-white/60 text-sm">Friends</div>
             </div>
           </div>

@@ -523,4 +523,19 @@ export function getConversationByUserId(userId: string, token?: string) {
       token,
     }
   );
+}
+
+// Get user's connections count (actual connections, not onboarding friends)
+export function getUserConnectionsCount(token?: string) {
+  return apiClient<{
+    success: boolean;
+    connectionsCount: number;
+    message?: string;
+  }>(
+    '/api/v1/connections/count',
+    {
+      method: 'GET',
+      token,
+    }
+  );
 } 
