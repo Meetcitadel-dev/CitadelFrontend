@@ -8,16 +8,15 @@ const degrees = ["B.Tech", "B.Des", "B.A.", "B.Sc", "BBA", "M.Tech", "M.A.", "Ph
 
 const years = ["1st", "2nd", "3rd", "4th", "5th"]
 
-export default function DegreeSelection({ value, onContinue }: { value?: { degree: string; year: string }, onContinue: (degree: string, year: string) => void }) {
-  const [selectedDegree, setSelectedDegree] = useState(value?.degree || "")
-  const [selectedYear, setSelectedYear] = useState(value?.year || "")
+export default function DegreeSelection({ onContinue }: { onContinue?: () => void }) {
+  const [selectedDegree, setSelectedDegree] = useState("")
+  const [selectedYear, setSelectedYear] = useState("")
   const [showDropdown, setShowDropdown] = useState(false)
-  const [currentStep, setCurrentStep] = useState(selectedDegree ? (selectedYear ? "done" : "year") : "degree") // "degree" or "year" or "done"
+  const [currentStep, setCurrentStep] = useState("degree") // "degree" or "year"
 
   const handleDegreeSelect = (degree: string) => {
     setSelectedDegree(degree)
     setShowDropdown(false)
-    setCurrentStep("year")
   }
 
   const handleYearSelect = (year: string) => {
@@ -28,7 +27,9 @@ export default function DegreeSelection({ value, onContinue }: { value?: { degre
     if (currentStep === "degree" && selectedDegree) {
       setCurrentStep("year")
     } else if (currentStep === "year" && selectedYear) {
-      if (onContinue) onContinue(selectedDegree, selectedYear)
+      // Handle final submission
+      console.log("Selected:", { degree: selectedDegree, year: selectedYear })
+      if (onContinue) onContinue();
     }
   }
 
