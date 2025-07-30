@@ -90,7 +90,7 @@ export default function SkillsetsScreen({ value, onContinue }: SkillsetsScreenPr
     setTimeout(() => setShowDropdown(false), 150)
   }
 
-  const isSkillsValid = selectedSkills.length === 5
+  const isSkillsValid = selectedSkills.length >= 1 && selectedSkills.length <= 5
 
   return (
     <div style={{ minHeight: '100vh', background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif", display: 'flex', flexDirection: 'column' }}>
@@ -114,7 +114,7 @@ export default function SkillsetsScreen({ value, onContinue }: SkillsetsScreenPr
           </div>
           <input
             type="text"
-            placeholder="Select max 5"
+            placeholder="Select 1-5 skills"
             value={searchTerm}
             onChange={handleSearchChange}
             onFocus={handleInputFocus}

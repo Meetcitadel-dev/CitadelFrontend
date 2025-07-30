@@ -105,7 +105,7 @@ export default function BestFriendsScreen({ value, onContinue }: BestFriendsScre
     setTimeout(() => setShowDropdown(false), 150)
   }
 
-  const isFriendsValid = selectedFriends.length === 5
+  const isFriendsValid = selectedFriends.length >= 1 && selectedFriends.length <= 5
 
   if (!hasContactPermission) {
     return (
@@ -149,7 +149,7 @@ export default function BestFriendsScreen({ value, onContinue }: BestFriendsScre
           </div>
           <input
             type="text"
-            placeholder="Select max 5"
+            placeholder="Select 1-5 friends"
             value={searchTerm}
             onChange={handleSearchChange}
             onFocus={handleInputFocus}
