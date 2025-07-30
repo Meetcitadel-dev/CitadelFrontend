@@ -41,8 +41,8 @@ type Screen =
 export default function DinnerBooking() {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
   const [currentScreen, setCurrentScreen] = useState<Screen>("booking")
-  const [selectedCity, setSelectedCity] = useState("delhi")
-  const [selectedArea, setSelectedArea] = useState("chanakyapuri")
+  const [selectedCity, setSelectedCity] = useState({ id: "delhi", name: "New Delhi" })
+  const [selectedArea, setSelectedArea] = useState({ id: "chanakyapuri", name: "Chanakyapuri" })
   const [userPreferences, setUserPreferences] = useState({
     languages: ["English"],
     budget: "$",
@@ -63,13 +63,22 @@ export default function DinnerBooking() {
     { icon: User, label: "Profile", onClick: () => navigate("/profile"), active: location.pathname === "/profile" },
   ];
 
-  const bookingDetails = {
-    guests: 6,
-    date: "02 July 2025",
-    time: "8:00 PM",
-    location: "HSR, Bangalore",
-    price: 299,
+  // Dynamic booking details based on selected values
+  const getBookingDetails = () => {
+    const selectedTimeSlot = timeSlots.find(slot => slot.id === selectedSlot)
+    const selectedBudget = parseInt(userPreferences.budget) || 500
+    const bookingFee = Math.round(selectedBudget * 0.15) // 15% of selected budget
+    
+    return {
+      guests: 6,
+      date: selectedTimeSlot?.date || "02 July 2025",
+      time: selectedTimeSlot?.time || "8:00 PM",
+      location: `${selectedArea.name}, ${selectedCity.name}`,
+      price: bookingFee,
+    }
   }
+
+  const bookingDetails = getBookingDetails()
 
   const handleSlotSelect = (slotId: string) => {
     setSelectedSlot(slotId)
@@ -82,12 +91,27 @@ export default function DinnerBooking() {
   }
 
   const handleCitySelect = (cityId: string) => {
-    setSelectedCity(cityId)
+    // Map city ID to name
+    const cityNames: { [key: string]: string } = {
+      "delhi": "New Delhi",
+      "bangalore": "Bangalore", 
+      "mumbai": "Mumbai"
+    }
+    setSelectedCity({ id: cityId, name: cityNames[cityId] || cityId })
     setCurrentScreen("area-selection")
   }
 
   const handleAreaSelect = (areaId: string) => {
-    setSelectedArea(areaId)
+    // Map area ID to name
+    const areaNames: { [key: string]: string } = {
+      "dwarka": "Dwarka",
+      "chanakyapuri": "Chanakyapuri",
+      "gurgaon": "Gurgaon",
+      "vasant-kunj": "Vasant Kunj",
+      "faridabad": "Faridabad",
+      "hauz-khas": "Hauz Khas"
+    }
+    setSelectedArea({ id: areaId, name: areaNames[areaId] || areaId })
     setCurrentScreen("preferences")
   }
 
@@ -150,7 +174,7 @@ export default function DinnerBooking() {
         onBack={handleBackToCity}
         onClose={handleCloseSelection}
         onAreaSelect={handleAreaSelect}
-        cityName="New Delhi"
+        cityName={selectedCity.name}
       />
     )
   }
