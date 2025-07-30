@@ -15,7 +15,7 @@ interface UserPreferences {
 
 export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["English"])
-  const [selectedBudget, setSelectedBudget] = useState<string>("$")
+  const [selectedBudget, setSelectedBudget] = useState<string>("500")
   const [vegetarianOnly, setVegetarianOnly] = useState<boolean>(false)
 
   const languages = [
@@ -24,9 +24,9 @@ export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
   ]
 
   const budgetOptions = [
-    { id: "$", name: "$" },
-    { id: "$$", name: "$$" },
-    { id: "$$$", name: "$$$" },
+    { id: "500", name: "500 Rs" },
+    { id: "1000", name: "1000 Rs" },
+    { id: "1500", name: "1500 Rs" },
   ]
 
   const handleLanguageToggle = (languageId: string) => {
