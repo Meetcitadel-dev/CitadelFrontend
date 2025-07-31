@@ -42,8 +42,7 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
   const { isConnected } = useWebSocket()
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Debug props
-  console.log('🔍 ChatConversation props:', { conversationId, userId });
+
 
   useEffect(() => {
     let cleanupPolling: (() => void) | undefined;
@@ -83,26 +82,20 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
         const token = getAuthToken()
         if (!token) return
 
-        console.log('🔍 Fetching conversation info for userId:', userId)
-        
         // If we have userId, try to get conversation info
         if (userId) {
           const response = await getConversationByUserId(userId, token)
-          console.log('getConversationByUserId response:', response)
           
           if (response.success && response.conversation) {
             setConversationInfo(response.conversation)
-            console.log('✅ Conversation info set:', response.conversation)
             return
           }
         }
         
         // Fallback: try to get user profile by ID if userId exists
         if (userId) {
-          console.log('⚠️ Conversation not found, trying to fetch user profile...')
           try {
             const userProfileResponse = await fetchUserProfileByName(userId, token)
-            console.log('User profile response:', userProfileResponse)
             
             if (userProfileResponse.success && userProfileResponse.data) {
               setConversationInfo({
@@ -111,7 +104,6 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
                 name: userProfileResponse.data.name,
                 profileImage: undefined
               })
-              console.log('✅ User profile set as conversation info')
               return
             }
           } catch (profileError) {
@@ -121,15 +113,11 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
         
         // Final fallback: try to get conversation details by conversation ID
         if (conversationId && !userId) {
-          console.log('⚠️ No userId provided, trying to get conversation details...')
-          
           try {
             const conversationResponse = await getConversationById(conversationId, token)
-            console.log('getConversationById response:', conversationResponse)
             
             if (conversationResponse.success && conversationResponse.conversation) {
               setConversationInfo(conversationResponse.conversation)
-              console.log('✅ Conversation details set:', conversationResponse.conversation)
               return
             }
           } catch (error) {
@@ -149,7 +137,6 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
                   name: `User`,
                   profileImage: undefined
                 })
-                console.log('✅ Using "User" as fallback')
                 return
               }
             }
@@ -164,7 +151,6 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
             name: `Chat ${conversationId.slice(0, 8)}...`,
             profileImage: undefined
           })
-          console.log('✅ Using conversation ID as fallback')
         }
       } catch (error) {
         console.error('Error fetching conversation info:', error)
@@ -174,11 +160,9 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
     // Initialize WebSocket connection
     const initializeWebSocket = () => {
       if (isInitialized) {
-        console.log('⚠️ WebSocket already initialized, skipping...')
         return;
       }
       
-      console.log('🔄 Attempting WebSocket connection...')
       chatSocketService.connect()
       
       // Remove any existing listeners first
@@ -187,7 +171,6 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
       
       // Listen for new messages
       chatSocketService.onNewMessage((data) => {
-        console.log('📨 WebSocket: New message received', data)
         if (data.conversationId === conversationId) {
           const newMessage: Message = {
             id: data.message.id,
@@ -198,9 +181,11 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
           }
           setMessages(prev => {
             // Check if message already exists to prevent duplicates
-            const messageExists = prev.some(msg => msg.id === data.message.id)
+            const messageExists = prev.some(msg => 
+              msg.id === data.message.id || 
+              (msg.text === data.message.text && Math.abs(new Date(msg.timestamp).getTime() - new Date(data.message.timestamp).getTime()) < 1000)
+            )
             if (messageExists) {
-              console.log('⚠️ Message already exists, skipping duplicate')
               return prev
             }
             return [...prev, newMessage]
@@ -210,7 +195,6 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
 
       // Listen for message status updates
       chatSocketService.onMessageStatusUpdate((data) => {
-        console.log('📊 WebSocket: Message status update', data)
         setMessages(prev => prev.map(msg => 
           msg.id === data.messageId 
             ? { ...msg, status: data.status }
@@ -221,7 +205,6 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
       // Join the conversation room
       if (conversationId) {
         chatSocketService.joinConversation(conversationId)
-        console.log('✅ WebSocket: Joined conversation room')
       }
       
       isInitialized = true;
@@ -229,7 +212,6 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
 
     // Polling mechanism for real-time updates (fallback)
     const startPolling = () => {
-      console.log('🔄 Starting polling mechanism (fallback)')
       const pollInterval = setInterval(async () => {
         if (!conversationId) return
         
@@ -246,14 +228,13 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
               const hasNewMessages = newMessages.some(msg => !currentMessageIds.has(msg.id))
               
               if (hasNewMessages) {
-                console.log('📨 Polling: New messages detected', newMessages.length - prev.length, 'new messages')
                 return newMessages
               }
               return prev
             })
           }
         } catch (error) {
-          console.error('❌ Error polling messages:', error)
+          console.error('Error polling messages:', error)
         }
       }, 3000) // Poll every 3 seconds
 
@@ -266,26 +247,23 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
       // Try WebSocket first, fallback to polling
       try {
         initializeWebSocket()
-        console.log('✅ WebSocket connection attempted')
         setConnectionMethod('websocket')
       } catch (error) {
-        console.log('⚠️ WebSocket not available, using polling')
         setConnectionMethod('polling')
         cleanupPolling = startPolling()
       }
     }
     
     // Always try to fetch conversation info, even without userId
-    console.log('👤 Fetching conversation info...')
     fetchConversationInfo()
 
     // Cleanup function
     return () => {
-      console.log('🧹 Cleaning up chat conversation...')
       if (conversationId) {
         chatSocketService.leaveConversation(conversationId)
         chatSocketService.off('new_message')
         chatSocketService.off('message_status')
+        chatSocketService.off('user_status')
       }
       if (cleanupPolling) {
         cleanupPolling()
@@ -324,7 +302,17 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
           timestamp: response.message.timestamp,
           status: 'sent'
         }
-        setMessages(prev => [...prev, newMessage])
+        setMessages(prev => {
+          // Check if message already exists to prevent duplicates
+          const messageExists = prev.some(msg => 
+            msg.text === messageText && 
+            Math.abs(new Date(msg.timestamp).getTime() - new Date(response.message.timestamp).getTime()) < 1000
+          )
+          if (messageExists) {
+            return prev
+          }
+          return [...prev, newMessage]
+        })
         
         // Then send via WebSocket for real-time delivery to other users
         chatSocketService.sendMessage(conversationId, messageText)
@@ -386,29 +374,31 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
   }
 
   return (
-    <div className="bg-black min-h-screen text-white flex flex-col relative">
-      {/* Header */}
-      <div className="flex items-center px-4 py-4 border-b border-gray-800">
-        <button onClick={onBack} className="mr-4">
-          <ArrowLeft className="w-6 h-6 text-white" />
-        </button>
-        <img
-          src={conversationInfo?.profileImage || "/placeholder.svg?height=40&width=40"}
-          alt={conversationInfo?.name || "User"}
-          className="w-10 h-10 rounded-full object-cover mr-3"
-        />
-        <div className="flex-1">
-          <h1 className="text-lg font-semibold">
-            {conversationInfo?.name || userId || "User"}
-          </h1>
-          <div className="flex items-center text-sm text-gray-400">
-            <div className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-            {isConnected ? 'Online' : 'Connecting...'}
+    <div className="bg-black min-h-screen text-white relative">
+      {/* Header - Fixed */}
+      <div className="fixed top-0 left-0 right-0 z-10 bg-black border-b border-gray-800">
+        <div className="flex items-center px-4 py-4">
+          <button onClick={onBack} className="mr-4">
+            <ArrowLeft className="w-6 h-6 text-white" />
+          </button>
+          <img
+            src={conversationInfo?.profileImage || "/placeholder.svg?height=40&width=40"}
+            alt={conversationInfo?.name || "User"}
+            className="w-10 h-10 rounded-full object-cover mr-3"
+          />
+          <div className="flex-1">
+            <h1 className="text-lg font-semibold">
+              {conversationInfo?.name || userId || "User"}
+            </h1>
+            <div className="flex items-center text-sm text-gray-400">
+              <div className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              {isConnected ? 'Online' : 'Connecting...'}
+            </div>
           </div>
+          <button onClick={() => setShowDropdown(!showDropdown)} className="relative">
+            <MoreVertical className="w-6 h-6 text-white" />
+          </button>
         </div>
-        <button onClick={() => setShowDropdown(!showDropdown)} className="relative">
-          <MoreVertical className="w-6 h-6 text-white" />
-        </button>
       </div>
 
       {/* Dropdown Menu */}
@@ -425,8 +415,8 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
       {/* Block User Modal */}
       {showBlockModal && <BlockUserModal onClose={() => setShowBlockModal(false)} />}
 
-      {/* Messages */}
-      <div className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
+      {/* Messages - Scrollable with proper spacing */}
+      <div className="pt-20 pb-24 px-4 py-4 space-y-4 overflow-y-auto h-screen">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-gray-400 text-center">
@@ -457,9 +447,9 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message Input */}
-      <div className="px-4 py-4 border-t border-gray-800">
-        <div className="flex items-center space-x-3">
+      {/* Message Input - Fixed */}
+      <div className="fixed bottom-0 left-0 right-0 z-10 bg-black border-t border-gray-800">
+        <div className="flex items-center space-x-3 px-4 py-4">
           <div className="flex-1 relative">
             <input
               type="text"

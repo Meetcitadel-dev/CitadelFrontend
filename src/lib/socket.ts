@@ -9,7 +9,6 @@ class ChatSocketService {
 
   connect() {
     if (this.socket?.connected) {
-      console.log('✅ WebSocket already connected, skipping...');
       return;
     }
 
@@ -28,7 +27,6 @@ class ChatSocketService {
     });
 
     this.socket.on('connect', () => {
-      console.log('✅ WebSocket connected successfully');
       this.isConnected = true;
       this.reconnectAttempts = 0;
     });
@@ -44,7 +42,7 @@ class ChatSocketService {
     });
 
     this.socket.on('connect_error', (error) => {
-      console.error('❌ WebSocket connection error:', error);
+      console.error('WebSocket connection error:', error);
       this.isConnected = false;
       
       if (this.reconnectAttempts < this.maxReconnectAttempts) {
@@ -58,7 +56,6 @@ class ChatSocketService {
   private reconnect() {
     this.reconnectAttempts++;
     if (this.reconnectAttempts <= this.maxReconnectAttempts) {
-      console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
       this.connect();
     }
   }
