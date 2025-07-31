@@ -11,6 +11,7 @@ import { PreferencesDisplay } from "@/components/Events/preferences-display"
 import { EditPreferences } from "@/components/Events/edit-preferences"
 import { AdditionalPreferences } from "@/components/Events/additional-preferences"
 import { BookingConfirmation } from "@/components/Events/booking-confirmation"
+import { PaymentSuccess } from "@/components/Events/payment-success"
 import { LocationHeader } from "@/components/Events/location-header"
 import { BookingHeader } from "@/components/Events/booking-header"
 import { TimeSlot } from "@/components/Events/time-slot"
@@ -37,6 +38,7 @@ type Screen =
   | "edit-preferences"
   | "additional-preferences"
   | "booking-confirmation"
+  | "payment-success"
 
 export default function DinnerBooking() {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
@@ -158,8 +160,20 @@ export default function DinnerBooking() {
   }
 
   const handlePayment = () => {
-    // Navigate to payment gateway
-    console.log("Proceeding to payment...")
+    // Payment will be handled by the BookingConfirmation component
+    console.log("Payment initiated...")
+  }
+
+  const handlePaymentSuccess = () => {
+    setCurrentScreen("payment-success")
+  }
+
+  const handlePaymentFailure = (error: string) => {
+    alert(`Payment failed: ${error}`)
+  }
+
+  const handlePaymentCancel = () => {
+    console.log("Payment cancelled by user")
   }
 
   // City Selection Screen
@@ -207,6 +221,19 @@ export default function DinnerBooking() {
         onBack={handleBackToAdditionalPrefs}
         onPayment={handlePayment}
         bookingDetails={bookingDetails}
+        onPaymentSuccess={handlePaymentSuccess}
+        onPaymentFailure={handlePaymentFailure}
+        onPaymentCancel={handlePaymentCancel}
+      />
+    )
+  }
+
+  // Payment Success Screen
+  if (currentScreen === "payment-success") {
+    return (
+      <PaymentSuccess
+        bookingDetails={bookingDetails}
+        onClose={() => setCurrentScreen("booking")}
       />
     )
   }

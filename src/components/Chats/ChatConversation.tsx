@@ -6,6 +6,8 @@ import BlockUserModal from "./BlockUserModal"
 import ChatDropdown from "./ChatDropdown"
 import { fetchConversationMessages, sendMessage, markMessagesAsRead, getConversationByUserId } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
+import { chatSocketService } from "@/lib/socket"
+import { useWebSocket } from "@/lib/hooks/useWebSocket"
 
 interface ChatConversationProps {
   onBack: () => void
@@ -36,9 +38,14 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
   const [showBlockModal, setShowBlockModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
+  const [connectionMethod, setConnectionMethod] = useState<'websocket' | 'polling' | 'none'>('none')
+  const { isConnected } = useWebSocket()
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    let cleanupPolling: (() => void) | undefined;
+    let isInitialized = false;
+
     const fetchMessages = async () => {
       try {
         setLoading(true)
@@ -83,12 +90,126 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
       }
     }
 
+    // Initialize WebSocket connection
+    const initializeWebSocket = () => {
+      if (isInitialized) {
+        console.log('⚠️ WebSocket already initialized, skipping...')
+        return;
+      }
+      
+      console.log('🔄 Attempting WebSocket connection...')
+      chatSocketService.connect()
+      
+      // Remove any existing listeners first
+      chatSocketService.off('new_message')
+      chatSocketService.off('message_status')
+      
+      // Listen for new messages
+      chatSocketService.onNewMessage((data) => {
+        console.log('📨 WebSocket: New message received', data)
+        if (data.conversationId === conversationId) {
+          const newMessage: Message = {
+            id: data.message.id,
+            text: data.message.text,
+            isSent: false, // Message from other user
+            timestamp: data.message.timestamp,
+            status: data.message.status
+          }
+          setMessages(prev => {
+            // Check if message already exists to prevent duplicates
+            const messageExists = prev.some(msg => msg.id === data.message.id)
+            if (messageExists) {
+              console.log('⚠️ Message already exists, skipping duplicate')
+              return prev
+            }
+            return [...prev, newMessage]
+          })
+        }
+      })
+
+      // Listen for message status updates
+      chatSocketService.onMessageStatusUpdate((data) => {
+        console.log('📊 WebSocket: Message status update', data)
+        setMessages(prev => prev.map(msg => 
+          msg.id === data.messageId 
+            ? { ...msg, status: data.status }
+            : msg
+        ))
+      })
+
+      // Join the conversation room
+      if (conversationId) {
+        chatSocketService.joinConversation(conversationId)
+        console.log('✅ WebSocket: Joined conversation room')
+      }
+      
+      isInitialized = true;
+    }
+
+    // Polling mechanism for real-time updates (fallback)
+    const startPolling = () => {
+      console.log('🔄 Starting polling mechanism (fallback)')
+      const pollInterval = setInterval(async () => {
+        if (!conversationId) return
+        
+        try {
+          const token = getAuthToken()
+          if (!token) return
+
+          const response = await fetchConversationMessages(conversationId, token)
+          if (response.success) {
+            setMessages(prev => {
+              // Only update if there are new messages
+              const newMessages = response.messages
+              const currentMessageIds = new Set(prev.map(msg => msg.id))
+              const hasNewMessages = newMessages.some(msg => !currentMessageIds.has(msg.id))
+              
+              if (hasNewMessages) {
+                console.log('📨 Polling: New messages detected', newMessages.length - prev.length, 'new messages')
+                return newMessages
+              }
+              return prev
+            })
+          }
+        } catch (error) {
+          console.error('❌ Error polling messages:', error)
+        }
+      }, 3000) // Poll every 3 seconds
+
+      return () => clearInterval(pollInterval)
+    }
+
     if (conversationId) {
       fetchMessages()
+      
+      // Try WebSocket first, fallback to polling
+      try {
+        initializeWebSocket()
+        console.log('✅ WebSocket connection attempted')
+        setConnectionMethod('websocket')
+      } catch (error) {
+        console.log('⚠️ WebSocket not available, using polling')
+        setConnectionMethod('polling')
+        cleanupPolling = startPolling()
+      }
     }
     
     if (userId) {
       fetchConversationInfo()
+    }
+
+    // Cleanup function
+    return () => {
+      console.log('🧹 Cleaning up chat conversation...')
+      if (conversationId) {
+        chatSocketService.leaveConversation(conversationId)
+        chatSocketService.off('new_message')
+        chatSocketService.off('message_status')
+      }
+      if (cleanupPolling) {
+        cleanupPolling()
+      }
+      isInitialized = false;
     }
   }, [conversationId, userId])
 
@@ -111,6 +232,7 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
       const token = getAuthToken()
       if (!token) return
 
+      // Send message via REST API for persistence first
       const response = await sendMessage(conversationId, messageText, token)
       
       if (response.success) {
@@ -122,6 +244,9 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
           status: 'sent'
         }
         setMessages(prev => [...prev, newMessage])
+        
+        // Then send via WebSocket for real-time delivery to other users
+        chatSocketService.sendMessage(conversationId, messageText)
       }
     } catch (error) {
       console.error('Error sending message:', error)
@@ -191,7 +316,13 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
           alt={conversationInfo?.name || "User"}
           className="w-10 h-10 rounded-full object-cover mr-3"
         />
-        <h1 className="text-lg font-semibold flex-1">{conversationInfo?.name || "User"}</h1>
+        <div className="flex-1">
+          <h1 className="text-lg font-semibold">{conversationInfo?.name || "User"}</h1>
+          <div className="flex items-center text-sm text-gray-400">
+            <div className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            {isConnected ? 'Online' : 'Connecting...'}
+          </div>
+        </div>
         <button onClick={() => setShowDropdown(!showDropdown)} className="relative">
           <MoreVertical className="w-6 h-6 text-white" />
         </button>

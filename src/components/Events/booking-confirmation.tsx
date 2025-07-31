@@ -1,7 +1,9 @@
 "use client"
 
 import { MapPin } from "lucide-react"
+import { useState } from "react"
 import WavyPattern from "@/assets/Group 190.png";
+import { paymentService } from "@/lib/payment";
 
 interface BookingConfirmationProps {
   onBack: () => void
@@ -13,9 +15,67 @@ interface BookingConfirmationProps {
     location: string
     price: number
   }
+  onPaymentSuccess?: () => void
+  onPaymentFailure?: (error: string) => void
+  onPaymentCancel?: () => void
 }
 
-export function BookingConfirmation({ onBack, onPayment, bookingDetails }: BookingConfirmationProps) {
+export function BookingConfirmation({ 
+  onBack, 
+  onPayment, 
+  bookingDetails, 
+  onPaymentSuccess, 
+  onPaymentFailure, 
+  onPaymentCancel 
+}: BookingConfirmationProps) {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handlePayment = async () => {
+    setIsProcessing(true);
+    try {
+      // Generate a unique booking ID
+      const bookingId = `booking_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Mock user data - in real app, get from user context/state
+      const userData = {
+        user_id: "user_123", // Replace with actual user ID
+        user_name: "John Doe", // Replace with actual user name
+        user_email: "john@example.com", // Replace with actual user email
+        user_phone: "9876543210", // Replace with actual user phone
+      };
+
+      await paymentService.initializePayment({
+        amount: bookingDetails.price,
+        booking_id: bookingId,
+        user_id: userData.user_id,
+        event_type: "Dinner",
+        user_name: userData.user_name,
+        user_email: userData.user_email,
+        user_phone: userData.user_phone,
+      }, {
+        onSuccess: (verification) => {
+          console.log('Payment successful:', verification);
+          onPaymentSuccess?.();
+        },
+        onFailure: (error) => {
+          console.error('Payment failed:', error);
+          onPaymentFailure?.(error);
+        },
+        onCancel: () => {
+          console.log('Payment cancelled');
+          onPaymentCancel?.();
+        }
+      });
+
+      // Call the original onPayment callback for any additional logic
+      onPayment();
+    } catch (error) {
+      console.error('Payment initialization failed:', error);
+      alert('Failed to initialize payment. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
       {/* Content */}
@@ -91,10 +151,11 @@ export function BookingConfirmation({ onBack, onPayment, bookingDetails }: Booki
           Back
         </button>
         <button
-          onClick={onPayment}
-          className="flex-1 py-4 rounded-2xl bg-green-400 text-black text-lg font-semibold hover:bg-green-300 transition-colors"
+          onClick={handlePayment}
+          disabled={isProcessing}
+          className="flex-1 py-4 rounded-2xl bg-green-400 text-black text-lg font-semibold hover:bg-green-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Pay amount
+          {isProcessing ? "Processing..." : "Pay amount"}
         </button>
       </div>
     </div>
