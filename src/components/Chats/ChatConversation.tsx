@@ -449,9 +449,6 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
                   }`}
                 >
                   <p className="text-sm">{message.text}</p>
-                  <div className={`text-xs mt-1 ${message.isSent ? 'text-green-200' : 'text-gray-400'}`}>
-                    {message.status === 'read' ? '✓✓' : message.status === 'delivered' ? '✓✓' : '✓'}
-                  </div>
                 </div>
               </div>
             </div>
