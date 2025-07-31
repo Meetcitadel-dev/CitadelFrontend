@@ -525,6 +525,25 @@ export function getConversationByUserId(userId: string, token?: string) {
   );
 }
 
+// Get conversation details by conversation ID
+export function getConversationById(conversationId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    conversation?: {
+      id: string;
+      userId: string;
+      name: string;
+      profileImage?: string;
+    };
+  }>(
+    `/api/v1/chats/conversation/details/${conversationId}`,
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
 // Get user's connections count (actual connections, not onboarding friends)
 export function getUserConnectionsCount(token?: string) {
   return apiClient<{

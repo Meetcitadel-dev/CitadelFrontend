@@ -50,6 +50,7 @@ export default function MatchesChats({ activeTab, setActiveTab, onChatSelect }: 
         const response = await fetchMatchedConversations(token)
         
         if (response.success) {
+          console.log('📋 Matched conversations response:', response.conversations)
           setConversations(response.conversations)
         } else {
           setError('Failed to load matches')
@@ -143,7 +144,10 @@ export default function MatchesChats({ activeTab, setActiveTab, onChatSelect }: 
               avatar={conversation.profileImage || "/placeholder.svg?height=48&width=48"}
               isOnline={conversation.isOnline}
               unreadCount={conversation.unreadCount}
-              onClick={() => onChatSelect(conversation.id, conversation.userId)}
+              onClick={() => {
+                console.log('🖱️ Chat clicked:', { id: conversation.id, userId: conversation.userId, name: conversation.name })
+                onChatSelect(conversation.id, conversation.userId)
+              }}
             />
           ))
         )}

@@ -72,6 +72,7 @@ export default function ChatApp() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           onChatSelect={(chatId, userId) => {
+            console.log('🎯 Chat selected:', { chatId, userId });
             setSelectedChat(chatId);
             setSelectedUserId(userId);
           }}

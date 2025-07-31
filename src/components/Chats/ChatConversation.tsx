@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { ArrowLeft, MoreVertical, Mic, Send } from "lucide-react"
 import BlockUserModal from "./BlockUserModal"
 import ChatDropdown from "./ChatDropdown"
-import { fetchConversationMessages, sendMessage, markMessagesAsRead, getConversationByUserId } from "@/lib/api"
+import { fetchConversationMessages, sendMessage, markMessagesAsRead, getConversationByUserId, getConversationById, fetchUserProfileByName } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
 import { chatSocketService } from "@/lib/socket"
 import { useWebSocket } from "@/lib/hooks/useWebSocket"
@@ -42,6 +42,9 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
   const { isConnected } = useWebSocket()
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  // Debug props
+  console.log('🔍 ChatConversation props:', { conversationId, userId });
+
   useEffect(() => {
     let cleanupPolling: (() => void) | undefined;
     let isInitialized = false;
@@ -78,12 +81,90 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
     const fetchConversationInfo = async () => {
       try {
         const token = getAuthToken()
-        if (!token || !userId) return
+        if (!token) return
 
-        const response = await getConversationByUserId(userId, token)
-        console.log('getConversationByUserId response:', response) // Debug log
-        if (response.success && response.conversation) {
-          setConversationInfo(response.conversation)
+        console.log('🔍 Fetching conversation info for userId:', userId)
+        
+        // If we have userId, try to get conversation info
+        if (userId) {
+          const response = await getConversationByUserId(userId, token)
+          console.log('getConversationByUserId response:', response)
+          
+          if (response.success && response.conversation) {
+            setConversationInfo(response.conversation)
+            console.log('✅ Conversation info set:', response.conversation)
+            return
+          }
+        }
+        
+        // Fallback: try to get user profile by ID if userId exists
+        if (userId) {
+          console.log('⚠️ Conversation not found, trying to fetch user profile...')
+          try {
+            const userProfileResponse = await fetchUserProfileByName(userId, token)
+            console.log('User profile response:', userProfileResponse)
+            
+            if (userProfileResponse.success && userProfileResponse.data) {
+              setConversationInfo({
+                id: conversationId || '',
+                userId: userId,
+                name: userProfileResponse.data.name,
+                profileImage: undefined
+              })
+              console.log('✅ User profile set as conversation info')
+              return
+            }
+          } catch (profileError) {
+            console.error('Error fetching user profile:', profileError)
+          }
+        }
+        
+        // Final fallback: try to get conversation details by conversation ID
+        if (conversationId && !userId) {
+          console.log('⚠️ No userId provided, trying to get conversation details...')
+          
+          try {
+            const conversationResponse = await getConversationById(conversationId, token)
+            console.log('getConversationById response:', conversationResponse)
+            
+            if (conversationResponse.success && conversationResponse.conversation) {
+              setConversationInfo(conversationResponse.conversation)
+              console.log('✅ Conversation details set:', conversationResponse.conversation)
+              return
+            }
+          } catch (error) {
+            console.error('Error fetching conversation details:', error)
+          }
+          
+          // Fallback: try to get conversation details from the messages
+          try {
+            const messagesResponse = await fetchConversationMessages(conversationId, token)
+            if (messagesResponse.success && messagesResponse.messages.length > 0) {
+              // Look for messages from other users to get their info
+              const otherUserMessages = messagesResponse.messages.filter(msg => !msg.isSent)
+              if (otherUserMessages.length > 0) {
+                setConversationInfo({
+                  id: conversationId,
+                  userId: 'unknown',
+                  name: `User`,
+                  profileImage: undefined
+                })
+                console.log('✅ Using "User" as fallback')
+                return
+              }
+            }
+          } catch (error) {
+            console.error('Error fetching messages for fallback:', error)
+          }
+          
+          // Last resort: show conversation ID
+          setConversationInfo({
+            id: conversationId,
+            userId: 'unknown',
+            name: `Chat ${conversationId.slice(0, 8)}...`,
+            profileImage: undefined
+          })
+          console.log('✅ Using conversation ID as fallback')
         }
       } catch (error) {
         console.error('Error fetching conversation info:', error)
@@ -194,9 +275,9 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
       }
     }
     
-    if (userId) {
-      fetchConversationInfo()
-    }
+    // Always try to fetch conversation info, even without userId
+    console.log('👤 Fetching conversation info...')
+    fetchConversationInfo()
 
     // Cleanup function
     return () => {
@@ -317,7 +398,9 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
           className="w-10 h-10 rounded-full object-cover mr-3"
         />
         <div className="flex-1">
-          <h1 className="text-lg font-semibold">{conversationInfo?.name || "User"}</h1>
+          <h1 className="text-lg font-semibold">
+            {conversationInfo?.name || userId || "User"}
+          </h1>
           <div className="flex items-center text-sm text-gray-400">
             <div className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
             {isConnected ? 'Online' : 'Connecting...'}
