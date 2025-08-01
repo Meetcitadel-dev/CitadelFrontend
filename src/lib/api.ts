@@ -392,11 +392,12 @@ export function fetchUserProfileByName(username: string, token?: string) {
         id: string;
         cloudfrontUrl: string;
       }>;
-      friends?: Array<{
+      // Updated to reflect actual connection counts
+      connections?: Array<{
         id: string;
         name: string;
       }>;
-      mutualFriends?: Array<{
+      mutualConnections?: Array<{
         id: string;
         name: string;
       }>;

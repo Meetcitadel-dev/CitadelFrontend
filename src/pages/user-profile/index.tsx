@@ -51,8 +51,9 @@ interface UserProfile {
   phoneNumber?: string;
   profileImage?: string;
   uploadedImages?: string[];
-  friendsCount?: number;
-  mutualFriendsCount?: number;
+  // Updated to reflect actual connection counts
+  connectionsCount?: number; // Total connections the profile has
+  mutualConnectionsCount?: number; // Common connections between current user and profile
   connectionStatus?: 'connected' | 'requested' | 'not_connected' | 'blocked';
 }
 
@@ -114,8 +115,9 @@ export default function UserProfileScreen() {
             phoneNumber: profileData.phoneNumber,
             profileImage: profileData.images?.[0]?.cloudfrontUrl,
             uploadedImages: profileData.images?.map(img => img.cloudfrontUrl) || [],
-            friendsCount: profileData.friends?.length || 0,
-            mutualFriendsCount: profileData.mutualFriends?.length || 0,
+            // Updated to reflect actual connection counts
+            connectionsCount: profileData.connections?.length || 0,
+            mutualConnectionsCount: profileData.mutualConnections?.length || 0,
             connectionStatus: profileData.connectionState?.status || 'not_connected'
           }
           
@@ -339,13 +341,13 @@ export default function UserProfileScreen() {
             <div className="flex gap-4">
               {/* Friends Count */}
               <div className="text-center">
-                <div className="text-white text-xl font-bold">{userProfile.friendsCount || 0}</div>
+                <div className="text-white text-xl font-bold">{userProfile.connectionsCount || 0}</div>
                 <div className="text-white/60 text-sm">Friends</div>
               </div>
               
               {/* Mutuals Count */}
               <div className="text-center">
-                <div className="text-white text-xl font-bold">{userProfile.mutualFriendsCount || 0}</div>
+                <div className="text-white text-xl font-bold">{userProfile.mutualConnectionsCount || 0}</div>
                 <div className="text-white/60 text-sm">Mutuals</div>
               </div>
             </div>

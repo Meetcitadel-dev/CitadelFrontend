@@ -52,7 +52,7 @@ interface UserProfile {
   phoneNumber?: string;
   profileImage?: string;
   uploadedImages?: string[];
-  friendsCount?: number;
+  connectionsCount?: number; // Updated to reflect actual connections
 }
 
 export default function MobileProfileScreen() {
@@ -104,7 +104,7 @@ export default function MobileProfileScreen() {
             phoneNumber: profileData.phoneNumber || undefined,
             profileImage: profileData.images?.[0]?.cloudfrontUrl, // Use first image as profile
             uploadedImages: profileData.images?.map((img: any) => img.cloudfrontUrl) || [],
-            friendsCount: 0 // We'll update this with actual connections count
+            connectionsCount: 0 // We'll update this with actual connections count
           }
           
           console.log('Mapped profile:', mappedProfile)
@@ -158,7 +158,7 @@ export default function MobileProfileScreen() {
     portfolioLink: undefined,
     profileImage: undefined,
     uploadedImages: [],
-    friendsCount: 0
+    connectionsCount: 0
   }
 
   // Get profile image (user's uploaded image or default)
