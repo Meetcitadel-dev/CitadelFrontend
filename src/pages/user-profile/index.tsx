@@ -25,6 +25,15 @@ const interFont = {
   fontFamily: "Inter, sans-serif",
 }
 
+// Function to convert ordinal year to simple number
+const convertOrdinalToNumber = (year: string): string => {
+  if (!year) return '--'
+  
+  // Remove ordinal suffixes and return just the number
+  const number = year.replace(/(st|nd|rd|th)$/, '')
+  return number
+}
+
 interface UserProfile {
   id: string;
   name: string;
@@ -294,8 +303,8 @@ export default function UserProfileScreen() {
                 </div>
                 {/* Year Badge */}
                 <div className="bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2">
-                  <div className="text-white/60 text-xs font-medium">Year</div>
-                  <div className="text-white text-2xl font-bold">{userProfile.year || '--'}</div>
+                  <div className="text-white/60 text-xs font-medium text-center">Year</div>
+                  <div className="text-white text-2xl font-bold text-center">{convertOrdinalToNumber(userProfile.year) || '--'}</div>
                 </div>
               </div>
             </div>
