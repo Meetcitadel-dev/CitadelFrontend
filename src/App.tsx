@@ -22,7 +22,9 @@ export default function App() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/search" element={<ProfilesPage />} />
+        <Route path="/gridview" element={<ProfilesPage />} />
         <Route path="/profile" element={<UserProfilePage />} />
+        {/* Catch-all route for user profiles - must be last */}
         <Route path="/:name" element={<UserProfileScreen />} />
         {/* Default route: redirect to onboarding */}
         <Route path="*" element={<Navigate to="/onboarding" replace />} />

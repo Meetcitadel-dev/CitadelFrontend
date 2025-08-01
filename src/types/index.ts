@@ -66,18 +66,18 @@ export interface AdjectiveMatch {
 }
 
 export interface ConnectionState {
-  id: string;
-  userId1?: string;
-  userId2?: string;
-  requesterId?: string;
-  targetId?: string;
+  id: string | number;
+  userId1?: string | number;
+  userId2?: string | number;
+  requesterId?: string | number;
+  targetId?: string | number;
   status: 'not_connected' | 'requested' | 'connected' | 'blocked' | 'pending';
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export interface ExploreProfile {
-  id: string;
+  id: string | number;
   name: string;
   email: string;
   university: {
@@ -101,6 +101,11 @@ export interface ExploreResponse {
   profiles: ExploreProfile[];
   hasMore: boolean;
   totalCount: number;
+  filters?: {
+    availableUniversities: string[];
+    availableSkills: string[];
+    availableYears: string[];
+  };
 }
 
 export interface ConnectionRequest {

@@ -8,10 +8,17 @@ export type ApiClientOptions = {
 
 function getApiUrl(url: string) {
   const base = import.meta.env.VITE_API_URL;
+  console.log('VITE_API_URL:', base);
+  
   // If url is absolute (starts with http), return as is
   if (/^https?:\/\//.test(url)) return url;
+  
+  // If base is not defined, use localhost:3000 as default
+  const apiBase = base || 'http://localhost:3000';
+  console.log('Using API base:', apiBase);
+  
   // Otherwise, prepend base URL
-  return base.replace(/\/$/, '') + (url.startsWith('/') ? url : '/' + url);
+  return apiBase.replace(/\/$/, '') + (url.startsWith('/') ? url : '/' + url);
 }
 
 export async function apiClient<T = any>(
@@ -59,7 +66,11 @@ export async function apiClient<T = any>(
   // Try to parse JSON, fallback to text
   const contentType = res.headers.get('content-type');
   if (contentType && contentType.includes('application/json')) {
-    return res.json();
+    const jsonResponse = await res.json();
+    console.log('Parsed JSON response:', jsonResponse);
+    return jsonResponse;
   }
-  return (await res.text()) as any;
+  const textResponse = await res.text();
+  console.log('Text response:', textResponse);
+  return textResponse as any;
 } 

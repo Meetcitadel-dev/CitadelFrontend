@@ -12,9 +12,16 @@ export interface Profile {
 
 interface ProfileCardViewProps {
   profiles: Profile[]
+  onConnectionAction?: (profileId: string, action: 'connect' | 'remove' | 'accept' | 'reject') => void
 }
 
-export function ProfileCardView({ profiles }: ProfileCardViewProps) {
+export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardViewProps) {
+  const handleConnectionAction = (profileId: number, action: 'connect' | 'remove' | 'accept' | 'reject') => {
+    if (onConnectionAction) {
+      onConnectionAction(profileId.toString(), action)
+    }
+  }
+
   return (
     <div className="grid grid-cols-2 gap-4">
       {profiles.map((profile) => (
@@ -60,7 +67,15 @@ export function ProfileCardView({ profiles }: ProfileCardViewProps) {
               </span>
             </div>
 
-            <ProfileActionButton status={profile.status} />
+            <ProfileActionButton 
+              status={profile.status} 
+              onClick={() => {
+                const action = profile.status === 'connect' ? 'connect' : 
+                             profile.status === 'connected' ? 'remove' : 
+                             profile.status === 'request' ? 'accept' : 'connect'
+                handleConnectionAction(profile.id, action)
+              }}
+            />
           </div>
         </div>
       ))}

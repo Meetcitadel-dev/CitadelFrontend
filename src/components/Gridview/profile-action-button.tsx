@@ -2,9 +2,10 @@ import { Button } from "@/components/ui/button"
 
 interface ProfileActionButtonProps {
   status: "connect" | "remove" | "request" | "connected"
+  onClick?: () => void
 }
 
-export function ProfileActionButton({ status }: ProfileActionButtonProps) {
+export function ProfileActionButton({ status, onClick }: ProfileActionButtonProps) {
   const getButtonConfig = () => {
     switch (status) {
       case "connect":
@@ -38,7 +39,11 @@ export function ProfileActionButton({ status }: ProfileActionButtonProps) {
   const { text, className } = getButtonConfig()
 
   return (
-    <Button className={`w-full rounded-xl py-3 font-medium ${className}`} size="sm">
+    <Button 
+      className={`w-full rounded-xl py-3 font-medium ${className}`} 
+      size="sm"
+      onClick={onClick}
+    >
       {text}
     </Button>
   )

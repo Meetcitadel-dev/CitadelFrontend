@@ -99,7 +99,7 @@ export async function uploadImage(file: File, token?: string) {
   // Remove Content-Type header to let browser set it with boundary for FormData
   delete headers['Content-Type'];
   
-  const base = import.meta.env.VITE_API_URL;
+  const base = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   const url = base.replace(/\/$/, '') + '/api/profile/upload';
   
   const response = await fetch(url, {
@@ -221,12 +221,24 @@ export function fetchExploreProfiles(params?: {
   limit?: number;
   offset?: number;
   token?: string;
+  search?: string;
+  sortBy?: string;
+  gender?: string;
+  years?: string[];
+  universities?: string[];
+  skills?: string[];
 }) {
   const query = new URLSearchParams();
   if (params?.limit) query.append('limit', params.limit.toString());
   if (params?.offset) query.append('offset', params.offset.toString());
+  if (params?.search) query.append('search', params.search);
+  if (params?.sortBy) query.append('sortBy', params.sortBy);
+  if (params?.gender) query.append('gender', params.gender);
+  if (params?.years && params.years.length > 0) query.append('years', params.years.join(','));
+  if (params?.universities && params.universities.length > 0) query.append('universities', params.universities.join(','));
+  if (params?.skills && params.skills.length > 0) query.append('skills', params.skills.join(','));
   
-  const url = '/api/v1/explore/profiles' + (query.toString() ? `?${query.toString()}` : '');
+  const url = '/api/v1/users/gridview' + (query.toString() ? `?${query.toString()}` : '');
   
   return apiClient<ExploreResponse>(url, {
     method: 'GET',

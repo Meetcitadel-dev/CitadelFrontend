@@ -70,7 +70,7 @@ export default function UploadBox({
       const formData = new FormData()
       formData.append('image', file)
       
-      const base = import.meta.env.VITE_API_URL
+      const base = import.meta.env.VITE_API_URL || 'http://localhost:3000'
       const url = base.replace(/\/$/, '') + '/api/profile/upload'
       
       const response = await fetch(url, {
