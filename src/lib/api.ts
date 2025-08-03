@@ -571,3 +571,14 @@ export function getUserConnectionsCount(token?: string) {
     }
   );
 } 
+
+// Delete user account
+export function deleteUserAccount(token?: string) {
+  return apiClient<{ success: boolean; message?: string }>(
+    '/api/v1/profile/delete-account',
+    {
+      method: 'DELETE',
+      token,
+    }
+  );
+} 
