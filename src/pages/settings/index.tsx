@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import SettingsScreen from "@/components/Settings/settings-screen"
 import EventBookingsScreen from "@/components/Settings/event-bookings-screen"
 import NotificationsScreen from "@/components/Settings/notifications-screen"
@@ -8,6 +9,7 @@ import PrivacyPolicyScreen from "@/components/Settings/privacy-policy-screen"
 import QueryModal from "@/components/Settings/query-modal"
 
 export default function SettingsPage() {
+  const navigate = useNavigate()
   const [currentScreen, setCurrentScreen] = useState<
     "settings" | "eventBookings" | "notifications" | "blockedUsers" | "helpSupport" | "privacyPolicy"
   >("settings")
@@ -19,6 +21,7 @@ export default function SettingsPage() {
   const handleNavigateToHelpSupport = () => setCurrentScreen("helpSupport")
   const handleNavigateToPrivacyPolicy = () => setCurrentScreen("privacyPolicy")
   const handleBackToSettings = () => setCurrentScreen("settings")
+  const handleBackToMain = () => navigate("/profile")
   const handleOpenQueryModal = () => setShowQueryModal(true)
   const handleCloseQueryModal = () => setShowQueryModal(false)
 
@@ -31,6 +34,7 @@ export default function SettingsPage() {
           onNavigateToBlockedUsers={handleNavigateToBlockedUsers}
           onNavigateToHelpSupport={handleNavigateToHelpSupport}
           onNavigateToPrivacyPolicy={handleNavigateToPrivacyPolicy}
+          onBack={handleBackToMain}
         />
       )}
       {currentScreen === "eventBookings" && <EventBookingsScreen onBack={handleBackToSettings} />}
