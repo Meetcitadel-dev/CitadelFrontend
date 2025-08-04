@@ -390,10 +390,6 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
             <h1 className="text-lg font-semibold">
               {conversationInfo?.name || userId || "User"}
             </h1>
-            <div className="flex items-center text-sm text-gray-400">
-              <div className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              {isConnected ? 'Online' : 'Connecting...'}
-            </div>
           </div>
           <button onClick={() => setShowDropdown(!showDropdown)} className="relative">
             <MoreVertical className="w-6 h-6 text-white" />
