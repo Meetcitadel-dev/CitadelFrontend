@@ -50,7 +50,14 @@ export default function MatchesChats({ activeTab, setActiveTab, onChatSelect }: 
         const response = await fetchMatchedConversations(token)
         
         if (response.success) {
-          setConversations(response.conversations)
+          // Sort conversations by lastMessageTime (latest first)
+          const sortedConversations = response.conversations.sort((a, b) => {
+            if (!a.lastMessageTime && !b.lastMessageTime) return 0;
+            if (!a.lastMessageTime) return 1;
+            if (!b.lastMessageTime) return -1;
+            return new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime();
+          });
+          setConversations(sortedConversations)
         } else {
           setError('Failed to load matches')
         }
