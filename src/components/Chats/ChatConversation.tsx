@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useState, useEffect, useRef } from "react"
 import { ArrowLeft, MoreVertical, Mic, Send } from "lucide-react"
@@ -66,7 +66,11 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
         const response = await fetchConversationMessages(conversationId, token)
         
         if (response.success) {
-          setMessages(response.messages)
+          // Sort messages by timestamp to ensure proper order
+          const sortedMessages = response.messages.sort((a, b) => 
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          )
+          setMessages(sortedMessages)
           // Mark messages as read
           await markMessagesAsRead(conversationId, token)
         }
@@ -179,17 +183,21 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
             timestamp: data.message.timestamp,
             status: data.message.status
           }
-          setMessages(prev => {
-            // Check if message already exists to prevent duplicates
-            const messageExists = prev.some(msg => 
-              msg.id === data.message.id || 
-              (msg.text === data.message.text && Math.abs(new Date(msg.timestamp).getTime() - new Date(data.message.timestamp).getTime()) < 1000)
-            )
-            if (messageExists) {
-              return prev
-            }
-            return [...prev, newMessage]
-          })
+                  setMessages(prev => {
+          // Check if message already exists to prevent duplicates
+          const messageExists = prev.some(msg => 
+            msg.id === data.message.id || 
+            (msg.text === data.message.text && Math.abs(new Date(msg.timestamp).getTime() - new Date(data.message.timestamp).getTime()) < 1000)
+          )
+          if (messageExists) {
+            return prev
+          }
+          // Add new message and sort by timestamp
+          const updatedMessages = [...prev, newMessage].sort((a, b) => 
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          )
+          return updatedMessages
+        })
         }
       })
 
@@ -222,13 +230,16 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
           const response = await fetchConversationMessages(conversationId, token)
           if (response.success) {
             setMessages(prev => {
-              // Only update if there are new messages
-              const newMessages = response.messages
+              // Merge new messages with existing ones, avoiding duplicates
               const currentMessageIds = new Set(prev.map(msg => msg.id))
-              const hasNewMessages = newMessages.some(msg => !currentMessageIds.has(msg.id))
+              const newMessages = response.messages.filter(msg => !currentMessageIds.has(msg.id))
               
-              if (hasNewMessages) {
-                return newMessages
+              if (newMessages.length > 0) {
+                // Sort all messages by timestamp to maintain order
+                const allMessages = [...prev, ...newMessages].sort((a, b) => 
+                  new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+                )
+                return allMessages
               }
               return prev
             })
@@ -311,7 +322,11 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
           if (messageExists) {
             return prev
           }
-          return [...prev, newMessage]
+          // Add new message and sort by timestamp
+          const updatedMessages = [...prev, newMessage].sort((a, b) => 
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          )
+          return updatedMessages
         })
         
         // Then send via WebSocket for real-time delivery to other users
