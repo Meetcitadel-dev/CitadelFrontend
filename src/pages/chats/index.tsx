@@ -59,6 +59,7 @@ export default function ChatApp() {
         }} 
         conversationId={selectedChat}
         userId={selectedUserId || undefined}
+        isFromMatches={activeTab === "matches"}
       />
     );
   }

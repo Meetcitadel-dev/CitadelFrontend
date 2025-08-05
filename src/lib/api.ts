@@ -274,7 +274,7 @@ export function manageConnection(request: ConnectionRequest, token?: string) {
 // Select adjective for a profile
 export function selectAdjective(selection: AdjectiveSelection, token?: string) {
   return apiClient<AdjectiveMatchResponse>(
-    '/api/v1/explore/adjectives/select',
+    '/api/v1/enhanced-explore/adjectives/select',
     {
       method: 'POST',
       body: selection,
@@ -571,6 +571,203 @@ export function getUserConnectionsCount(token?: string) {
     }
   );
 } 
+
+// Enhanced Adjective System API Functions
+
+// Get user's gender for adjective selection
+export function getUserGender(token?: string) {
+  return apiClient<{
+    success: boolean;
+    gender: string;
+    message?: string;
+  }>(
+    '/api/v1/enhanced-explore/profile/gender',
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+// Get adjective selections for a specific user
+export function getAdjectiveSelections(targetUserId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    selections: Array<{
+      id: string;
+      userId: string;
+      targetUserId: string;
+      adjective: string;
+      timestamp: string;
+      isMatched: boolean;
+    }>;
+    message?: string;
+  }>(
+    `/api/v1/enhanced-explore/adjectives/selections/${targetUserId}`,
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+// Get available adjectives for a target user
+export function getAvailableAdjectives(targetUserId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    adjectives: string[];
+    hasPreviousSelection: boolean;
+    previousSelection?: string;
+    message?: string;
+  }>(
+    `/api/v1/enhanced-explore/adjectives/available/${targetUserId}`,
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+// Get match state between two users
+export function getMatchState(targetUserId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    matchState?: {
+      id: string;
+      userId1: string;
+      userId2: string;
+      mutualAdjective: string;
+      isConnected: boolean;
+      matchTimestamp: string;
+      connectionTimestamp?: string;
+      iceBreakingPrompt?: string;
+    };
+    message?: string;
+  }>(
+    `/api/v1/enhanced-explore/matches/state/${targetUserId}`,
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+// Connect after matching
+export function connectAfterMatch(targetUserId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    connectionState: any;
+    message?: string;
+  }>(
+    '/api/v1/enhanced-explore/matches/connect',
+    {
+      method: 'POST',
+      body: { targetUserId },
+      token,
+    }
+  );
+}
+
+// Get ice-breaking prompt for a matched user
+export function getIceBreakingPrompt(targetUserId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    prompt: string;
+    message?: string;
+  }>(
+    `/api/v1/enhanced-explore/matches/ice-breaking/${targetUserId}`,
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+// Enhanced Chat Matching APIs
+export function sendConnectionRequest(targetUserId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    message: string;
+  }>(
+    '/api/v1/enhanced-chats/connection-request',
+    {
+      method: 'POST',
+      body: { targetUserId },
+      token,
+    }
+  );
+}
+
+export function dismissMatchPrompt(targetUserId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    message: string;
+  }>(
+    '/api/v1/enhanced-chats/dismiss',
+    {
+      method: 'POST',
+      body: { targetUserId },
+      token,
+    }
+  );
+}
+
+export function moveChatToActive(targetUserId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    message: string;
+  }>(
+    '/api/v1/enhanced-chats/move-to-active',
+    {
+      method: 'POST',
+      body: { targetUserId },
+      token,
+    }
+  );
+}
+
+export function checkChatHistory(targetUserId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    hasChatHistory: boolean;
+    message?: string;
+  }>(
+    `/api/v1/enhanced-chats/chat-history/${targetUserId}`,
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+// Enhanced matches endpoint
+export function getEnhancedMatches(token?: string) {
+  return apiClient<{
+    success: boolean;
+    conversations: Array<{
+      id: string;
+      userId: string;
+      name: string;
+      lastMessage?: string;
+      lastMessageTime?: string;
+      unreadCount: number;
+      caseType: 'CASE_1' | 'CASE_2' | 'CASE_3';
+      isConnected: boolean;
+      hasChatHistory: boolean;
+      matchData?: {
+        mutualAdjective: string;
+        iceBreakingPrompt: string;
+      };
+    }>;
+    message?: string;
+  }>(
+    '/api/v1/enhanced-chats/matches',
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
 
 // Delete user account
 export function deleteUserAccount(token?: string) {

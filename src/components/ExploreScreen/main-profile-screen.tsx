@@ -3,9 +3,24 @@ import { useState, useEffect } from "react"
 import Navbar from "../Common/navbar";
 import { useNavigate, useLocation } from "react-router-dom";
 import ProfileImage from "@/assets/657e5f166ffee2019c3aa97b2117a5c1144d080e.png"
-import { fetchExploreProfiles, manageConnection, selectAdjective, trackProfileView, checkAdjectiveSelection } from "@/lib/api"
+import { 
+  fetchExploreProfiles, 
+  manageConnection, 
+  selectAdjective, 
+  trackProfileView, 
+  checkAdjectiveSelection,
+  getUserGender,
+  getAdjectiveSelections,
+  getMatchState,
+  getAvailableAdjectives
+} from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
-import type { ExploreProfile, ConnectionRequest, AdjectiveSelection } from "@/types"
+import type { ExploreProfile, ConnectionRequest, AdjectiveSelection, AdjectiveDisplayData } from "@/types"
+import { 
+  generateAdjectiveDisplay, 
+  generateIceBreakingPrompt,
+  checkForMatch 
+} from "@/lib/adjectiveUtils"
 
 // Add Inter font import for this page only
 const interFont = {
@@ -21,13 +36,6 @@ const convertOrdinalToNumber = (year: string): string => {
   return number
 }
 
-// Valid adjectives that are more likely to be accepted by the backend
-const VALID_ADJECTIVES = [
-  "Beautiful", "Handsome", "Smart", "Intelligent", "Creative", "Funny", 
-  "Kind", "Ambitious", "Confident", "Friendly", "Adventurous", "Caring",
-  "Passionate", "Reliable", "Optimistic", "Energetic", "Thoughtful", "Dynamic"
-]
-
 export default function MobileProfileScreen() {
   const [selectedTrait, setSelectedTrait] = useState("")
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0)
@@ -39,16 +47,16 @@ export default function MobileProfileScreen() {
   const [trackingView, setTrackingView] = useState(false)
   const [hasSelectedAdjective, setHasSelectedAdjective] = useState(false)
   const [checkingAdjective, setCheckingAdjective] = useState(false)
+  
+  // New state for enhanced adjective system
+  const [userGender, setUserGender] = useState<string>('')
+  const [availableAdjectives, setAvailableAdjectives] = useState<string[]>([])
+  const [adjectiveDisplay, setAdjectiveDisplay] = useState<AdjectiveDisplayData | null>(null)
+  const [matchState, setMatchState] = useState<any>(null)
+  const [loadingAdjectives, setLoadingAdjectives] = useState(false)
+  
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Use a subset of valid adjectives for the UI
-  const traits = [
-    { name: "Beautiful" }, 
-    { name: "Smart" }, 
-    { name: "Funny" }, 
-    { name: "Kind" }
-  ]
 
   const navItems = [
     { icon: Search, label: "Explore", onClick: () => navigate("/explore"), active: location.pathname === "/explore" },
@@ -57,6 +65,25 @@ export default function MobileProfileScreen() {
     { icon: Bell, label: "Notifications", onClick: () => navigate("/notification"), active: location.pathname === "/notification" },
     { icon: User, label: "Profile", onClick: () => navigate("/profile"), active: location.pathname === "/profile" },
   ];
+
+  // Load user's gender for adjective selection
+  useEffect(() => {
+    const loadUserGender = async () => {
+      try {
+        const token = getAuthToken()
+        if (!token) return
+
+        const response = await getUserGender(token)
+        if (response.success) {
+          setUserGender(response.gender)
+        }
+      } catch (error) {
+        console.error('Error loading user gender:', error)
+      }
+    }
+
+    loadUserGender()
+  }, [])
 
   // Load profiles from API
   useEffect(() => {
@@ -114,6 +141,64 @@ export default function MobileProfileScreen() {
     loadProfiles()
   }, [offset, navigate])
 
+  // Load adjectives and match state for current profile
+  useEffect(() => {
+    const loadAdjectivesAndMatchState = async () => {
+      if (profiles.length === 0 || currentProfileIndex >= profiles.length) return
+      
+      const currentProfile = profiles[currentProfileIndex]
+      if (!currentProfile || !userGender) return
+
+      try {
+        setLoadingAdjectives(true)
+        const token = getAuthToken()
+        if (!token) return
+
+        // Get available adjectives from backend (already includes previous selection logic)
+        const availableAdjsResponse = await getAvailableAdjectives(String(currentProfile.id), token)
+        if (availableAdjsResponse.success) {
+          setAvailableAdjectives(availableAdjsResponse.adjectives)
+          
+          // Create adjective display directly from backend response
+          const display: AdjectiveDisplayData = {
+            selectedAdjective: availableAdjsResponse.previousSelection || '',
+            randomAdjectives: availableAdjsResponse.adjectives.filter(adj => adj !== availableAdjsResponse.previousSelection),
+            allAdjectives: availableAdjsResponse.adjectives,
+            isMatched: false
+          }
+          setAdjectiveDisplay(display)
+          
+          // Set hasSelectedAdjective based on backend response
+          setHasSelectedAdjective(availableAdjsResponse.hasPreviousSelection || false)
+        } else {
+          // Fallback to neutral adjectives if API fails
+          setAvailableAdjectives(["Smart", "Funny", "Friendly", "Creative", "Optimistic", "Organized", "Adaptable", "Generous"])
+        }
+
+        // Check match state
+        const matchResponse = await getMatchState(String(currentProfile.id), token)
+        if (matchResponse.success && matchResponse.matchState) {
+          setMatchState(matchResponse.matchState)
+          if (adjectiveDisplay) {
+            adjectiveDisplay.isMatched = true
+            adjectiveDisplay.matchData = {
+              mutualAdjective: matchResponse.matchState.mutualAdjective,
+              matchTimestamp: new Date(matchResponse.matchState.matchTimestamp)
+            }
+            setAdjectiveDisplay(adjectiveDisplay)
+          }
+        }
+
+      } catch (error) {
+        console.error('Error loading adjectives and match state:', error)
+      } finally {
+        setLoadingAdjectives(false)
+      }
+    }
+
+    loadAdjectivesAndMatchState()
+  }, [currentProfileIndex, profiles, userGender])
+
   // Track profile view when profile changes
   useEffect(() => {
     const trackCurrentProfileView = async () => {
@@ -127,7 +212,7 @@ export default function MobileProfileScreen() {
         const token = getAuthToken()
         if (!token) return
 
-        await trackProfileView(currentProfile.id, token)
+        await trackProfileView(String(currentProfile.id), token)
         console.log('Profile view tracked for:', currentProfile.name)
       } catch (error) {
         console.error('Error tracking profile view:', error)
@@ -139,40 +224,6 @@ export default function MobileProfileScreen() {
 
     // Track view after a short delay to ensure profile is loaded
     const timer = setTimeout(trackCurrentProfileView, 500)
-    return () => clearTimeout(timer)
-  }, [currentProfileIndex, profiles])
-
-  // Check if user has already selected an adjective for current profile
-  useEffect(() => {
-    const checkCurrentProfileAdjective = async () => {
-      if (profiles.length === 0 || currentProfileIndex >= profiles.length) return
-      
-      const currentProfile = profiles[currentProfileIndex]
-      if (!currentProfile) return
-
-      try {
-        setCheckingAdjective(true)
-        const token = getAuthToken()
-        if (!token) return
-
-        const response = await checkAdjectiveSelection(currentProfile.id, token)
-        
-        if (response.success) {
-          setHasSelectedAdjective(response.hasSelectedAdjective)
-        } else {
-          console.error('Error checking adjective selection:', response.message)
-          setHasSelectedAdjective(false)
-        }
-      } catch (error) {
-        console.error('Error checking adjective selection:', error)
-        setHasSelectedAdjective(false)
-      } finally {
-        setCheckingAdjective(false)
-      }
-    }
-
-    // Check adjective selection after profile view is tracked
-    const timer = setTimeout(checkCurrentProfileAdjective, 1000)
     return () => clearTimeout(timer)
   }, [currentProfileIndex, profiles])
 
@@ -189,26 +240,26 @@ export default function MobileProfileScreen() {
       if (currentProfileIndex < profiles.length - 1) {
         setCurrentProfileIndex(prev => prev + 1)
         setSelectedTrait("")
+        setAdjectiveDisplay(null)
+        setMatchState(null)
       } else if (hasMore) {
         // Load more profiles if we're at the end
         loadMoreProfiles()
         setCurrentProfileIndex(0)
         setSelectedTrait("")
+        setAdjectiveDisplay(null)
+        setMatchState(null)
       }
     }, 1000)
   }
 
   // Handle trait selection and matching
   const handleTraitSelection = async (traitName: string) => {
-    if (!profiles[currentProfileIndex]) return
+    if (!profiles[currentProfileIndex] || !adjectiveDisplay) return
 
-    // If user has already selected an adjective for this profile, show message and move to next
-    if (hasSelectedAdjective) {
-      alert('You have already selected an adjective for this profile.')
-      moveToNextProfile()
-      return
-    }
-
+    // Allow users to update their previous selection
+    // Remove the hasSelectedAdjective check that was blocking clicks
+    
     setSelectedTrait(traitName)
     
     try {
@@ -216,16 +267,17 @@ export default function MobileProfileScreen() {
       if (!token) return
 
       const selection: AdjectiveSelection = {
-        targetUserId: profiles[currentProfileIndex].id,
+        targetUserId: String(profiles[currentProfileIndex].id),
         adjective: traitName
       }
 
       const response = await selectAdjective(selection, token)
       
       if (response.success && response.matched) {
-        // Show match notification
+        // Show match notification with ice-breaking prompt
+        const prompt = generateIceBreakingPrompt(traitName)
         setTimeout(() => {
-          alert(`🎉 You matched with ${profiles[currentProfileIndex].name} on "${traitName}"!`)
+          alert(`🎉 You matched with ${profiles[currentProfileIndex].name} on "${traitName}"!\n\n${prompt}`)
         }, 500)
       } else if (!response.success) {
         // Handle specific error messages from backend
@@ -241,6 +293,9 @@ export default function MobileProfileScreen() {
           return // Don't proceed to next profile
         }
       }
+      
+      // Update hasSelectedAdjective to true after successful selection
+      setHasSelectedAdjective(true)
       
       // Move to next profile after a short delay (only if successful)
       moveToNextProfile()
@@ -283,10 +338,10 @@ export default function MobileProfileScreen() {
       const token = getAuthToken()
       if (!token) return
 
-      const request: ConnectionRequest = {
-        targetUserId: profiles[currentProfileIndex].id,
-        action: action
-      }
+              const request: ConnectionRequest = {
+          targetUserId: String(profiles[currentProfileIndex].id),
+          action: action
+        }
 
       const response = await manageConnection(request, token)
       
@@ -405,6 +460,11 @@ export default function MobileProfileScreen() {
                   Requested
                 </div>
               )}
+              {connectionStatus === 'matched' && (
+                <div className="bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-semibold inline-block">
+                  Matched
+                </div>
+              )}
               {connectionStatus === 'not_connected' && (
                 <button 
                   onClick={() => handleConnectionAction('connect')}
@@ -448,24 +508,42 @@ export default function MobileProfileScreen() {
 
       {/* Personality Traits */}
       <div className="px-6 mt-2 mb-24">
-        <div className="grid grid-cols-2 gap-3">
-          {traits.map((trait) => (
-            <button
-              key={trait.name}
-              onClick={() => handleTraitSelection(trait.name)}
-              disabled={selectedTrait !== ""}
-              className={`rounded-2xl px-8 py-5 text-center transition-all ${
-                selectedTrait === trait.name 
-                  ? "bg-green-500 text-black" 
-                  : selectedTrait !== "" 
-                    ? "bg-gray-500 text-gray-300 cursor-not-allowed"
-                    : "bg-white/10 backdrop-blur-sm text-green-400 hover:bg-white/20"
-              }`}
-            >
-              <span className="text-lg font-semibold">{trait.name}</span>
-            </button>
-          ))}
-        </div>
+        {loadingAdjectives ? (
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-2xl px-8 py-5 bg-gray-800 animate-pulse">
+                <div className="h-6 bg-gray-700 rounded"></div>
+              </div>
+            ))}
+          </div>
+        ) : adjectiveDisplay ? (
+          <div className="grid grid-cols-2 gap-3">
+            {adjectiveDisplay.allAdjectives.map((trait) => (
+              <button
+                key={trait}
+                onClick={() => handleTraitSelection(trait)}
+                disabled={selectedTrait !== ""}
+                className={`rounded-2xl px-8 py-5 text-center transition-all ${
+                  selectedTrait === trait 
+                    ? "bg-green-500 text-black" 
+                    : selectedTrait !== "" 
+                      ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                      : "bg-white/10 backdrop-blur-sm text-green-400 hover:bg-white/20"
+                }`}
+              >
+                <span className="text-lg font-semibold">{trait}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-2xl px-8 py-5 bg-gray-800">
+                <div className="h-6 bg-gray-700 rounded"></div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Bottom Navigation */}

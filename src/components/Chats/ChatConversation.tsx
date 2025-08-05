@@ -1,18 +1,34 @@
 
 
 import { useState, useEffect, useRef } from "react"
-import { ArrowLeft, MoreVertical, Mic, Send } from "lucide-react"
+import { ArrowLeft, MoreVertical, Mic, Send, Heart, MessageCircle, X } from "lucide-react"
 import BlockUserModal from "./BlockUserModal"
 import ChatDropdown from "./ChatDropdown"
-import { fetchConversationMessages, sendMessage, markMessagesAsRead, getConversationByUserId, getConversationById, fetchUserProfileByName } from "@/lib/api"
+import { 
+  fetchConversationMessages, 
+  sendMessage, 
+  markMessagesAsRead, 
+  getConversationByUserId, 
+  getConversationById, 
+  fetchUserProfileByName,
+  getMatchState,
+  connectAfterMatch,
+  getIceBreakingPrompt,
+  sendConnectionRequest,
+  dismissMatchPrompt,
+  moveChatToActive,
+  checkChatHistory
+} from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
 import { chatSocketService } from "@/lib/socket"
 import { useWebSocket } from "@/lib/hooks/useWebSocket"
+import { generateIceBreakingPrompt } from "@/lib/adjectiveUtils"
 
 interface ChatConversationProps {
   onBack: () => void
   conversationId?: string
   userId?: string
+  isFromMatches?: boolean // New prop to identify if chat is from matches section
 }
 
 interface Message {
@@ -30,7 +46,30 @@ interface ConversationInfo {
   profileImage?: string
 }
 
-export default function ChatConversation({ onBack, conversationId, userId }: ChatConversationProps) {
+interface MatchState {
+  id: string
+  userId1: string
+  userId2: string
+  mutualAdjective: string
+  isConnected: boolean
+  matchTimestamp: string
+  connectionTimestamp?: string
+  iceBreakingPrompt?: string
+}
+
+// Enum for match cases
+enum MatchCase {
+  CASE_1 = 'CASE_1', // Already Connected + Already Chatting + Match
+  CASE_2 = 'CASE_2', // Already Connected + Never Chatted + Match  
+  CASE_3 = 'CASE_3'  // Never Connected + Match
+}
+
+export default function ChatConversation({ onBack, conversationId, userId, isFromMatches = false }: ChatConversationProps) {
+  console.log('🚀 ChatConversation rendered with props:', {
+    conversationId,
+    userId,
+    isFromMatches
+  })
   const [messages, setMessages] = useState<Message[]>([])
   const [conversationInfo, setConversationInfo] = useState<ConversationInfo | null>(null)
   const [inputValue, setInputValue] = useState("")
@@ -42,7 +81,18 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
   const { isConnected } = useWebSocket()
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-
+  // Enhanced state for match and connection flow
+  const [matchState, setMatchState] = useState<MatchState | null>(null)
+  const [isMatched, setIsMatched] = useState(false)
+  const [isConnectedToMatch, setIsConnectedToMatch] = useState(false)
+  const [showConnectButton, setShowConnectButton] = useState(false)
+  const [showCrossButton, setShowCrossButton] = useState(false)
+  const [connecting, setConnecting] = useState(false)
+  const [iceBreakingPrompt, setIceBreakingPrompt] = useState<string>("")
+  const [matchCase, setMatchCase] = useState<MatchCase | null>(null)
+  const [hasChatHistory, setHasChatHistory] = useState(false)
+  const [isUserConnected, setIsUserConnected] = useState(false)
+  const [showPrompt, setShowPrompt] = useState(false)
 
   useEffect(() => {
     let cleanupPolling: (() => void) | undefined;
@@ -161,6 +211,91 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
       }
     }
 
+    // Check match state and connection status
+    const checkMatchAndConnection = async () => {
+      if (!userId) return
+      
+      try {
+        const token = getAuthToken()
+        if (!token) return
+
+        console.log('🔍 Checking match and connection for userId:', userId)
+
+      // Get match state
+      const matchResponse = await getMatchState(userId, token)
+      console.log('📊 Match response:', matchResponse)
+      
+      if (matchResponse.success && matchResponse.matchState) {
+        setMatchState(matchResponse.matchState)
+        setIsMatched(true)
+        
+        // Check if users are connected
+        const isConnected = matchResponse.matchState.isConnected
+        console.log('🔗 Is connected:', isConnected)
+        
+        // Check chat history
+        const chatHistoryResponse = await checkChatHistory(userId, token)
+        console.log('💬 Chat history response:', chatHistoryResponse)
+        const hasHistory = chatHistoryResponse.success ? chatHistoryResponse.hasChatHistory : false
+        console.log('📝 Has chat history:', hasHistory)
+        
+        // Determine match case based on connection status and chat history
+        if (isConnected && hasHistory) {
+          console.log('✅ Case 1: Already Connected + Already Chatting + Match')
+          console.log('🔧 Setting UI state:', {
+            showPrompt: isFromMatches,
+            showCrossButton: isFromMatches,
+            showConnectButton: false,
+            isFromMatches: isFromMatches
+          })
+          setMatchCase(MatchCase.CASE_1)
+          setIsUserConnected(true)
+          setHasChatHistory(true)
+          setShowPrompt(isFromMatches) // Only show prompt in matches section
+          setShowCrossButton(isFromMatches)
+          setShowConnectButton(false)
+        } else if (isConnected && !hasHistory) {
+          console.log('✅ Case 2: Already Connected + Never Chatted + Match')
+          setMatchCase(MatchCase.CASE_2)
+          setIsUserConnected(true)
+          setHasChatHistory(false)
+          setShowPrompt(true)
+          setShowCrossButton(true)
+          setShowConnectButton(false)
+        } else if (!isConnected) {
+          console.log('✅ Case 3: Never Connected + Match')
+          setMatchCase(MatchCase.CASE_3)
+          setIsUserConnected(false)
+          setHasChatHistory(false)
+          setShowPrompt(true)
+          setShowConnectButton(true)
+          setShowCrossButton(false)
+        }
+        
+        console.log('🎯 Final state:', {
+          matchCase: matchCase,
+          showPrompt: showPrompt,
+          showCrossButton: showCrossButton,
+          showConnectButton: showConnectButton,
+          isFromMatches: isFromMatches
+        })
+        
+        // Get ice-breaking prompt
+        const promptResponse = await getIceBreakingPrompt(userId, token)
+        if (promptResponse.success) {
+          setIceBreakingPrompt(promptResponse.prompt)
+        } else {
+          // Fallback prompt
+          setIceBreakingPrompt(`You both find each other ${matchResponse.matchState.mutualAdjective.toLowerCase()}!`)
+        }
+      } else {
+        console.log('❌ No match state found')
+      }
+    } catch (error) {
+      console.error('Error checking match and connection:', error)
+    }
+  }
+
     // Initialize WebSocket connection
     const initializeWebSocket = () => {
       if (isInitialized) {
@@ -267,6 +402,9 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
     
     // Always try to fetch conversation info, even without userId
     fetchConversationInfo()
+    
+    // Check match and connection state
+    checkMatchAndConnection()
 
     // Cleanup function
     return () => {
@@ -286,6 +424,31 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Debug useEffect to log state changes
+  useEffect(() => {
+    console.log('🔄 State changed:', {
+      matchCase,
+      showPrompt,
+      showCrossButton,
+      showConnectButton,
+      isFromMatches,
+      isUserConnected,
+      hasChatHistory
+    })
+  }, [matchCase, showPrompt, showCrossButton, showConnectButton, isFromMatches, isUserConnected, hasChatHistory])
+
+  // Debug useEffect to log banner rendering
+  useEffect(() => {
+    if (showPrompt) {
+      console.log('🎨 Banner should be rendered with:', {
+        showPrompt,
+        showConnectButton,
+        showCrossButton,
+        iceBreakingPrompt
+      })
+    }
+  }, [showPrompt, showConnectButton, showCrossButton, iceBreakingPrompt])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -338,6 +501,97 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
       setInputValue(messageText)
     } finally {
       setSending(false)
+    }
+  }
+
+  const handleConnect = async () => {
+    if (!userId || connecting) return
+    
+    try {
+      setConnecting(true)
+      const token = getAuthToken()
+      if (!token) return
+
+      if (matchCase === MatchCase.CASE_3) {
+        // Case 3: Send connection request
+        const response = await sendConnectionRequest(userId, token)
+        if (response.success) {
+          setShowConnectButton(false)
+          setShowCrossButton(true)
+          // Add a system message about the connection request
+          const systemMessage: Message = {
+            id: `system-${Date.now()}`,
+            text: "Connection request sent! Waiting for acceptance...",
+            isSent: false,
+            timestamp: new Date().toISOString(),
+            status: 'sent'
+          }
+          setMessages(prev => [...prev, systemMessage])
+        }
+      } else {
+        // Case 2: Direct connection (already connected)
+        const response = await connectAfterMatch(userId, token)
+        if (response.success) {
+          setIsConnectedToMatch(true)
+          setShowConnectButton(false)
+          setShowCrossButton(false)
+          setShowPrompt(false)
+          // Add a system message about the connection
+          const systemMessage: Message = {
+            id: `system-${Date.now()}`,
+            text: "You are now connected! Start chatting!",
+            isSent: false,
+            timestamp: new Date().toISOString(),
+            status: 'sent'
+          }
+          setMessages(prev => [...prev, systemMessage])
+        }
+      }
+    } catch (error) {
+      console.error('Error connecting:', error)
+    } finally {
+      setConnecting(false)
+    }
+  }
+
+  const handleDismissPrompt = async () => {
+    if (!userId) return
+    
+    try {
+      const token = getAuthToken()
+      if (!token) return
+
+      const response = await dismissMatchPrompt(userId, token)
+      if (response.success) {
+        setShowPrompt(false)
+        setShowCrossButton(false)
+        
+        // If this is from matches section and users are connected, 
+        // the chat should disappear from matches and only appear in active
+        if (isFromMatches && isUserConnected) {
+          // Navigate back to remove from matches section
+          onBack()
+        }
+      }
+    } catch (error) {
+      console.error('Error dismissing prompt:', error)
+    }
+  }
+
+  const handleMoveToActive = async () => {
+    if (!userId) return
+    
+    try {
+      const token = getAuthToken()
+      if (!token) return
+
+      const response = await moveChatToActive(userId, token)
+      if (response.success) {
+        // Navigate back to remove from matches section
+        onBack()
+      }
+    } catch (error) {
+      console.error('Error moving chat to active:', error)
     }
   }
 
@@ -405,6 +659,14 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
             <h1 className="text-lg font-semibold">
               {conversationInfo?.name || userId || "User"}
             </h1>
+            {isMatched && matchState && (
+              <div className="flex items-center gap-1 mt-1">
+                <Heart className="w-3 h-3 text-pink-500" />
+                <span className="text-xs text-pink-500">
+                  Matched on "{matchState.mutualAdjective}"
+                </span>
+              </div>
+            )}
           </div>
           <button onClick={() => setShowDropdown(!showDropdown)} className="relative">
             <MoreVertical className="w-6 h-6 text-white" />
@@ -420,19 +682,63 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
             setShowBlockModal(true)
             setShowDropdown(false)
           }}
+          onMoveToActive={handleMoveToActive}
+          showMoveToActive={matchCase === MatchCase.CASE_2 && isFromMatches}
         />
       )}
 
       {/* Block User Modal */}
       {showBlockModal && <BlockUserModal onClose={() => setShowBlockModal(false)} />}
 
+      {/* Match/Connection Banner */}
+      {showPrompt && (
+        <div className="fixed top-16 left-0 right-0 z-10 bg-purple-600 text-white px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 text-center">
+              <div className="text-sm font-medium mb-1">{iceBreakingPrompt}</div>
+              {showConnectButton && (
+                <button
+                  onClick={handleConnect}
+                  disabled={connecting}
+                  className="bg-white text-purple-600 px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+                >
+                  {connecting ? "Sending..." : "Connect to Chat"}
+                </button>
+              )}
+            </div>
+            {showCrossButton && (
+              <button
+                onClick={handleDismissPrompt}
+                className="ml-4 p-2 text-white hover:bg-purple-700 rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Messages - Scrollable with proper spacing */}
-      <div className="pt-20 pb-24 px-4 py-4 space-y-4 overflow-y-auto h-screen">
+      <div className={`pt-20 pb-24 px-4 py-4 space-y-4 overflow-y-auto h-screen ${showPrompt ? 'pt-32' : ''}`}>
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-gray-400 text-center">
-              <div className="mb-2">No messages yet</div>
-              <div className="text-sm">Start the conversation!</div>
+              {matchCase === MatchCase.CASE_3 && !isUserConnected ? (
+                <div>
+                  <div className="mb-2">You matched with {conversationInfo?.name}!</div>
+                  <div className="text-sm">Connect to start the conversation</div>
+                </div>
+              ) : matchCase === MatchCase.CASE_2 && !hasChatHistory ? (
+                <div>
+                  <div className="mb-2">You matched with {conversationInfo?.name}!</div>
+                  <div className="text-sm">Start your first conversation</div>
+                </div>
+              ) : (
+                <div>
+                  <div className="mb-2">No messages yet</div>
+                  <div className="text-sm">Start the conversation!</div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -464,17 +770,27 @@ export default function ChatConversation({ onBack, conversationId, userId }: Cha
           <div className="flex-1 relative">
             <input
               type="text"
-              placeholder="Send a message..."
+              placeholder={
+                matchCase === MatchCase.CASE_3 && !isUserConnected 
+                  ? "Connect to start chatting..." 
+                  : matchCase === MatchCase.CASE_2 && !hasChatHistory
+                  ? "Start chatting with your match!"
+                  : "Send a message..."
+              }
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              disabled={sending}
+              disabled={sending || (matchCase === MatchCase.CASE_3 && !isUserConnected)}
               className="w-full bg-gray-800 rounded-full py-3 px-4 text-white placeholder-gray-400 focus:outline-none disabled:opacity-50"
             />
           </div>
           <button 
             onClick={handleSendMessage}
-            disabled={!inputValue.trim() || sending}
+            disabled={
+              !inputValue.trim() || 
+              sending || 
+              (matchCase === MatchCase.CASE_3 && !isUserConnected)
+            }
             className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {inputValue.trim() ? (

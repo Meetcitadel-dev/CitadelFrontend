@@ -5,7 +5,7 @@ import ChatHeader from "./ChatHeader"
 import ChatItem from "./ChatItem"
 import SearchBar from "./SearchBar"
 import TabNavigation from "./TabNavigation"
-import { fetchMatchedConversations } from "@/lib/api"
+import { getEnhancedMatches } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
 
 interface MatchesChatsProps {
@@ -14,19 +14,25 @@ interface MatchesChatsProps {
   onChatSelect: (chatId: string, userId: string) => void
 }
 
-interface Conversation {
+interface EnhancedConversation {
   id: string;
   userId: string;
   name: string;
   profileImage?: string;
   lastMessage?: string;
   lastMessageTime?: string;
-  isOnline: boolean;
   unreadCount: number;
+  caseType: 'CASE_1' | 'CASE_2' | 'CASE_3';
+  isConnected: boolean;
+  hasChatHistory: boolean;
+  matchData?: {
+    mutualAdjective: string;
+    iceBreakingPrompt: string;
+  };
 }
 
 export default function MatchesChats({ activeTab, setActiveTab, onChatSelect }: MatchesChatsProps) {
-  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [conversations, setConversations] = useState<EnhancedConversation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -47,7 +53,7 @@ export default function MatchesChats({ activeTab, setActiveTab, onChatSelect }: 
           return
         }
 
-        const response = await fetchMatchedConversations(token)
+        const response = await getEnhancedMatches(token)
         
         if (response.success) {
           // Sort conversations by lastMessageTime (latest first)
@@ -148,7 +154,7 @@ export default function MatchesChats({ activeTab, setActiveTab, onChatSelect }: 
               message={conversation.lastMessage || "No messages yet"}
               time={conversation.lastMessageTime ? formatTime(conversation.lastMessageTime) : ""}
               avatar={conversation.profileImage || "/placeholder.svg?height=48&width=48"}
-              isOnline={conversation.isOnline}
+              isOnline={false} // isOnline is no longer available from the API
               unreadCount={conversation.unreadCount}
               onClick={() => onChatSelect(conversation.id, conversation.userId)}
             />

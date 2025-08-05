@@ -65,21 +65,64 @@ export interface AdjectiveMatch {
   matched: boolean;
 }
 
+// New types for enhanced adjective system
+export interface GenderBasedAdjectives {
+  male: string[];
+  female: string[];
+  neutral: string[];
+}
+
+export interface UserAdjectiveSelection {
+  id: string;
+  userId: string;
+  targetUserId: string;
+  adjective: string;
+  timestamp: Date;
+  isMatched: boolean;
+}
+
+export interface AdjectiveDisplayData {
+  selectedAdjective: string;
+  randomAdjectives: string[];
+  allAdjectives: string[];
+  isMatched: boolean;
+  matchData?: {
+    mutualAdjective: string;
+    matchTimestamp: Date;
+  };
+}
+
+export interface MatchState {
+  id: string;
+  userId1: string;
+  userId2: string;
+  mutualAdjective: string;
+  isConnected: boolean;
+  matchTimestamp: Date;
+  connectionTimestamp?: Date;
+  iceBreakingPrompt?: string;
+}
+
 export interface ConnectionState {
   id: string | number;
   userId1?: string | number;
   userId2?: string | number;
   requesterId?: string | number;
   targetId?: string | number;
-  status: 'not_connected' | 'requested' | 'connected' | 'blocked' | 'pending';
+  status: 'not_connected' | 'requested' | 'connected' | 'blocked' | 'pending' | 'matched';
   createdAt: Date | string;
   updatedAt: Date | string;
+  matchData?: {
+    mutualAdjective: string;
+    matchTimestamp: Date;
+  };
 }
 
 export interface ExploreProfile {
   id: string | number;
   name: string;
   email: string;
+  gender?: string;
   university: {
     id: number;
     name: string;
