@@ -1,16 +1,22 @@
-import Citadelicon from '@/assets/Group 191.png'
-import Citadel from '@/assets/Star 1 (1).png'
-
 export default function SplashScreen3() {
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center px-8">
       <div className="text-center">
         {/* Citadel Icon */}
-        <div className="mb-8">
-          <img src={Citadel} alt="Citadel" width={120} height={120} className="mx-auto" />
+        <div className="mb-3">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="227" 
+            height="227" 
+            viewBox="0 0 185 185" 
+            fill="none"
+            className="mx-auto"
+          >
+            <path d="M86.6475 4.90945C88.0564 -1.32788 96.9436 -1.32788 98.3525 4.90945L107.218 44.1592C108.132 48.2016 112.77 50.1231 116.275 47.9104L150.298 26.4258C155.704 23.0115 161.988 29.2958 158.574 34.7025L137.09 68.7254C134.877 72.2295 136.798 76.8684 140.841 77.7815L180.091 86.6475C186.328 88.0564 186.328 96.9436 180.091 98.3525L140.841 107.218C136.798 108.132 134.877 112.77 137.09 116.275L158.574 150.298C161.988 155.704 155.704 161.988 150.298 158.574L116.275 137.09C112.77 134.877 108.132 136.798 107.218 140.841L98.3525 180.091C96.9436 186.328 88.0564 186.328 86.6475 180.091L77.7815 140.841C76.8684 136.798 72.2295 134.877 68.7254 137.09L34.7025 158.574C29.2958 161.988 23.0115 155.704 26.4258 150.298L47.9104 116.275C50.1231 112.77 48.2016 108.132 44.1592 107.218L4.90945 98.3525C-1.32788 96.9436 -1.32788 88.0564 4.90945 86.6475L44.1592 77.7815C48.2016 76.8684 50.1231 72.2295 47.9104 68.7254L26.4258 34.7025C23.0115 29.2958 29.2958 23.0115 34.7025 26.4258L68.7254 47.9104C72.2295 50.1231 76.8684 48.2016 77.7815 44.1592L86.6475 4.90945Z" fill="#1BEA7B"/>
+          </svg>
         </div>
 
-        <h1 className="text-white text-4xl font-normal">Citadel</h1>
+        <h1 className="text-white text-4xl font-semibold" style={{ fontFamily: '"Roboto Serif", serif', fontSize: '36px', fontWeight: 600, textAlign: 'center' }}>Citadel</h1>
       </div>
     </div>
   )

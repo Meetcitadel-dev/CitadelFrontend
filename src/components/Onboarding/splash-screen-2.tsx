@@ -7,11 +7,11 @@ export default function SplashScreen2() {
         </h1>
 
         {/* Smiley Face SVG */}
-        <div className="mt-8">
+        <div className="mt-6">
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
-            width="64" 
-            height="64" 
+            width="38" 
+            height="38" 
             viewBox="0 0 42 43" 
             fill="none"
             className="mx-auto"
