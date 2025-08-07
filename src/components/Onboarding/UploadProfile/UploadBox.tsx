@@ -1,15 +1,16 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { getAuthToken } from "@/lib/utils"
+import { X } from "lucide-react"
 
 interface UploadBoxProps {
   onClick?: () => void
   className?: string
-  onImageSelect?: (file: File, uploadedImageUrl?: string) => void
+  onImageSelect?: (file: File | null, index: number) => void
   selectedImage?: File | null
   uploadedImageUrl?: string
   index: number
+  onRemoveImage?: (index: number) => void
 }
 
 export default function UploadBox({ 
@@ -18,10 +19,10 @@ export default function UploadBox({
   onImageSelect, 
   selectedImage, 
   uploadedImageUrl,
-  index 
+  index,
+  onRemoveImage
 }: UploadBoxProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [isUploading, setIsUploading] = useState(false)
 
   const handleClick = () => {
     fileInputRef.current?.click()
@@ -30,66 +31,18 @@ export default function UploadBox({
     }
   }
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file && onImageSelect) {
-      setIsUploading(true)
-      try {
-        // Upload to S3 and get the response
-        const response = await uploadImageToS3(file)
-        console.log('Upload response:', response) // Debug log
-        
-        // Check for different possible response formats
-        const imageUrl = response.imageUrl || response.cloudFrontUrl || response.url || response.signedUrl
-        if (response.success && imageUrl) {
-          onImageSelect(file, imageUrl)
-        } else {
-          // If upload failed but we have a file, still pass it for local preview
-          onImageSelect(file)
-        }
-      } catch (error: any) {
-        console.error('Upload failed:', error)
-        // Show error to user but allow local preview
-        console.warn(`Upload to S3 failed: ${error.message}. Using local preview instead.`)
-        // If upload failed but we have a file, still pass it for local preview
-        onImageSelect(file)
-      } finally {
-        setIsUploading(false)
-      }
+      // Store locally without uploading to S3
+      onImageSelect(file, index)
     }
   }
 
-  const uploadImageToS3 = async (file: File) => {
-    try {
-      const token = getAuthToken()
-      
-      if (!token) {
-        throw new Error('No authentication token found. Please complete the onboarding process first.')
-      }
-      
-      const formData = new FormData()
-      formData.append('image', file)
-      
-      const base = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-      const url = base.replace(/\/$/, '') + '/api/profile/upload'
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Upload failed' }))
-        throw new Error(errorData.error || 'Upload failed')
-      }
-      
-      return await response.json()
-    } catch (error) {
-      console.error('S3 upload error:', error)
-      throw error
+  const handleRemoveImage = (e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent triggering the file input
+    if (onRemoveImage) {
+      onRemoveImage(index)
     }
   }
 
@@ -98,11 +51,7 @@ export default function UploadBox({
       className={`w-[100px] h-[100px] border-2 border-dashed border-gray-600 rounded-lg flex items-center justify-center cursor-pointer hover:border-gray-500 transition-colors relative ${className}`}
       onClick={handleClick}
     >
-      {isUploading ? (
-        <div className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
-        </div>
-      ) : uploadedImageUrl ? (
+      {uploadedImageUrl ? (
         <img
           src={uploadedImageUrl}
           alt="Uploaded"
@@ -117,6 +66,17 @@ export default function UploadBox({
       ) : (
         <div className="text-green-500 text-3xl font-light">+</div>
       )}
+      
+      {/* Remove button - only show when there's an image */}
+      {(selectedImage || uploadedImageUrl) && onRemoveImage && (
+        <button
+          onClick={handleRemoveImage}
+          className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
+      
       <input
         ref={fileInputRef}
         type="file"
