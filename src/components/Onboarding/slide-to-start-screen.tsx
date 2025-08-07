@@ -1,5 +1,9 @@
 import Connecting2 from '@/assets/sign up animation 1.png'
 import CitadelIcon from '@/assets/Star 1 (1).png'
+import Rectangle4 from '@/assets/Rectangle 4.png'
+import Rectangle2 from '@/assets/Rectangle 2.png'
+import Rectangle1 from '@/assets/a man teaching, realistic man image, cinemtic, man wearing casual clothes.png'
+import Rectangle3 from '@/assets/Rectangle 3.png'
 
 import type React from "react"
 
@@ -86,74 +90,237 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Profile Images with Stars - Using exact provided layout */}
-      <div className="absolute inset-0">
-        {/* Use the provided profile images */}
-        <div className="absolute top-20 left-0 right-0">
-          <div className="relative w-full h-96 flex items-center justify-center">
-            <img src={Connecting2} alt="Student profiles" className="w-80 h-80 object-contain" />
-            {/* Decorative stars positioned around the images */}
-            <div className="absolute top-16 left-12">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 0L12 7L20 7L14 12L16 20L10 15L4 20L6 12L0 7L8 7L10 0Z" fill="white" />
-              </svg>
-            </div>
-            <div className="absolute bottom-20 right-16">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 0L14.4 8.4L24 8.4L16.8 14.4L19.2 24L12 18L4.8 24L7.2 14.4L0 8.4L9.6 8.4L12 0Z"
-                  fill="white"
-                />
-              </svg>
-            </div>
-          </div>
+      {/* Images Container - Above Curved Background */}
+      <div 
+        className="absolute left-1/2 transform -translate-x-1/2"
+        style={{
+          top: '44px',
+          width: '336px',
+          height: '348px'
+        }}
+      >
+        {/* First Image - Rectangle 4 */}
+        <div 
+          className="absolute"
+          style={{
+            left: '28px',
+            top: '4px',
+            width: '79.636px',
+            height: '104.727px',
+            borderRadius: '60px',
+            background: `url(${Rectangle4}) lightgray 0px -1.479px / 100% 114.253% no-repeat`,
+            flexShrink: 0
+          }}
+        />
+
+        {/* Second Image - Rectangle 2 */}
+        <div 
+          className="absolute"
+          style={{
+            left: '0px',
+            bottom: '0px',
+            width: '150.545px',
+            height: '198.545px',
+            borderRadius: '60px',
+            background: `url(${Rectangle2}) lightgray 50% / cover no-repeat`,
+            flexShrink: 0
+          }}
+        />
+
+        {/* Third Image - Rectangle 4 (Top Right) */}
+        <div 
+          className="absolute"
+          style={{
+            right: '14px',
+            top: '0px',
+            width: '150.545px',
+            height: '198.545px',
+            borderRadius: '60px',
+            background: `url(${Rectangle1}) lightgray 50% / cover no-repeat`,
+            flexShrink: 0
+          }}
+        />
+
+        {/* Fourth Image - Rectangle 3 */}
+        <div 
+          className="absolute"
+          style={{
+            right: '35px',
+            bottom: '21.8px',
+            width: '79.636px',
+            height: '104.727px',
+            borderRadius: '60px',
+            background: `url(${Rectangle3}) 50% / cover no-repeat`,
+            flexShrink: 0
+          }}
+        />
+
+        {/* Vector Icon */}
+        <div 
+          className="absolute"
+          style={{
+            top: '86.7px',
+            left: '3.27px',
+            width: '16.559px',
+            height: '19.091px',
+            flexShrink: 0
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="21" viewBox="0 0 18 21" fill="none">
+            <path d="M1.27344 19.818L17.0916 0.727051" stroke="white"/>
+            <path d="M1.27349 9.72686L16.001 10.5451" stroke="white"/>
+            <path d="M7.12645 2.91747L13.2735 18.1816" stroke="white"/>
+          </svg>
+        </div>
+
+        {/* Second Vector Icon */}
+        <div 
+          className="absolute"
+          style={{
+            top: '155px',
+            right: '168px',
+            width: '13.092px',
+            height: '15.093px',
+            flexShrink: 0
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="17" viewBox="0 0 15 17" fill="none">
+            <path d="M1 15.8193L13.5054 0.726562" stroke="white"/>
+            <path d="M1.00084 7.84184L12.644 8.4887" stroke="white"/>
+            <path d="M5.62827 2.45835L10.488 14.5257" stroke="white"/>
+          </svg>
+        </div>
+
+        {/* Third Vector Icon */}
+        <div 
+          className="absolute"
+          style={{
+            bottom: '60.5px',
+            right: '0px',
+            width: '26.182px',
+            height: '23.499px',
+            flexShrink: 0
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="25" viewBox="0 0 28 25" fill="none">
+            <path d="M0.908203 1.04453C0.908203 1.04453 3.63548 0.499072 4.18093 3.22635C4.72639 5.95362 -1.27362 13.0445 1.99911 16.3173C5.27184 19.59 8.54457 18.2797 10.7264 17.4082C12.9082 16.5367 12.9082 13.0445 11.8173 12.4991C10.7264 11.9536 8.54457 11.2718 4.72639 14.1354C0.908203 16.9991 0.908203 18.4991 0.908203 20.6809C0.908203 22.8627 1.99911 24.4991 6.9082 24.4991C11.8173 24.4991 14.5446 20.6809 19.9991 19.0445C25.4537 17.4082 27.09 19.59 27.09 19.59" stroke="white"/>
+          </svg>
         </div>
       </div>
 
-      {/* Bottom Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-6">
-        {/* Citadel Icon */}
-        <div className="text-center mb-4">
-          <img src={CitadelIcon} alt="Citadel" width={40} height={40} className="mx-auto" />
-        </div>
+      {/* Curved Background Container */}
+      <div 
+        className="absolute bottom-0 left-0 right-0"
+        style={{
+          width: '393px',
+          height: '355px',
+          borderRadius: '45px 45px 0 0',
+          background: 'linear-gradient(136deg, #111 0%, #040404 64.5%)',
+          flexShrink: 0
+        }}
+      >
+        {/* Content inside curved background */}
+        <div className="relative h-full flex flex-col items-center justify-center px-6">
+          {/* Citadel Icon */}
+          <div className="flex items-center justify-center mb-[5px] h-[61px] w-[61px]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="47" height="47" viewBox="0 0 47 47" fill="none">
+              <path d="M21.5491 1.63649C22.0188 -0.44262 24.9812 -0.442626 25.4508 1.63649L27.3342 9.97426C27.6386 11.3217 29.1849 11.9622 30.3529 11.2247L37.5804 6.66071C39.3826 5.52264 41.4774 7.61738 40.3393 9.41962L35.7753 16.6471C35.0378 17.8151 35.6783 19.3614 37.0257 19.6658L45.3635 21.5491C47.4426 22.0188 47.4426 24.9812 45.3635 25.4508L37.0257 27.3342C35.6783 27.6386 35.0378 29.1849 35.7753 30.3529L40.3393 37.5804C41.4774 39.3826 39.3826 41.4774 37.5804 40.3393L30.3529 35.7753C29.1849 35.0378 27.6386 35.6783 27.3342 37.0257L25.4509 45.3635C24.9812 47.4426 22.0188 47.4426 21.5492 45.3635L19.6658 37.0257C19.3614 35.6783 17.8151 35.0378 16.6471 35.7753L9.41962 40.3393C7.61739 41.4774 5.52263 39.3826 6.6607 37.5804L11.2247 30.3529C11.9622 29.1849 11.3217 27.6386 9.97426 27.3342L1.63649 25.4509C-0.44262 24.9812 -0.442626 22.0188 1.63649 21.5492L9.97426 19.6658C11.3217 19.3614 11.9622 17.8151 11.2247 16.6471L6.6607 9.41962C5.52264 7.61738 7.61738 5.52263 9.41962 6.6607L16.6471 11.2247C17.8151 11.9622 19.3614 11.3217 19.6658 9.97426L21.5491 1.63649Z" fill="#1BEA7B"/>
+            </svg>
+          </div>
 
-        {/* Main Text */}
-        <div className="text-center mb-8">
-          <h1 className="text-white text-2xl font-normal">i'm good, wby?</h1>
-        </div>
+          {/* Main Text */}
+          <div className="text-center mb-8">
+            <p style={{color: '#FFF', fontFamily: 'Roboto Serif', fontSize: '36px', fontStyle: 'normal', fontWeight: 600, lineHeight: 'normal', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2}}>i'm good, wby?</p>
+          </div>
 
-        {/* Slide to Start */}
-        <div className="mb-6">
-          <div ref={containerRef} className="relative bg-gray-800 rounded-full h-14 flex items-center px-2">
-            <div
-              ref={sliderRef}
-              className="absolute w-12 h-12 bg-green-400 rounded-full flex items-center justify-center cursor-pointer transition-transform duration-200 z-10"
-              style={{ transform: `translateX(${slidePosition}px)` }}
-              onMouseDown={handleMouseDown}
-              onTouchStart={handleTouchStart}
+          {/* Slide to Start */}
+          <div className="mb-6">
+            <div 
+              ref={containerRef} 
+              className="relative flex items-center px-2"
+              style={{
+                width: '365.842px',
+                height: '84px',
+                borderRadius: '45px',
+                background: '#161616',
+                flexShrink: 0
+              }}
             >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M7.5 5L12.5 10L7.5 15"
-                  stroke="black"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            <div className="flex-1 text-center">
-              <span className="text-gray-400 text-lg font-medium">Slide to start</span>
+              <div
+                ref={sliderRef}
+                className="absolute w-[75px] h-[75px] bg-green-400 rounded-full flex items-center justify-center cursor-pointer transition-transform duration-200 z-10"
+                style={{ transform: `translateX(${slidePosition}px)` }}
+                onMouseDown={handleMouseDown}
+                onTouchStart={handleTouchStart}
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path
+                    d="M7.5 5L12.5 10L7.5 15"
+                    stroke="black"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+                             <div className="flex-1 text-center">
+                 <span 
+                   style={{
+                     fontFamily: 'Inter, sans-serif',
+                     fontSize: '18px',
+                     fontStyle: 'normal',
+                     fontWeight: 500,
+                     lineHeight: '135%',
+                     background: 'linear-gradient(90deg, #CACACA 0%, #9A9A9A 100%)',
+                     backgroundClip: 'text',
+                     WebkitBackgroundClip: 'text',
+                     WebkitTextFillColor: 'transparent'
+                   }}
+                 >
+                   Slide to start
+                 </span>
+               </div>
             </div>
           </div>
-        </div>
 
-        {/* Terms Text */}
-        <div className="text-center">
-          <p className="text-gray-500 text-xs">
-            By signing in you accept our <span className="underline">Terms of use</span> and{" "}
-            <span className="underline">Privacy policy</span>
-          </p>
+          {/* Terms Text */}
+          <div className="absolute w-[229px] top-[296px] left-[77px] text-center">
+                         <p 
+               style={{ 
+                 color: '#2C2C2C',
+                 fontFamily: 'Inter, sans-serif',
+                 fontSize: '14px',
+                 fontStyle: 'normal',
+                 fontWeight: 500,
+                 lineHeight: '135%',
+                 textAlign: 'center',
+                 whiteSpace: 'pre-line'
+               }}
+             >
+               By signing in you accept our{" "}
+               <span style={{ 
+                 textDecorationLine: 'underline',
+                 textDecorationStyle: 'solid',
+                 textDecorationSkipInk: 'none',
+                 textDecorationThickness: 'auto',
+                 textUnderlineOffset: 'auto',
+                 textUnderlinePosition: 'from-font'
+               }}>
+                 Terms of use
+               </span>{" "}
+               and{" "}
+               <span style={{ 
+                 textDecorationLine: 'underline',
+                 textDecorationStyle: 'solid',
+                 textDecorationSkipInk: 'none',
+                 textDecorationThickness: 'auto',
+                 textUnderlineOffset: 'auto',
+                 textUnderlinePosition: 'from-font'
+               }}>
+                 Privacy policy
+               </span>
+             </p>
+          </div>
         </div>
       </div>
     </div>
