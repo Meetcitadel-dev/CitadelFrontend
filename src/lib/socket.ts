@@ -27,6 +27,7 @@ class ChatSocketService {
     });
 
     this.socket.on('connect', () => {
+      console.log('WebSocket connected successfully');
       this.isConnected = true;
       this.reconnectAttempts = 0;
     });
@@ -67,6 +68,8 @@ class ChatSocketService {
       this.isConnected = false;
     }
   }
+
+  // ===== INDIVIDUAL CONVERSATION METHODS =====
 
   // Listen for new messages
   onNewMessage(callback: (data: {
@@ -134,6 +137,121 @@ class ChatSocketService {
     if (!this.socket) return;
     
     this.socket.emit('mark_read', { conversationId });
+  }
+
+  // ===== GROUP CHAT METHODS =====
+
+  // Listen for new group messages
+  onGroupMessage(callback: (data: {
+    groupId: string;
+    message: {
+      id: string;
+      content: string;
+      senderId: string;
+      senderName: string;
+      senderAvatar?: string;
+      timestamp: string;
+    };
+  }) => void) {
+    if (!this.socket) return;
+    
+    this.socket.on('group-message', callback);
+  }
+
+  // Listen for member joined group
+  onMemberJoined(callback: (data: {
+    groupId: string;
+    member: {
+      id: string;
+      name: string;
+      avatar?: string;
+    };
+  }) => void) {
+    if (!this.socket) return;
+    
+    this.socket.on('member-joined', callback);
+  }
+
+  // Listen for member left group
+  onMemberLeft(callback: (data: {
+    groupId: string;
+    memberId: string;
+  }) => void) {
+    if (!this.socket) return;
+    
+    this.socket.on('member-left', callback);
+  }
+
+  // Listen for group updates
+  onGroupUpdated(callback: (data: {
+    groupId: string;
+    group: {
+      id: string;
+      name: string;
+      description?: string;
+      avatar?: string;
+      memberCount: number;
+    };
+  }) => void) {
+    if (!this.socket) return;
+    
+    this.socket.on('group-updated', callback);
+  }
+
+  // Listen for typing indicators in groups
+  onGroupTyping(callback: (data: {
+    groupId: string;
+    userId: string;
+    userName: string;
+    isTyping: boolean;
+  }) => void) {
+    if (!this.socket) return;
+    
+    this.socket.on('group-typing', callback);
+  }
+
+  // Join a group room
+  joinGroup(groupId: string) {
+    if (!this.socket) return;
+    
+    console.log('Joining group room:', groupId);
+    this.socket.emit('join-group', { groupId });
+  }
+
+  // Leave a group room
+  leaveGroup(groupId: string) {
+    if (!this.socket) return;
+    
+    console.log('Leaving group room:', groupId);
+    this.socket.emit('leave-group', { groupId });
+  }
+
+  // Send a group message
+  sendGroupMessage(groupId: string, message: string) {
+    if (!this.socket) return;
+    
+    console.log('Sending group message:', { groupId, message });
+    this.socket.emit('send-group-message', {
+      groupId,
+      content: message
+    });
+  }
+
+  // Send typing indicator in group
+  sendGroupTyping(groupId: string, isTyping: boolean) {
+    if (!this.socket) return;
+    
+    this.socket.emit('group-typing', {
+      groupId,
+      isTyping
+    });
+  }
+
+  // Mark group messages as read
+  markGroupMessagesAsRead(groupId: string) {
+    if (!this.socket) return;
+    
+    this.socket.emit('mark-group-read', { groupId });
   }
 
   // Remove event listeners

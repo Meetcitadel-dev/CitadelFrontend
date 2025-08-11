@@ -200,4 +200,71 @@ export interface NotificationResponse {
 export interface AcceptRejectRequest {
   requestId: string;
   action: 'accept' | 'reject';
+}
+
+// Group Chat Types
+export interface GroupMember {
+  id: string;
+  name: string;
+  location: string;
+  avatar?: string;
+  isAdmin: boolean;
+  joinedAt: Date;
+}
+
+export interface GroupChat {
+  id: string;
+  name: string;
+  description?: string;
+  avatar?: string;
+  members: GroupMember[];
+  memberCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  lastMessage?: {
+    id: string;
+    content: string;
+    senderId: string;
+    senderName: string;
+    timestamp: Date;
+  };
+  unreadCount: number;
+  isAdmin: boolean;
+}
+
+export interface CreateGroupRequest {
+  name: string;
+  description?: string;
+  memberIds: string[];
+}
+
+export interface UpdateGroupRequest {
+  name?: string;
+  description?: string;
+  memberIds?: string[];
+}
+
+export interface GroupMessage {
+  id: string;
+  groupId: string;
+  senderId: string;
+  senderName: string;
+  senderAvatar?: string;
+  content: string;
+  timestamp: Date;
+  isEdited: boolean;
+  editedAt?: Date;
+}
+
+export interface GroupChatResponse {
+  success: boolean;
+  group?: GroupChat;
+  groups?: GroupChat[];
+  message?: string;
+}
+
+export interface GroupMessageResponse {
+  success: boolean;
+  messages?: GroupMessage[];
+  message?: string;
 } 

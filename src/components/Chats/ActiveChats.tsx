@@ -10,13 +10,15 @@ import ChatHeader from "./ChatHeader"
 import ChatItem from "./ChatItem"
 import SearchBar from "./SearchBar"
 import TabNavigation from "./TabNavigation"
-import { fetchActiveConversations } from "@/lib/api"
+import { fetchActiveConversations, fetchGroupChats } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
+import type { GroupChat } from "@/types"
 
 interface ActiveChatsProps {
   activeTab: "active" | "matches"
   setActiveTab: (tab: "active" | "matches") => void
-  onChatSelect: (chatId: string) => void
+  onChatSelect: (chatId: string, isGroup?: boolean) => void
+  onPlusClick?: () => void
 }
 
 interface Conversation {
@@ -30,13 +32,25 @@ interface Conversation {
   unreadCount: number;
 }
 
-export default function ActiveChats({ activeTab, setActiveTab, onChatSelect }: ActiveChatsProps) {
+interface ChatItem {
+  id: string;
+  name: string;
+  profileImage?: string;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  unreadCount: number;
+  isGroup: boolean;
+  isOnline?: boolean;
+}
+
+export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onPlusClick }: ActiveChatsProps) {
   const [conversations, setConversations] = useState<Conversation[]>([])
+  const [groupChats, setGroupChats] = useState<GroupChat[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchConversations = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true)
         setError(null)
@@ -47,18 +61,35 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect }: A
           return
         }
 
-        const response = await fetchActiveConversations(token)
+        // Fetch both individual conversations and group chats
+        const [conversationsResponse, groupsResponse] = await Promise.all([
+          fetchActiveConversations(token),
+          fetchGroupChats(token)
+        ])
         
-        if (response.success) {
+        if (conversationsResponse.success) {
           // Sort conversations by lastMessageTime (latest first)
-          const sortedConversations = response.conversations.sort((a, b) => {
+          const sortedConversations = conversationsResponse.conversations.sort((a, b) => {
             if (!a.lastMessageTime && !b.lastMessageTime) return 0;
             if (!a.lastMessageTime) return 1;
             if (!b.lastMessageTime) return -1;
             return new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime();
           });
           setConversations(sortedConversations)
-        } else {
+        }
+
+        if (groupsResponse.success) {
+          // Sort group chats by lastMessageTime (latest first)
+          const sortedGroupChats = groupsResponse.groups.sort((a, b) => {
+            if (!a.lastMessage?.timestamp && !b.lastMessage?.timestamp) return 0;
+            if (!a.lastMessage?.timestamp) return 1;
+            if (!b.lastMessage?.timestamp) return -1;
+            return new Date(b.lastMessage.timestamp).getTime() - new Date(a.lastMessage.timestamp).getTime();
+          });
+          setGroupChats(sortedGroupChats)
+        }
+
+        if (!conversationsResponse.success && !groupsResponse.success) {
           setError('Failed to load conversations')
         }
       } catch (error) {
@@ -69,7 +100,7 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect }: A
       }
     }
 
-    fetchConversations()
+    fetchData()
   }, [])
 
   const formatTime = (timestamp: string) => {
@@ -93,12 +124,53 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect }: A
     }
   }
 
+  // Combine and sort all chats (individual conversations + group chats)
+  // First, let's check if conversations already include groups to avoid duplicates
+  const individualConversations = conversations.filter(conv => !conv.id.startsWith('group_'));
+  const existingGroupIds = new Set(individualConversations.map(conv => conv.id));
+  
+  // Only add group chats that don't already exist in conversations
+  const uniqueGroupChats = groupChats.filter(group => !existingGroupIds.has(group.id));
+  
+  const allChats: ChatItem[] = [
+    ...individualConversations.map(conv => ({
+      id: conv.id,
+      name: conv.name,
+      profileImage: conv.profileImage,
+      lastMessage: conv.lastMessage,
+      lastMessageTime: conv.lastMessageTime,
+      unreadCount: conv.unreadCount,
+      isGroup: false,
+      isOnline: conv.isOnline
+    })),
+    ...uniqueGroupChats.map(group => ({
+      id: group.id,
+      name: group.name,
+      profileImage: group.avatar,
+      lastMessage: group.lastMessage?.content,
+      lastMessageTime: group.lastMessage?.timestamp,
+      unreadCount: group.unreadCount,
+      isGroup: true,
+      isOnline: false
+    }))
+  ].sort((a, b) => {
+    if (!a.lastMessageTime && !b.lastMessageTime) return 0;
+    if (!a.lastMessageTime) return 1;
+    if (!b.lastMessageTime) return -1;
+    return new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime();
+  });
+
+  // Remove any remaining duplicates by ID
+  const uniqueChats = allChats.filter((chat, index, self) => 
+    index === self.findIndex(c => c.id === chat.id)
+  );
+
   if (loading) {
     return (
       <div className="pb-20">
-        <ChatHeader />
+        <ChatHeader onPlusClick={onPlusClick} />
         <SearchBar />
-        <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} activeCount={conversations.length} matchesCount={0} />
+        <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} activeCount={uniqueChats.length} matchesCount={0} />
         <div className="flex items-center justify-center py-8">
           <div className="text-white">Loading conversations...</div>
         </div>
@@ -109,7 +181,7 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect }: A
   if (error) {
     return (
       <div className="pb-20">
-        <ChatHeader />
+        <ChatHeader onPlusClick={onPlusClick} />
         <SearchBar />
         <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} activeCount={0} matchesCount={0} />
         <div className="flex items-center justify-center py-8">
@@ -129,11 +201,11 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect }: A
 
   return (
     <div className="pb-20">
-      <ChatHeader />
+      <ChatHeader onPlusClick={onPlusClick} />
       <SearchBar />
-      <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} activeCount={conversations.length} matchesCount={0} />
+      <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} activeCount={uniqueChats.length} matchesCount={0} />
       <div className="space-y-0">
-        {conversations.length === 0 ? (
+        {uniqueChats.length === 0 ? (
           <div className="flex items-center justify-center py-8">
             <div className="text-gray-400 text-center">
               <div className="mb-2">No active conversations</div>
@@ -141,16 +213,16 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect }: A
             </div>
           </div>
         ) : (
-          conversations.map((conversation) => (
+          uniqueChats.map((chat) => (
             <ChatItem
-              key={conversation.id}
-              name={conversation.name}
-              message={conversation.lastMessage || "No messages yet"}
-              time={conversation.lastMessageTime ? formatTime(conversation.lastMessageTime) : ""}
-              avatar={conversation.profileImage || "/placeholder.svg?height=48&width=48"}
-              isOnline={conversation.isOnline}
-              unreadCount={conversation.unreadCount}
-              onClick={() => onChatSelect(conversation.id)}
+              key={chat.id}
+              name={chat.name}
+              message={chat.lastMessage || "No messages yet"}
+              time={chat.lastMessageTime ? formatTime(chat.lastMessageTime) : ""}
+              avatar={chat.profileImage || "/placeholder.svg?height=48&width=48"}
+              isOnline={chat.isOnline || false}
+              unreadCount={chat.unreadCount}
+              onClick={() => onChatSelect(chat.id, chat.isGroup)}
             />
           ))
         )}

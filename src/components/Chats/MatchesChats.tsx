@@ -12,6 +12,7 @@ interface MatchesChatsProps {
   activeTab: "active" | "matches"
   setActiveTab: (tab: "active" | "matches") => void
   onChatSelect: (chatId: string, userId: string) => void
+  onPlusClick?: () => void
 }
 
 interface EnhancedConversation {
@@ -31,7 +32,7 @@ interface EnhancedConversation {
   };
 }
 
-export default function MatchesChats({ activeTab, setActiveTab, onChatSelect }: MatchesChatsProps) {
+export default function MatchesChats({ activeTab, setActiveTab, onChatSelect, onPlusClick }: MatchesChatsProps) {
   const [conversations, setConversations] = useState<EnhancedConversation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -102,9 +103,9 @@ export default function MatchesChats({ activeTab, setActiveTab, onChatSelect }: 
   if (loading) {
     return (
       <div className="pb-20">
-        <ChatHeader />
+        <ChatHeader onPlusClick={onPlusClick} />
         <SearchBar />
-        <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} activeCount={0} matchesCount={conversations.length} />
+        <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} activeCount={0} matchesCount={uniqueConversations.length} />
         <div className="flex items-center justify-center py-8">
           <div className="text-white">Loading matches...</div>
         </div>
@@ -115,7 +116,7 @@ export default function MatchesChats({ activeTab, setActiveTab, onChatSelect }: 
   if (error) {
     return (
       <div className="pb-20">
-        <ChatHeader />
+        <ChatHeader onPlusClick={onPlusClick} />
         <SearchBar />
         <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} activeCount={0} matchesCount={0} />
         <div className="flex items-center justify-center py-8">
@@ -135,7 +136,7 @@ export default function MatchesChats({ activeTab, setActiveTab, onChatSelect }: 
 
   return (
     <div className="pb-20">
-      <ChatHeader />
+      <ChatHeader onPlusClick={onPlusClick} />
       <SearchBar />
       <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} activeCount={0} matchesCount={uniqueConversations.length} />
       <div className="space-y-0">
@@ -143,7 +144,7 @@ export default function MatchesChats({ activeTab, setActiveTab, onChatSelect }: 
           <div className="flex items-center justify-center py-8">
             <div className="text-gray-400 text-center">
               <div className="mb-2">No matches yet</div>
-              <div className="text-sm">Start matching with people to see conversations here</div>
+              <div className="text-sm">Start exploring to find your matches</div>
             </div>
           </div>
         ) : (
@@ -154,7 +155,7 @@ export default function MatchesChats({ activeTab, setActiveTab, onChatSelect }: 
               message={conversation.lastMessage || "No messages yet"}
               time={conversation.lastMessageTime ? formatTime(conversation.lastMessageTime) : ""}
               avatar={conversation.profileImage || "/placeholder.svg?height=48&width=48"}
-              isOnline={false} // isOnline is no longer available from the API
+              isOnline={false}
               unreadCount={conversation.unreadCount}
               onClick={() => onChatSelect(conversation.id, conversation.userId)}
             />

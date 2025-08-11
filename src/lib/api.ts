@@ -772,9 +772,142 @@ export function getEnhancedMatches(token?: string) {
 // Delete user account
 export function deleteUserAccount(token?: string) {
   return apiClient<{ success: boolean; message?: string }>(
-    '/api/v1/profile/delete-account',
+    '/api/v1/user/delete-account',
     {
       method: 'DELETE',
+      token,
+    }
+  );
+} 
+
+// Group Chat API Functions
+export function fetchUserConnections(token?: string) {
+  return apiClient<{ success: boolean; connections: any[] }>(
+    '/api/v1/connections',
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+export function createGroupChat(data: {
+  name: string;
+  description?: string;
+  memberIds: string[];
+}, token?: string) {
+  return apiClient<{ success: boolean; group?: any; message?: string }>(
+    '/api/v1/groups',
+    {
+      method: 'POST',
+      body: data,
+      token,
+    }
+  );
+}
+
+export function fetchGroupChats(token?: string) {
+  return apiClient<{ success: boolean; groups: any[] }>(
+    '/api/v1/groups',
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+export function fetchGroupChat(groupId: string, token?: string) {
+  return apiClient<{ success: boolean; group?: any; message?: string }>(
+    `/api/v1/groups/${groupId}`,
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+export function updateGroupChat(groupId: string, data: {
+  name?: string;
+  description?: string;
+  memberIds?: string[];
+}, token?: string) {
+  return apiClient<{ success: boolean; group?: any; message?: string }>(
+    `/api/v1/groups/${groupId}`,
+    {
+      method: 'PUT',
+      body: data,
+      token,
+    }
+  );
+}
+
+export function deleteGroupChat(groupId: string, token?: string) {
+  return apiClient<{ success: boolean; message?: string }>(
+    `/api/v1/groups/${groupId}`,
+    {
+      method: 'DELETE',
+      token,
+    }
+  );
+}
+
+export function fetchGroupMessages(groupId: string, token?: string) {
+  return apiClient<{ success: boolean; messages: any[] }>(
+    `/api/v1/groups/${groupId}/messages`,
+    {
+      method: 'GET',
+      token,
+    }
+  );
+}
+
+export function sendGroupMessage(groupId: string, message: string, token?: string) {
+  return apiClient<{ success: boolean; message?: any }>(
+    `/api/v1/groups/${groupId}/messages`,
+    {
+      method: 'POST',
+      body: { content: message },
+      token,
+    }
+  );
+}
+
+export function markGroupMessagesAsRead(groupId: string, token?: string) {
+  return apiClient<{ success: boolean; message?: string }>(
+    `/api/v1/groups/${groupId}/messages/read`,
+    {
+      method: 'POST',
+      token,
+    }
+  );
+}
+
+export function addGroupMembers(groupId: string, memberIds: string[], token?: string) {
+  return apiClient<{ success: boolean; message?: string }>(
+    `/api/v1/groups/${groupId}/members`,
+    {
+      method: 'POST',
+      body: { memberIds },
+      token,
+    }
+  );
+}
+
+export function removeGroupMember(groupId: string, memberId: string, token?: string) {
+  return apiClient<{ success: boolean; message?: string }>(
+    `/api/v1/groups/${groupId}/members/${memberId}`,
+    {
+      method: 'DELETE',
+      token,
+    }
+  );
+}
+
+export function leaveGroupChat(groupId: string, token?: string) {
+  return apiClient<{ success: boolean; message?: string }>(
+    `/api/v1/groups/${groupId}/leave`,
+    {
+      method: 'POST',
       token,
     }
   );
