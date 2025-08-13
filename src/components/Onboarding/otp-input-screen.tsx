@@ -9,9 +9,10 @@ import { setAuthToken } from '@/lib/utils'
 interface OTPInputScreenProps {
   email: string
   onContinue: () => void
+  onBack?: () => void
 }
 
-export default function OTPInputScreen({ email, onContinue }: OTPInputScreenProps) {
+export default function OTPInputScreen({ email, onContinue, onBack }: OTPInputScreenProps) {
   const [otp, setOtp] = useState(["", "", "", ""])
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -77,8 +78,11 @@ export default function OTPInputScreen({ email, onContinue }: OTPInputScreenProp
     <div style={{ minHeight: '100vh', background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif" }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '0 0 0 8px', paddingTop: 32, height: 56 }}>
-        <button style={{ background: 'none', border: 'none', padding: 0, marginRight: 0 }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
+                <button 
+          onClick={onBack}
+          style={{ background: 'none', border: 'none', padding: 0, marginRight: 0 }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
             <path d="M10.5 20L1 10.5M1 10.5L10.5 1M1 10.5L20 10.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>

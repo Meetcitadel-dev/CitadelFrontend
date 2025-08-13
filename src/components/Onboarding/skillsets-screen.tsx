@@ -8,6 +8,7 @@ import { Search, X } from "lucide-react"
 interface SkillsetsScreenProps {
   value?: string[]
   onContinue: (skills: string[]) => void
+  onBack?: () => void
 }
 
 const availableSkills = [
@@ -57,7 +58,7 @@ const availableSkills = [
   "MUJ",
 ]
 
-export default function SkillsetsScreen({ value, onContinue }: SkillsetsScreenProps) {
+export default function SkillsetsScreen({ value, onContinue, onBack }: SkillsetsScreenProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedSkills, setSelectedSkills] = useState<string[]>(value || [])
   const [showDropdown, setShowDropdown] = useState(false)
@@ -96,8 +97,11 @@ export default function SkillsetsScreen({ value, onContinue }: SkillsetsScreenPr
     <div style={{ minHeight: '100vh', background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif", display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '0 0 0 8px', paddingTop: 32, height: 56 }}>
-        <button style={{ background: 'none', border: 'none', padding: 0, marginRight: 0 }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
+                <button 
+          onClick={onBack}
+          style={{ background: 'none', border: 'none', padding: 0, marginRight: 0 }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
             <path d="M10.5 20L1 10.5M1 10.5L10.5 1M1 10.5L20 10.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>

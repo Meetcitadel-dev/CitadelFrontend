@@ -92,6 +92,46 @@ export default function App() {
     setShowLoginEmailScreen(false);
     setShowConnectScreen(true);
   };
+
+  // Add back handlers for all screens
+  const handleUniversityBack = () => {
+    setShowUniversityScreen(false);
+    setShowConnectScreen(true);
+  };
+
+  const handleEmailBack = () => {
+    setShowEmailScreen(false);
+    setShowUniversityScreen(true);
+  };
+
+  const handleOTPBack = () => {
+    setShowOTPScreen(false);
+    if (isLoginMode) {
+      setShowLoginEmailScreen(true);
+    } else {
+      setShowEmailScreen(true);
+    }
+  };
+
+  const handleNameBack = () => {
+    setShowNameScreen(false);
+    setShowOTPScreen(true);
+  };
+
+  const handleDateBack = () => {
+    setShowDateScreen(false);
+    setShowNameScreen(true);
+  };
+
+  const handleDegreeBack = () => {
+    setShowDegreeScreen(false);
+    setShowDateScreen(true);
+  };
+
+  const handleSkillsBack = () => {
+    setShowSkillsScreen(false);
+    setShowDegreeScreen(true);
+  };
   const handleOTPComplete = () => {
     setShowOTPScreen(false);
     // If we came from login flow, redirect to explore
@@ -201,28 +241,28 @@ export default function App() {
     return <UploadScreen onComplete={handleUploadComplete} onBack={handleUploadBack} />;
   }
   if (showSkillsScreen) {
-    return <SkillsetsScreen value={onboardingData.skills} onContinue={handleSkillsComplete} />;
+    return <SkillsetsScreen value={onboardingData.skills} onContinue={handleSkillsComplete} onBack={handleSkillsBack} />;
   }
   if (showDateScreen) {
-    return <DateOfBirthScreen value={onboardingData.dob} onContinue={handleDateComplete} />;
+    return <DateOfBirthScreen value={onboardingData.dob} onContinue={handleDateComplete} onBack={handleDateBack} />;
   }
   if (showNameScreen) {
-    return <NameInputScreen value={onboardingData.name || ""} gender={onboardingData.gender} onContinue={handleNameComplete} />;
+    return <NameInputScreen value={onboardingData.name || ""} gender={onboardingData.gender} onContinue={handleNameComplete} onBack={handleNameBack} />;
   }
   if (showOTPScreen) {
-    return <OTPInputScreen email={userEmail} onContinue={handleOTPComplete} />;
+    return <OTPInputScreen email={userEmail} onContinue={handleOTPComplete} onBack={handleOTPBack} />;
   }
   if (showEmailScreen) {
-    return <EmailInputScreen value={onboardingData.email} onContinue={handleEmailComplete} />;
+    return <EmailInputScreen value={onboardingData.email} onContinue={handleEmailComplete} onBack={handleEmailBack} />;
   }
   if (showLoginEmailScreen) {
     return <LoginEmailScreen onContinue={handleLoginEmailComplete} onBack={handleLoginEmailBack} />;
   }
   if (showUniversityScreen) {
-    return <UniversitySelectionScreen value={onboardingData.university} onContinue={handleUniversityComplete} />;
+    return <UniversitySelectionScreen value={onboardingData.university} onContinue={handleUniversityComplete} onBack={handleUniversityBack} />;
   }
   if (showDegreeScreen) {
-    return <DegreeSelection value={{ degree: onboardingData.degree, year: onboardingData.year }} onContinue={handleDegreeComplete} />;
+    return <DegreeSelection value={{ degree: onboardingData.degree, year: onboardingData.year }} onContinue={handleDegreeComplete} onBack={handleDegreeBack} />;
   }
   if (showConnectScreen) {
     return <ConnectStudentsScreen onContinue={handleConnectComplete} onLogin={handleLoginClick} />;
