@@ -119,12 +119,12 @@ export default function DegreeSelection({ value, onContinue, onBack }: { value?:
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
             <span style={{ color: '#fff', fontSize: 18 }}>Year</span>
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ display: 'flex', gap: '12px' }}>
               {years.map((year) => (
                 <button
                   key={year}
                   style={{
-                    padding: '10px 20px',
+                    padding: '10px 18px',
                     borderRadius: 12,
                     fontWeight: 600,
                     fontSize: 13,
