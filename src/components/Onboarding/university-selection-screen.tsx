@@ -1,7 +1,7 @@
 
 import type React from "react"
 import { useState, useRef } from "react"
-import { ChevronLeft, Search } from "lucide-react"
+import { Search } from "lucide-react"
 import { useQuery } from '@tanstack/react-query'
 import { fetchUniversities } from '@/lib/api'
 // import { fetchUniversities } from '@/lib/apiClient'
@@ -48,9 +48,11 @@ export default function UniversitySelectionScreen({ value, onContinue }: Univers
   return (
     <div style={{ minHeight: '100vh', background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif" }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', padding: '0 0 0 8px', paddingTop: 32, height: 56 }}>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '0 0 0 8px', paddingTop: 35, height: 56 }}>
         <button style={{ background: 'none', border: 'none', padding: 0, marginRight: 0 }}>
-          <ChevronLeft size={24} color="white" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
+            <path d="M10.5 20L1 10.5M1 10.5L10.5 1M1 10.5L20 10.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
       </div>
 

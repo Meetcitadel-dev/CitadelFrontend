@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { ChevronLeft } from "lucide-react"
+// ... existing code ...
 
 interface DateOfBirthScreenProps {
   value?: { day: string; month: string; year: string }
@@ -59,7 +59,9 @@ export default function DateOfBirthScreen({ value, onContinue }: DateOfBirthScre
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '0 0 0 8px', paddingTop: 32, height: 56 }}>
         <button style={{ background: 'none', border: 'none', padding: 0, marginRight: 0 }}>
-          <ChevronLeft size={24} color="white" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
+            <path d="M10.5 20L1 10.5M1 10.5L10.5 1M1 10.5L20 10.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
       </div>
 
