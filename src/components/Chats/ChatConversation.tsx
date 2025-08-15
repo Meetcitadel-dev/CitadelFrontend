@@ -29,6 +29,8 @@ interface ChatConversationProps {
   conversationId?: string
   userId?: string
   isFromMatches?: boolean // New prop to identify if chat is from matches section
+  isGroupChat?: boolean // New prop to identify if this is a group chat
+  onHeaderClick?: (conversationInfo: ConversationInfo | null) => void // Updated to pass conversation info
 }
 
 interface Message {
@@ -64,7 +66,7 @@ enum MatchCase {
   CASE_3 = 'CASE_3'  // Never Connected + Match
 }
 
-export default function ChatConversation({ onBack, conversationId, userId, isFromMatches = false }: ChatConversationProps) {
+export default function ChatConversation({ onBack, conversationId, userId, isFromMatches = false, isGroupChat = false, onHeaderClick }: ChatConversationProps) {
   console.log('🚀 ChatConversation rendered with props:', {
     conversationId,
     userId,
@@ -650,23 +652,28 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
           <button onClick={onBack} className="mr-4">
             <ArrowLeft className="w-6 h-6 text-white" />
           </button>
-          <img
-            src={conversationInfo?.profileImage || "/placeholder.svg?height=40&width=40"}
-            alt={conversationInfo?.name || "User"}
-            className="w-10 h-10 rounded-full object-cover mr-3"
-          />
-          <div className="flex-1">
-            <h1 className="text-lg font-semibold">
-              {conversationInfo?.name || userId || "User"}
-            </h1>
-            {isMatched && matchState && (
-              <div className="flex items-center gap-1 mt-1">
-                <Heart className="w-3 h-3 text-pink-500" />
-                <span className="text-xs text-pink-500">
-                  Matched on "{matchState.mutualAdjective}"
-                </span>
-              </div>
-            )}
+          <div 
+            className="flex items-center flex-1 cursor-pointer hover:bg-gray-800 rounded-lg px-2 py-1 transition-colors"
+            onClick={() => onHeaderClick?.(conversationInfo)}
+          >
+            <img
+              src={conversationInfo?.profileImage || "/placeholder.svg?height=40&width=40"}
+              alt={conversationInfo?.name || "User"}
+              className="w-10 h-10 rounded-full object-cover mr-3"
+            />
+            <div className="flex-1">
+              <h1 className="text-lg font-semibold">
+                {conversationInfo?.name || userId || "User"}
+              </h1>
+              {isMatched && matchState && (
+                <div className="flex items-center gap-1 mt-1">
+                  <Heart className="w-3 h-3 text-pink-500" />
+                  <span className="text-xs text-pink-500">
+                    Matched on "{matchState.mutualAdjective}"
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
           <button onClick={() => setShowDropdown(!showDropdown)} className="relative">
             <MoreVertical className="w-6 h-6 text-white" />

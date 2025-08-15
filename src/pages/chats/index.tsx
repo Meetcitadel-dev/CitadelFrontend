@@ -6,8 +6,9 @@ import MatchesChats from "../../components/Chats/MatchesChats"
 import ChatConversation from "../../components/Chats/ChatConversation"
 import GroupChatApp from "../../components/Chats/GroupChats"
 import GroupChatScreen from "../../components/Chats/GroupChats/group-chat-screen"
+import EditGroupScreen from "../../components/Chats/GroupChats/edit-group-screen"
 import Navbar from "../../components/Common/navbar"
-import { Search, Calendar, MessageCircle, Bell, User } from "lucide-react"
+import { Search, Calendar, MessageCircle, Bell, User, ArrowLeft } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { getConversationByUserId, fetchGroupChat } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
@@ -21,6 +22,7 @@ export default function ChatApp() {
   const [selectedChatType, setSelectedChatType] = useState<"individual" | "group">("individual")
   const [showGroupChat, setShowGroupChat] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<GroupChat | null>(null)
+  const [showEditGroup, setShowEditGroup] = useState(false)
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -108,6 +110,20 @@ export default function ChatApp() {
     setSelectedUserId(null);
     setSelectedChatType("individual");
     setSelectedGroup(null);
+    setShowEditGroup(false);
+  };
+
+  const handleHeaderClick = (conversationInfo: any) => {
+    if (selectedChatType === "group" && selectedGroup) {
+      setShowEditGroup(true);
+    } else if (conversationInfo?.name) {
+      // For individual chats, navigate to user profile page using the name
+      navigate(`/user-profile/${conversationInfo.name}`);
+    }
+  };
+
+  const handleBackFromEditGroup = () => {
+    setShowEditGroup(false);
   };
 
   if (showGroupChat) {
@@ -120,6 +136,20 @@ export default function ChatApp() {
   }
 
   if (selectedChat) {
+    // Show edit group if header was clicked for group chat (check this first)
+    if (showEditGroup && selectedGroup) {
+      return (
+        <EditGroupScreen
+          onBack={handleBackFromEditGroup}
+          groupId={selectedChat!}
+          onGroupUpdated={() => {
+            // Optionally refresh the group data
+            console.log('Group updated');
+          }}
+        />
+      );
+    }
+
     if (selectedChatType === "group" && selectedGroup) {
       return (
         <GroupChatScreen
@@ -128,6 +158,7 @@ export default function ChatApp() {
           groupName={selectedGroup.name}
           groupAvatar={selectedGroup.avatar || ""}
           memberCount={selectedGroup.memberCount}
+          onHeaderClick={() => setShowEditGroup(true)}
         />
       );
     }
@@ -155,6 +186,8 @@ export default function ChatApp() {
         conversationId={selectedChat}
         userId={selectedUserId || undefined}
         isFromMatches={activeTab === "matches"}
+        isGroupChat={selectedChatType === "group"}
+        onHeaderClick={handleHeaderClick}
       />
     );
   }

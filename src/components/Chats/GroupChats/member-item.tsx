@@ -10,9 +10,19 @@ interface Member {
 
 interface MemberItemProps {
   member: Member
+  onRemoveMember?: (memberId: string) => void
+  onMessageMember?: (memberId: string) => void
+  canRemove?: boolean
+  canMessage?: boolean
 }
 
-export default function MemberItem({ member }: MemberItemProps) {
+export default function MemberItem({ 
+  member, 
+  onRemoveMember, 
+  onMessageMember, 
+  canRemove = false, 
+  canMessage = false 
+}: MemberItemProps) {
   return (
     <div className="flex items-center justify-between p-4 hover:bg-gray-900">
       <div className="flex items-center gap-3">
@@ -27,18 +37,24 @@ export default function MemberItem({ member }: MemberItemProps) {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button
-          size="sm"
-          className="bg-transparent border border-green-500 text-green-500 hover:bg-green-500 hover:text-black w-8 h-8 p-0 rounded"
-        >
-          <MessageSquare className="w-4 h-4" />
-        </Button>
-        <Button
-          size="sm"
-          className="bg-transparent border border-red-500 text-red-500 hover:bg-red-500 hover:text-white w-8 h-8 p-0 rounded"
-        >
-          <Minus className="w-4 h-4" />
-        </Button>
+        {canMessage && (
+          <Button
+            size="sm"
+            className="bg-transparent border border-green-500 text-green-500 hover:bg-green-500 hover:text-black w-8 h-8 p-0 rounded"
+            onClick={() => onMessageMember?.(member.id)}
+          >
+            <MessageSquare className="w-4 h-4" />
+          </Button>
+        )}
+        {canRemove && (
+          <Button
+            size="sm"
+            className="bg-transparent border border-red-500 text-red-500 hover:bg-red-500 hover:text-white w-8 h-8 p-0 rounded"
+            onClick={() => onRemoveMember?.(member.id)}
+          >
+            <Minus className="w-4 h-4" />
+          </Button>
+        )}
       </div>
     </div>
   )

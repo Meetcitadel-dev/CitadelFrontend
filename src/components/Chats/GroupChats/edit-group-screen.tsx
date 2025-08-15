@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import GroupOptionsMenu from "./group-options-menu"
 import MemberItem from "./member-item"
-import { fetchGroupChat, updateGroupChat } from "@/lib/api"
+import { fetchGroupChat, updateGroupChat, removeGroupMember, addGroupMembers, leaveGroupChat } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
 import type { GroupChat, GroupMember } from "@/types"
+import { getCurrentUserProfile } from "@/lib/api"
 
 interface EditGroupScreenProps {
   onBack: () => void
@@ -25,6 +26,9 @@ export default function EditGroupScreen({ onBack, groupId, onGroupUpdated }: Edi
   const [editingName, setEditingName] = useState(false)
   const [newGroupName, setNewGroupName] = useState("")
   const [saving, setSaving] = useState(false)
+  const [removingMember, setRemovingMember] = useState<string | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [showAddMembersModal, setShowAddMembersModal] = useState(false)
 
   useEffect(() => {
     const fetchGroup = async () => {
@@ -57,6 +61,25 @@ export default function EditGroupScreen({ onBack, groupId, onGroupUpdated }: Edi
     fetchGroup()
   }, [groupId])
 
+  // Get current user ID
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      try {
+        const token = getAuthToken()
+        if (!token) return
+
+        const response = await getCurrentUserProfile(token)
+        if (response.success && response.data) {
+          setCurrentUserId(response.data.id.toString())
+        }
+      } catch (error) {
+        console.error('Error fetching current user:', error)
+      }
+    }
+
+    getCurrentUser()
+  }, [])
+
   const handleSaveGroupName = async () => {
     if (!group || !newGroupName.trim()) return
 
@@ -87,6 +110,77 @@ export default function EditGroupScreen({ onBack, groupId, onGroupUpdated }: Edi
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (!group) return
+
+    try {
+      setRemovingMember(memberId)
+      setError(null)
+      
+      const token = getAuthToken()
+      if (!token) {
+        setError('Authentication required')
+        return
+      }
+
+      const response = await removeGroupMember(groupId, memberId, token)
+      
+      if (response.success) {
+        // Update local state by removing the member
+        setGroup(prev => prev ? {
+          ...prev,
+          members: prev.members.filter(member => member.id !== memberId),
+          memberCount: prev.memberCount - 1
+        } : null)
+        onGroupUpdated?.()
+      } else {
+        setError(response.message || 'Failed to remove member')
+      }
+    } catch (error) {
+      console.error('Error removing member:', error)
+      setError('Failed to remove member')
+    } finally {
+      setRemovingMember(null)
+    }
+  }
+
+  const handleAddMembers = () => {
+    setShowAddMembersModal(true)
+  }
+
+  const handleExitGroup = async () => {
+    if (!group) return
+
+    if (!confirm('Are you sure you want to exit this group?')) return
+
+    try {
+      setError(null)
+      
+      const token = getAuthToken()
+      if (!token) {
+        setError('Authentication required')
+        return
+      }
+
+      const response = await leaveGroupChat(groupId, token)
+      
+      if (response.success) {
+        onBack() // Go back to chat list
+      } else {
+        setError(response.message || 'Failed to exit group')
+      }
+    } catch (error) {
+      console.error('Error exiting group:', error)
+      setError('Failed to exit group')
+    }
+  }
+
+  const handleMessageMember = (memberId: string) => {
+    // Navigate to individual chat with this member
+    // For now, we'll just show an alert
+    alert(`Message functionality for member ${memberId} will be implemented here`)
   }
 
   const filteredMembers = group?.members.filter(member =>
@@ -178,12 +272,10 @@ export default function EditGroupScreen({ onBack, groupId, onGroupUpdated }: Edi
         ) : (
           <div className="flex items-center gap-2 mb-1">
             <h2 className="text-lg font-medium">{group.name}</h2>
-            {group.isAdmin && (
-              <Edit2 
-                className="w-4 h-4 text-gray-400 cursor-pointer hover:text-white" 
-                onClick={() => setEditingName(true)}
-              />
-            )}
+            <Edit2 
+              className="w-4 h-4 text-gray-400 cursor-pointer hover:text-white" 
+              onClick={() => setEditingName(true)}
+            />
           </div>
         )}
         
@@ -221,8 +313,15 @@ export default function EditGroupScreen({ onBack, groupId, onGroupUpdated }: Edi
             </div>
           </div>
         ) : (
-          filteredMembers.map((member) => (
-            <MemberItem key={member.id} member={member} />
+                    filteredMembers.map((member) => (
+            <MemberItem 
+              key={member.id} 
+              member={member}
+              onRemoveMember={handleRemoveMember}
+              onMessageMember={handleMessageMember}
+              canRemove={member.id !== currentUserId}
+              canMessage={member.id !== currentUserId}
+            />
           ))
         )}
       </div>
@@ -232,8 +331,41 @@ export default function EditGroupScreen({ onBack, groupId, onGroupUpdated }: Edi
         <GroupOptionsMenu 
           groupName={group.name} 
           memberCount={group.memberCount} 
-          onClose={() => setShowOptionsMenu(false)} 
+          onClose={() => setShowOptionsMenu(false)}
+          onAddMembers={handleAddMembers}
+          onExitGroup={handleExitGroup}
         />
+      )}
+
+      {/* Add Members Modal */}
+      {showAddMembersModal && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-gray-900 rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-medium text-white mb-4">Add Members</h3>
+            <p className="text-gray-400 mb-4">
+              This feature will allow you to add new members to the group. 
+              For now, you can manually invite people by sharing the group link.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => setShowAddMembersModal(false)}
+                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white"
+              >
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  // TODO: Implement actual add members functionality
+                  alert('Add members functionality will be implemented here')
+                  setShowAddMembersModal(false)
+                }}
+                className="flex-1 bg-green-500 hover:bg-green-600 text-black"
+              >
+                Add Members
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

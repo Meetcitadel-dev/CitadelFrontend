@@ -16,8 +16,9 @@ interface GroupChatScreenProps {
   onBack: () => void
   groupId: string
   groupName: string
-  groupAvatar: string
+  groupAvatar?: string
   memberCount: number
+  onHeaderClick?: () => void // New prop for header click navigation
 }
 
 interface Message {
@@ -30,7 +31,7 @@ interface Message {
   isCurrentUser: boolean
 }
 
-export default function GroupChatScreen({ onBack, groupId, groupName, groupAvatar, memberCount }: GroupChatScreenProps) {
+export default function GroupChatScreen({ onBack, groupId, groupName, groupAvatar, memberCount, onHeaderClick }: GroupChatScreenProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
   const [showOptionsMenu, setShowOptionsMenu] = useState(false)
@@ -324,8 +325,11 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
     <div className="flex flex-col h-screen bg-black text-white relative">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-800">
-        <div className="flex items-center gap-3">
-          <ArrowLeft className="w-6 h-6 cursor-pointer" onClick={onBack} />
+        <ArrowLeft className="w-6 h-6 cursor-pointer" onClick={onBack} />
+        <div 
+          className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-gray-800 rounded-lg px-2 py-1 transition-colors"
+          onClick={onHeaderClick}
+        >
           <img
             src={groupAvatar || "/images/profile.png"}
             alt={groupName}

@@ -4,10 +4,34 @@ interface GroupOptionsMenuProps {
   groupName: string
   memberCount: number
   onClose: () => void
+  onAddMembers?: () => void
+  onExitGroup?: () => void
+  onMoveToMatches?: () => void
+  onMuteNotifications?: () => void
 }
 
-export default function GroupOptionsMenu({ groupName, memberCount, onClose }: GroupOptionsMenuProps) {
-  const menuOptions = ["Add members", "Exit group", "Move to matches", "Mute notifications"]
+export default function GroupOptionsMenu({ 
+  groupName, 
+  memberCount, 
+  onClose,
+  onAddMembers,
+  onExitGroup,
+  onMoveToMatches,
+  onMuteNotifications
+}: GroupOptionsMenuProps) {
+  const menuOptions = [
+    { label: "Add members", action: onAddMembers },
+    { label: "Exit group", action: onExitGroup },
+    { label: "Move to matches", action: onMoveToMatches },
+    { label: "Mute notifications", action: onMuteNotifications }
+  ]
+
+  const handleOptionClick = (action?: () => void) => {
+    if (action) {
+      action()
+    }
+    onClose()
+  }
 
   return (
     <div className="absolute inset-0 bg-black bg-opacity-50 z-50" onClick={onClose}>
@@ -29,9 +53,9 @@ export default function GroupOptionsMenu({ groupName, memberCount, onClose }: Gr
             <button
               key={index}
               className="w-full text-left px-3 py-2 text-white hover:bg-gray-800 rounded transition-colors"
-              onClick={onClose}
+              onClick={() => handleOptionClick(option.action)}
             >
-              {option}
+              {option.label}
             </button>
           ))}
         </div>
