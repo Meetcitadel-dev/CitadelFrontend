@@ -12,6 +12,7 @@ import NameInputScreen from "../../components/Onboarding/name-input-screen"
 import DateOfBirthScreen from "../../components/Onboarding/date-of-birth-screen"
 import SkillsetsScreen from "../../components/Onboarding/skillsets-screen"
 import UploadScreen from "../../components/Onboarding/UploadProfile/uploadscreen"
+import FindFriendsScreen from "../../components/Onboarding/find-friends-screen"
 import BestFriendsScreen from "../../components/Onboarding/best-friends-screen"
 import SuccessScreen from "../../components/Onboarding/success-screen"
 import DegreeSelection from "../../components/Onboarding/degree-selection"
@@ -29,6 +30,7 @@ export default function App() {
   const [showDateScreen, setShowDateScreen] = useState(false)
   const [showSkillsScreen, setShowSkillsScreen] = useState(false)
   const [showUploadScreen, setShowUploadScreen] = useState(false)
+  const [showFindFriendsScreen, setShowFindFriendsScreen] = useState(false)
   const [showBestFriendsScreen, setShowBestFriendsScreen] = useState(false)
   const [showSuccessScreen, setShowSuccessScreen] = useState(false)
   const [showDegreeScreen, setShowDegreeScreen] = useState(false)
@@ -170,12 +172,63 @@ export default function App() {
       setOnboardingData((prev: any) => ({ ...prev, uploadedImages: images }));
     }
     setShowUploadScreen(false);
-    setShowBestFriendsScreen(true);
+    setShowFindFriendsScreen(true);
   };
   
   const handleUploadBack = () => {
     setShowUploadScreen(false);
     setShowSkillsScreen(true);
+  };
+
+  const handleAllowContacts = () => {
+    setShowFindFriendsScreen(false);
+    // Here you would typically show a contact buffering screen
+    // For now, we'll go directly to best friends screen
+    setShowBestFriendsScreen(true);
+  };
+
+  const handleSkipContacts = async () => {
+    setShowFindFriendsScreen(false);
+    
+    // Skip contacts and best friends, go directly to success
+    const finalData = { ...onboardingData, friends: [] }; // Empty friends array since user skipped
+    
+    // Debug: Log the complete data structure
+    console.log('=== ONBOARDING DATA DEBUG (SKIP) ===');
+    console.log('Complete onboarding data:', finalData);
+    console.log('Data structure:', {
+      university: finalData.university,
+      email: finalData.email,
+      name: finalData.name,
+      gender: finalData.gender,
+      dob: finalData.dob,
+      degree: finalData.degree,
+      year: finalData.year,
+      skills: finalData.skills,
+      uploadedImages: finalData.uploadedImages,
+      friends: finalData.friends
+    });
+    console.log('=== END DEBUG ===');
+    
+    // Submit all data to backend
+    try {
+      const result = await submitOnboardingData(finalData);
+      console.log('Onboarding API response:', result);
+      if (result.success) {
+        setShowSuccessScreen(true);
+      } else {
+        // Handle error - show error message or retry
+        console.error('Onboarding failed:', result.message);
+        alert('Onboarding failed. Please try again.');
+        // Stay on the current screen to allow retry
+        setShowFindFriendsScreen(true);
+      }
+    } catch (e: any) {
+      console.error('Onboarding error:', e);
+      alert('Onboarding failed. Please try again.');
+      // Stay on the current screen to allow retry
+      setShowFindFriendsScreen(true);
+    }
   };
   const handleBestFriendsComplete = async (friends: string[]) => {
     const finalData = { ...onboardingData, friends };
@@ -236,6 +289,9 @@ export default function App() {
 
   if (showBestFriendsScreen) {
     return <BestFriendsScreen value={onboardingData.friends} onContinue={handleBestFriendsComplete} />;
+  }
+  if (showFindFriendsScreen) {
+    return <FindFriendsScreen onAllowContacts={handleAllowContacts} onSkip={handleSkipContacts} />;
   }
   if (showUploadScreen) {
     return <UploadScreen onComplete={handleUploadComplete} onBack={handleUploadBack} />;
