@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-// ... existing code ...
+import { ChevronLeft } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import ProfileImageUpload from "@/components/EditProfile/profile-image-upload"
 import ProfileForm from "@/components/EditProfile/profile-form"
@@ -155,9 +155,7 @@ export default function EditProfileScreen({ onSave }: EditProfileScreenProps) {
             style={{ background: 'none', border: 'none', padding: 0, marginRight: 16, cursor: 'pointer' }}
             onClick={() => navigate('/profile')}
           >
-              <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
-            <path d="M10.5 20L1 10.5M1 10.5L10.5 1M1 10.5L20 10.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+              <ChevronLeft className="w-6 h-6 text-white" />
           </button>
           <h1 style={{ color: '#fff', fontSize: 24, fontWeight: 700, fontFamily: "'Roboto Serif', serif", margin: 0 }}>Profile</h1>
         </div>

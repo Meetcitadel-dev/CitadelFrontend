@@ -13,14 +13,40 @@ export default function SettingsMenuItem({ icon: Icon, title, onClick, isDestruc
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-4 w-full p-4 bg-gray-800 hover:bg-gray-700 transition-colors border-b border-gray-700 last:border-b-0 ${
+      className={`flex items-center w-full transition-colors ${
         isDestructive ? 'text-red-500 hover:text-red-400' : 'text-white'
       }`}
+      style={{
+        display: 'flex',
+        height: '77px',
+        padding: '12px 16px',
+        alignItems: 'center',
+        gap: '16px',
+        alignSelf: 'stretch',
+        borderBottom: '1px solid #2C2C2C',
+        background: '#111111'
+      }}
     >
-      <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-        <Icon className={`w-5 h-5 ${isDestructive ? 'text-red-500' : ''}`} />
+      <div className="flex items-center justify-center flex-shrink-0" style={{ width: '45px', height: '45px' }}>
+        <Icon className="" />
       </div>
-      <span className="text-base font-medium text-left">{title}</span>
+      <span 
+        style={{
+          display: '-webkit-box',
+          WebkitBoxOrient: 'vertical',
+          WebkitLineClamp: 2,
+          overflow: 'hidden',
+          color: isDestructive ? '#FF5151' : '#FFFFFF',
+          textOverflow: 'ellipsis',
+          fontFamily: 'Inter',
+          fontSize: '20px',
+          fontStyle: 'normal',
+          fontWeight: 500,
+          lineHeight: 'normal'
+        }}
+      >
+        {title}
+      </span>
     </button>
   )
 }
