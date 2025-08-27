@@ -1,4 +1,3 @@
-"use client"
 
 import { useState } from "react"
 import IndiaGate from "@/assets/unsplash_va77t8vGbJ8.png"
@@ -240,39 +239,76 @@ export default function DinnerBooking() {
 
   // Main Booking Screen
   return (
-    <div className="min-h-screen bg-black flex flex-col">
-      {/* Top Section - Image Background (30% of screen) */}
-      <div className="relative h-[35vh] overflow-hidden">
-        <img src={IndiaGate} alt="India Gate" className="object-cover w-full h-full absolute inset-0" />
+    <div className="min-h-screen flex flex-col">
+      {/* Top Section - Image Background - fixed 330px height */}
+      <div 
+        className="relative overflow-hidden" 
+        style={{ 
+          height: '330px',
+          background: `url(${IndiaGate}) lightgray -29px -40px / 115.013% 100.192% no-repeat`
+        }}
+      >
         {/* Dark Overlay for better text readability */}
         <div className="absolute inset-0 bg-black/40"></div>
 
         {/* Location Header Content */}
-        <div className="relative z-10 h-full flex flex-col justify-center">
+        <div className="relative z-10 h-full flex flex-col">
           <LocationHeader city="New Delhi" venue="Select Location" />
         </div>
       </div>
 
-      {/* Bottom Section - Black Background (70% of screen) */}
-      <div className="flex-1 bg-black px-6 pt-6">
-        <BookingHeader waitingCount={5} />
+      {/* Bottom Section Wrapper */}
+      <div 
+        style={{ 
+          position: 'absolute',
+          top: '260px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 15
+        }}
+      >
+        {/* Black Background Section - positioned 260px from top, 473px height */}
+        <div 
+          style={{
+            width: '393px',
+            height: '473px',
+            flexShrink: 0,
+            borderRadius: '15px',
+            background: '#000000',
+            padding: '24px 24px 0px',
+            position: 'relative'
+          }}
+        >
+          <BookingHeader waitingCount={5} />
 
-        {/* Time Slots */}
-        <div className="space-y-3 mb-6">
-          {timeSlots.map((slot) => (
-            <TimeSlot
-              key={slot.id}
-              date={slot.date}
-              time={slot.time}
-              isSelected={selectedSlot === slot.id}
-              onSelect={() => handleSlotSelect(slot.id)}
-            />
-          ))}
-        </div>
+          {/* Time Slots */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+            {timeSlots.map((slot) => (
+              <TimeSlot
+                key={slot.id}
+                date={slot.date}
+                time={slot.time}
+                isSelected={selectedSlot === slot.id}
+                onSelect={() => handleSlotSelect(slot.id)}
+              />
+            ))}
+          </div>
 
-        {/* Book Button */}
-        <div className="pb-24">
-          <BookButton isEnabled={selectedSlot !== null} onClick={handleBookSeat} />
+          {/* Book Button - positioned 16px from navbar, centered */}
+          <div 
+            style={{
+              position: 'absolute',
+              bottom: '16px',
+              left: '24px',
+              right: '24px',
+              height: '50px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <BookButton isEnabled={selectedSlot !== null} onClick={handleBookSeat} />
+          </div>
         </div>
       </div>
 

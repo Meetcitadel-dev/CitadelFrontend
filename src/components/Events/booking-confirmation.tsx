@@ -79,56 +79,208 @@ export function BookingConfirmation({
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
       {/* Content */}
-      <div className="flex-1 px-6 pt-16">
+      <div className="flex-1 px-6" style={{ paddingTop: '35px' }}>
         {/* Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-white text-4xl font-bold leading-tight">
+        <div className="text-center" style={{ marginBottom: '28px' }}>
+          <p 
+            style={{
+              display: '-webkit-box',
+              width: '315px',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 2,
+              overflow: 'hidden',
+              color: '#FFFFFF',
+              textAlign: 'center',
+              textOverflow: 'ellipsis',
+              fontFamily: '"Roboto Serif"',
+              fontSize: '28px',
+              fontStyle: 'normal',
+              fontWeight: 600,
+              lineHeight: 'normal',
+              margin: '0 auto'
+            }}
+          >
             Let's book your
             <br />
-            <span className="text-green-400 italic">DINNER!</span>
-          </h1>
+            <span 
+              style={{
+                overflow: 'hidden',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: 2,
+                color: '#1BEA7B',
+                textOverflow: 'ellipsis',
+                fontFamily: '"Roboto Serif"',
+                fontSize: '28px',
+                fontStyle: 'italic',
+                fontWeight: 700,
+                lineHeight: 'normal'
+              }}
+            >
+              DINNER!
+            </span>
+          </p>
         </div>
 
         {/* Booking Details Card */}
-        <div className="bg-gray-800/50 rounded-3xl p-6 mb-8">
+        <div 
+          style={{
+            width: '345px',
+            height: '273px',
+            flexShrink: 0,
+            borderRadius: '15px',
+            background: '#111',
+            paddingTop: '16px',
+            paddingLeft: '24px',
+            paddingRight: '24px',
+            // paddingBottom: '24px',
+            marginBottom: '32px',
+            margin: '0 auto'
+          }}
+        >
           {/* Restaurant Info */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between" style={{ marginBottom: '20px' }}>
             <div>
-              <h3 className="text-white text-xl font-bold mb-1">To be revealed</h3>
-              <p className="text-white/70 text-lg">{bookingDetails.guests} guests</p>
+              <p 
+                style={{
+                  color: '#FFF',
+                  fontFamily: 'Inter',
+                  fontSize: '16px',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  lineHeight: '135%',
+                  marginBottom: '2px'
+                }}
+              >
+                To be revealed
+              </p>
+              <p 
+                style={{
+                  color: '#FFF',
+                  fontFamily: 'Inter',
+                  fontSize: '14px',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  lineHeight: '135%',
+                  opacity: 0.7
+                }}
+              >
+                {bookingDetails.guests} guests
+              </p>
             </div>
-            <div className="w-16 h-16 rounded-xl overflow-hidden">
+            <div 
+              style={{
+                width: '45px',
+                height: '45px',
+                flexShrink: 0,
+                aspectRatio: '1/1',
+                borderRadius: '8px',
+                background: 'url(<path-to-image>) lightgray 50% / cover no-repeat',
+                overflow: 'hidden'
+              }}
+            >
               <img
                 src="/placeholder.svg"
                 alt="Restaurant"
-                width={64}
-                height={64}
-                className="object-cover w-full h-full"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
               />
             </div>
           </div>
 
           {/* Date & Time */}
-          <div className="mb-6">
-            <h4 className="text-white/70 text-base mb-1">Date & Time</h4>
-            <p className="text-white text-xl font-bold">
+          <div style={{ marginBottom: '20px' }}>
+            <p 
+              style={{
+                color: '#FFF',
+                fontFamily: 'Inter',
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: 400,
+                lineHeight: '135%',
+                opacity: 0.7,
+                marginBottom: '2px'
+              }}
+            >
+              Date & Time
+            </p>
+            <p 
+              style={{
+                color: '#FFF',
+                fontFamily: 'Inter',
+                fontSize: '16px',
+                fontStyle: 'normal',
+                fontWeight: 600,
+                lineHeight: '135%'
+              }}
+            >
               {bookingDetails.date} | {bookingDetails.time}
             </p>
           </div>
 
           {/* Location */}
           <div className="mb-6">
-            <h4 className="text-white/70 text-base mb-1">Location</h4>
+            <p 
+              style={{
+                color: '#FFF',
+                fontFamily: 'Inter',
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: 400,
+                lineHeight: '135%',
+                opacity: 0.7,
+                marginBottom: '2px'
+              }}
+            >
+              Location
+            </p>
             <div className="flex items-center justify-between">
-              <p className="text-white text-xl font-bold">{bookingDetails.location}</p>
+              <p 
+                style={{
+                  color: '#FFF',
+                  fontFamily: 'Inter',
+                  fontSize: '16px',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  lineHeight: '135%'
+                }}
+              >
+                {bookingDetails.location}
+              </p>
               <MapPin className="w-6 h-6 text-white/70" />
             </div>
           </div>
 
           {/* Price and Guidelines */}
           <div className="flex items-center justify-between">
-            <div className="bg-green-400 text-black px-4 py-2 rounded-lg">
-              <span className="text-lg font-bold">Rs {bookingDetails.price}</span>
+            <div 
+              style={{
+                display: 'inline-flex',
+                minHeight: '28px',
+                padding: '8px 14px',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '4px',
+                borderRadius: '6px',
+                border: '0.5px solid #133422',
+                background: '#133422'
+              }}
+            >
+              <span 
+                style={{
+                  color: '#1BEA7B',
+                  textAlign: 'center',
+                  fontFamily: 'Inter',
+                  fontSize: '15px',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  lineHeight: '135%' // 20.25px
+                }}
+              >
+                Rs {bookingDetails.price}
+              </span>
             </div>
             <button className="text-white text-lg font-medium">
               Guidelines <span className="text-xl">›</span>
@@ -143,17 +295,57 @@ export function BookingConfirmation({
       </div>
 
       {/* Bottom Buttons */}
-      <div className="bg-black px-6 py-6 flex gap-4">
+      <div className="bg-black px-6 flex gap-4" style={{ paddingTop: '24px', paddingBottom: '16px' }}>
         <button
           onClick={onBack}
-          className="flex-1 py-4 rounded-2xl border-2 border-gray-600 text-white text-lg font-semibold hover:bg-gray-800/50 transition-colors"
+          className="hover:bg-gray-800/50 transition-colors"
+          style={{
+            display: 'flex',
+            width: '173px',
+            height: '50px',
+            padding: '14.5px 16px',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '8px',
+            flexShrink: 0,
+            borderRadius: '48px',
+            background: '#111111',
+            border: 'none',
+            color: '#FFFFFF',
+            fontFamily: 'Inter',
+            fontSize: '16px',
+            fontStyle: 'normal',
+            fontWeight: 500,
+            lineHeight: '135%',
+            cursor: 'pointer'
+          }}
         >
           Back
         </button>
         <button
           onClick={handlePayment}
           disabled={isProcessing}
-          className="flex-1 py-4 rounded-2xl bg-green-400 text-black text-lg font-semibold hover:bg-green-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="hover:bg-green-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            display: 'flex',
+            width: '173px',
+            height: '50px',
+            padding: '14.5px 16px',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '8px',
+            flexShrink: 0,
+            borderRadius: '48px',
+            background: '#1BEA7B',
+            border: 'none',
+            color: '#040404',
+            fontFamily: 'Inter',
+            fontSize: '16px',
+            fontStyle: 'normal',
+            fontWeight: 500,
+            lineHeight: '135%',
+            cursor: 'pointer'
+          }}
         >
           {isProcessing ? "Processing..." : "Pay amount"}
         </button>

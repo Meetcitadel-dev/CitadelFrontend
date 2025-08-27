@@ -39,7 +39,7 @@ export function CitySelection({ onClose, onCitySelect }: CitySelectionProps) {
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 pt-16">
+      <div className="flex items-center justify-between px-6" style={{ paddingTop: '35px', paddingBottom: '0px' }}>
         <div></div>
         <h1 className="text-white text-xl font-medium">Location</h1>
         <button onClick={onClose} className="text-white">
@@ -49,11 +49,24 @@ export function CitySelection({ onClose, onCitySelect }: CitySelectionProps) {
 
       {/* Content */}
       <div className="flex-1 px-6">
-        <div className="text-center mb-8">
+        <div className="text-center" style={{ marginTop: '30px' }}>
           <h2 className="text-white text-4xl font-bold mb-2">
             Select <span className="text-green-400 italic">CITY</span>
           </h2>
-          <p className="text-white/70 text-lg">You can change it later</p>
+          <p 
+            style={{
+              color: '#FFFFFF',
+              textAlign: 'center',
+              fontFamily: 'Inter',
+              fontSize: '15px',
+              fontStyle: 'normal',
+              fontWeight: 500,
+              lineHeight: '135%', // 20.25px
+              marginBottom: '32px'
+            }}
+          >
+            You can change it later
+          </p>
         </div>
 
         {/* Cities Grid */}
@@ -63,15 +76,27 @@ export function CitySelection({ onClose, onCitySelect }: CitySelectionProps) {
               key={city.id}
               onClick={() => handleCityClick(city)}
               disabled={!city.available}
-              className={`relative h-48 rounded-2xl overflow-hidden transition-all duration-300 ${
+              className={`relative overflow-hidden transition-all duration-300 ${
                 selectedCity === city.id ? "ring-4 ring-green-400 scale-105" : ""
               } ${city.available ? "hover:scale-105" : "opacity-60"}`}
+              style={{
+                height: '184px',
+                borderRadius: '15px',
+                backgroundColor: '#111'
+              }}
             >
-              <img src={city.image || "/placeholder.svg"} alt={city.name} className="object-cover w-full h-full absolute inset-0" />
-              <div className="absolute inset-0 bg-black/40"></div>
-              <div className="absolute inset-0 flex flex-col justify-end p-4">
-                <h3 className="text-white text-xl font-bold mb-1">{city.name}</h3>
-                {!city.available && <p className="text-white/70 text-sm">(Coming soon)</p>}
+              <img 
+                src={city.image || "/placeholder.svg"} 
+                alt={city.name} 
+                className="object-cover w-full h-full absolute inset-0"
+                style={{
+                  borderRadius: '15px'
+                }}
+              />
+              <div className="absolute inset-0 bg-black/40" style={{ borderRadius: '15px' }}></div>
+              <div className="absolute inset-0 flex flex-col justify-center items-center p-4">
+                <h3 className="text-white text-xl font-bold mb-1 text-center">{city.name}</h3>
+                {!city.available && <p className="text-white/70 text-sm text-center">(Coming soon)</p>}
               </div>
               {selectedCity === city.id && <div className="absolute inset-0 bg-green-400/20 animate-pulse"></div>}
             </button>

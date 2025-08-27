@@ -10,9 +10,23 @@ export function BookButton({ isEnabled, onClick }: BookButtonProps) {
     <button
       onClick={onClick}
       disabled={!isEnabled}
-      className={`w-full py-4 rounded-2xl text-xl font-semibold transition-all duration-200 ${
-        isEnabled ? "bg-green-400 text-black hover:bg-green-300" : "bg-gray-600 text-gray-400 cursor-not-allowed"
-      }`}
+      style={{
+        display: 'flex',
+        height: '50px',
+        padding: '14.5px 16px',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '8px',
+        flex: '1 0 0',
+        borderRadius: '48px',
+        background: isEnabled ? '#1BEA7B' : '#2C2C2C',
+        color: isEnabled ? '#040404' : '#AAAAAA',
+        border: 'none',
+        cursor: isEnabled ? 'pointer' : 'not-allowed',
+        fontSize: '16px',
+        fontWeight: '500',
+        transition: 'all 0.2s ease'
+      }}
     >
       Book my seat
     </button>

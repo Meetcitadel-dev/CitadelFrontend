@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { ArrowLeft } from "lucide-react"
 
 interface EditPreferencesProps {
   onBack: () => void
@@ -58,24 +59,60 @@ export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-center p-6 pt-16 relative flex-shrink-0">
-        <h1 className="text-white text-xl font-medium">Your Dinner</h1>
+      <div className="flex items-center justify-between px-6 flex-shrink-0" style={{ paddingTop: '35px', paddingBottom: '0px' }}>
+        <button onClick={onBack} className="text-white">
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+        <h1 
+          style={{
+            color: '#FFFFFF',
+            textAlign: 'center',
+            fontFamily: 'Inter',
+            fontSize: '16px',
+            fontStyle: 'normal',
+            fontWeight: 600,
+            lineHeight: '135%' // 21.6px
+          }}
+        >
+          Your Dinner
+        </h1>
+        <div className="w-6"></div>
       </div>
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="px-6 pb-8">
+        <div className="pb-8" style={{ paddingLeft: '24px', paddingRight: '24px', paddingTop: '28px' }}>
           {/* Languages Question */}
-          <div className="mb-8">
-            <h2 className="text-white text-2xl font-bold mb-6 leading-tight">
+          <div style={{ marginBottom: '30px' }}>
+            <h2 
+              style={{
+                width: '346px',
+                color: '#FFFFFF',
+                fontFamily: 'Inter',
+                fontSize: '18px',
+                fontStyle: 'normal',
+                fontWeight: 700,
+                lineHeight: '135%', // 24.3px
+                marginBottom: '23px'
+              }}
+            >
               What languages are you willing to speak at dinner?*
             </h2>
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {languages.map((language) => (
                 <button
                   key={language.id}
                   onClick={() => handleLanguageToggle(language.id)}
-                  className="w-full p-4 rounded-2xl bg-gray-800/50 border border-gray-700 flex items-center justify-between hover:bg-gray-700/50 transition-colors"
+                  className="flex items-center justify-between hover:bg-gray-700/50 transition-colors"
+                  style={{
+                    width: '345px',
+                    height: '60px',
+                    flexShrink: 0,
+                    borderRadius: '15px',
+                    background: '#111',
+                    border: 'none',
+                    padding: '16px'
+                  }}
                 >
                   <span className="text-white text-lg font-medium">{language.name}</span>
                   <div
@@ -92,15 +129,40 @@ export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
 
           {/* Budget Question */}
           <div className="mb-8">
-            <h2 className="text-white text-2xl font-bold mb-6 leading-tight">
+            <h2 
+              style={{
+                display: 'flex',
+                width: '346px',
+                height: '47px',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                flexShrink: 0,
+                color: '#FFFFFF',
+                fontFamily: 'Inter',
+                fontSize: '18px',
+                fontStyle: 'normal',
+                fontWeight: 700,
+                lineHeight: '135%', // 24.3px
+                marginBottom: '24px'
+              }}
+            >
               How much are you willing to spend at dinner?*
             </h2>
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {budgetOptions.map((option) => (
                 <button
                   key={option.id}
                   onClick={() => handleBudgetSelect(option.id)}
-                  className="w-full p-4 rounded-2xl bg-gray-800/50 border border-gray-700 flex items-center justify-between hover:bg-gray-700/50 transition-colors"
+                  className="flex items-center justify-between hover:bg-gray-700/50 transition-colors"
+                  style={{
+                    width: '345px',
+                    height: '60px',
+                    flexShrink: 0,
+                    borderRadius: '15px',
+                    background: '#111',
+                    border: 'none',
+                    padding: '16px'
+                  }}
                 >
                   <span className="text-white text-lg font-medium">{option.name}</span>
                   <div
@@ -117,37 +179,61 @@ export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
 
           {/* Vegetarian Question */}
           <div className="mb-8">
-            <button
-              onClick={handleVegetarianToggle}
-              className="w-full p-4 rounded-2xl bg-gray-800/50 border border-gray-700 flex items-center justify-between hover:bg-gray-700/50 transition-colors text-left"
-            >
-              <span className="text-white text-xl font-bold leading-tight">
+            <div className="flex items-center" style={{ width: '345px', justifyContent: 'space-between', paddingRight: '16px' }}>
+              <span 
+                style={{
+                  width: '267px',
+                  color: '#FFFFFF',
+                  fontFamily: 'Inter',
+                  fontSize: '18px',
+                  fontStyle: 'normal',
+                  fontWeight: 700,
+                  lineHeight: '135%' // 24.3px
+                }}
+              >
                 I want only pure vegetarians at the table.
               </span>
-              <div
-                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+              <button
+                onClick={handleVegetarianToggle}
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
                   vegetarianOnly ? "border-green-400 bg-green-400" : "border-gray-400"
                 }`}
               >
                 {vegetarianOnly && <div className="w-2 h-2 bg-white rounded-full"></div>}
-              </div>
-            </button>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Fixed Continue Button */}
-      <div className="p-6 flex-shrink-0">
-        <button
-          onClick={handleContinue}
-          disabled={!canContinue}
-          className={`w-full py-4 rounded-2xl text-xl font-semibold transition-colors ${
-            canContinue ? "bg-green-400 text-black hover:bg-green-300" : "bg-gray-600 text-gray-400 cursor-not-allowed"
-          }`}
-        >
-          Continue
-        </button>
-      </div>
+      <button
+        onClick={handleContinue}
+        disabled={!canContinue}
+        className={`transition-colors ${
+          canContinue ? "hover:bg-green-300" : "cursor-not-allowed"
+        }`}
+        style={{
+          display: 'flex',
+          height: '50px',
+          padding: '14.5px 16px',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '8px',
+          flex: '1 0 0',
+          borderRadius: '48px',
+          background: canContinue ? '#1BEA7B' : '#666666',
+          color: canContinue ? '#040404' : '#999999',
+          border: 'none',
+          position: 'fixed',
+          bottom: '16px',
+          left: '16px',
+          right: '16px',
+          zIndex: 10
+        }}
+      >
+        Continue
+      </button>
     </div>
   )
 }
