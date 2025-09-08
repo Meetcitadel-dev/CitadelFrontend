@@ -17,8 +17,9 @@ const Navbar: React.FC<NavbarProps> = ({ navItems = [] }) => (
     role="navigation"
     aria-label="Primary"
     className="absolute bottom-0 left-0 right-0 bg-black/95 backdrop-blur-sm border-t border-white/10"
+    style={{ height: '72px' }}
   >
-    <div className="flex justify-between items-center px-4 py-3">
+    <div className="flex justify-between items-center px-4 h-full">
       {navItems.map((item) => {
         const IconComponent = item.icon
         const colorClass = item.active ? "text-green-500" : "text-white"
