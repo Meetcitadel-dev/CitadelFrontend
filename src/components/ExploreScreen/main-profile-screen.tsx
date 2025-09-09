@@ -542,7 +542,7 @@ export default function MobileProfileScreen() {
                       ? "bg-gray-500 text-gray-300 cursor-not-allowed"
                       : "bg-white/10 backdrop-blur-sm text-green-400 hover:bg-white/20"
                 }`}
-                style={{ width: '176px', height: '62px' }}
+                style={{ width: '176px', height: '62px', fontFamily: 'Inter' }}
               >
                 <span className="text-lg font-semibold">{trait}</span>
               </button>

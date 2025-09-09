@@ -1,11 +1,8 @@
-import Connecting2 from '@/assets/sign up animation 1.png'
-import CitadelIcon from '@/assets/Star 1 (1).png'
 import Rectangle4 from '@/assets/Rectangle 4.png'
 import Rectangle2 from '@/assets/Rectangle 2.png'
 import Rectangle1 from '@/assets/a man teaching, realistic man image, cinemtic, man wearing casual clothes.png'
 import Rectangle3 from '@/assets/Rectangle 3.png'
 
-import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
 
@@ -19,7 +16,7 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
   const sliderRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const handleStart = (clientX: number) => {
+  const handleStart = () => {
     setIsDragging(true)
   }
 
@@ -46,8 +43,8 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
   }
 
   // Mouse events
-  const handleMouseDown = (e: React.MouseEvent) => {
-    handleStart(e.clientX)
+  const handleMouseDown = () => {
+    handleStart()
   }
 
   const handleMouseMove = (e: MouseEvent) => {
@@ -59,8 +56,8 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
   }
 
   // Touch events
-  const handleTouchStart = (e: React.TouchEvent) => {
-    handleStart(e.touches[0].clientX)
+  const handleTouchStart = () => {
+    handleStart()
   }
 
   const handleTouchMove = (e: TouchEvent) => {
@@ -230,7 +227,7 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
 
           {/* Main Text */}
           <div className="text-center mb-8">
-            <p style={{color: '#FFF', fontFamily: 'Roboto Serif', fontSize: '36px', fontStyle: 'normal', fontWeight: 600, lineHeight: 'normal', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2}}>i'm good, wby?</p>
+            <p style={{color: '#FFF', fontFamily: '"Roboto Serif", serif', fontSize: '36px', fontStyle: 'normal', fontWeight: 600, lineHeight: 'normal', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2}}>i'm good, wby?</p>
           </div>
 
           {/* Slide to Start */}
