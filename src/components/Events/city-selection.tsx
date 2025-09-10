@@ -101,7 +101,12 @@ export function CitySelection({ onClose, onCitySelect }: CitySelectionProps) {
               />
               <div className="absolute inset-0 bg-black/40" style={{ borderRadius: '15px' }}></div>
               <div className="absolute inset-0 flex flex-col justify-center items-center p-4">
-                <h3 className="text-white text-xl font-bold mb-1 text-center">{city.name}</h3>
+                <h3 
+                  className="text-white text-xl font-bold mb-1 text-center"
+                  style={{ fontFamily: 'Inter' }}
+                >
+                  {city.name}
+                </h3>
                 {!city.available && <p className="text-white/70 text-sm text-center">(Coming soon)</p>}
               </div>
               {selectedCity === city.id && <div className="absolute inset-0 bg-green-400/20 animate-pulse"></div>}

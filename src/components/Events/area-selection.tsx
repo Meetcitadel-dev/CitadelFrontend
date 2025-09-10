@@ -52,7 +52,13 @@ export function AreaSelection({ onBack, onClose, onAreaSelect, cityName }: AreaS
       {/* Content */}
       <div className="flex-1 px-6">
         <div className="text-center" style={{ marginTop: '30px' }}>
-          <h2 className="text-white text-3xl font-bold leading-tight">
+          <h2 
+            className="text-white font-bold leading-tight"
+            style={{
+              fontSize: '28px',
+              fontFamily: 'Inter'
+            }}
+          >
             Where would you like
             <br />
             to have <span className="text-green-400 italic">DINNER?</span>

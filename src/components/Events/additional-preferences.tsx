@@ -101,7 +101,16 @@ export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferen
                     padding: '16px'
                   }}
                 >
-                  <span className="text-white text-lg font-medium">{option.name}</span>
+                  <span 
+                    style={{
+                      color: '#FFFFFF',
+                      fontFamily: 'Inter',
+                      fontSize: '18px',
+                      fontWeight: 500
+                    }}
+                  >
+                    {option.name}
+                  </span>
                   <div
                     className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                       relationshipStatus === option.id ? "border-green-400 bg-green-400" : "border-gray-400"
@@ -151,7 +160,16 @@ export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferen
                     padding: '16px'
                   }}
                 >
-                  <span className="text-white text-lg font-medium">{option.name}</span>
+                  <span 
+                    style={{
+                      color: '#FFFFFF',
+                      fontFamily: 'Inter',
+                      fontSize: '18px',
+                      fontWeight: 500
+                    }}
+                  >
+                    {option.name}
+                  </span>
                   <div
                     className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                       mealPreference === option.id ? "border-green-400 bg-green-400" : "border-gray-400"
@@ -211,6 +229,8 @@ export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferen
           borderRadius: '48px',
           background: canContinue ? '#1BEA7B' : '#666666',
           color: canContinue ? '#040404' : '#999999',
+          fontFamily: 'Inter',
+          fontSize: '18px',
           border: 'none',
           position: 'fixed',
           bottom: '16px',

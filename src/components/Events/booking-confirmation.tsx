@@ -144,7 +144,7 @@ export function BookingConfirmation({
                 style={{
                   color: '#FFF',
                   fontFamily: 'Inter',
-                  fontSize: '16px',
+                  fontSize: '17px',
                   fontStyle: 'normal',
                   fontWeight: 600,
                   lineHeight: '135%',
@@ -210,7 +210,7 @@ export function BookingConfirmation({
               style={{
                 color: '#FFF',
                 fontFamily: 'Inter',
-                fontSize: '16px',
+                fontSize: '17px',
                 fontStyle: 'normal',
                 fontWeight: 600,
                 lineHeight: '135%'
@@ -241,7 +241,7 @@ export function BookingConfirmation({
                 style={{
                   color: '#FFF',
                   fontFamily: 'Inter',
-                  fontSize: '16px',
+                  fontSize: '17px',
                   fontStyle: 'normal',
                   fontWeight: 600,
                   lineHeight: '135%'
@@ -313,7 +313,7 @@ export function BookingConfirmation({
             border: 'none',
             color: '#FFFFFF',
             fontFamily: 'Inter',
-            fontSize: '16px',
+            fontSize: '17px',
             fontStyle: 'normal',
             fontWeight: 500,
             lineHeight: '135%',
@@ -340,7 +340,7 @@ export function BookingConfirmation({
             border: 'none',
             color: '#040404',
             fontFamily: 'Inter',
-            fontSize: '16px',
+            fontSize: '17px',
             fontStyle: 'normal',
             fontWeight: 500,
             lineHeight: '135%',
