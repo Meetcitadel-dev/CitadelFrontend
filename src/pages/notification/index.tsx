@@ -153,10 +153,16 @@ export default function NotificationsScreen() {
           <h1 className="text-2xl font-bold mb-6">Notifications</h1>
         </div>
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
-          <div className="text-red-500 text-center mb-4">{error}</div>
+          <div 
+            className="text-red-500 text-center mb-4"
+            style={{ fontFamily: 'Inter' }}
+          >
+            {error}
+          </div>
           <button 
             onClick={retryLoadNotifications}
             className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm transition-colors"
+            style={{ fontFamily: 'Inter' }}
           >
             Try Again
           </button>
@@ -189,7 +195,10 @@ export default function NotificationsScreen() {
                 />
               ))
             ) : (
-              <div className="text-center py-8 text-gray-400">
+              <div 
+                className="text-center py-8 text-gray-400"
+                style={{ fontFamily: 'Inter' }}
+              >
                 No adjective notifications yet
               </div>
             )}
@@ -207,7 +216,10 @@ export default function NotificationsScreen() {
                 />
               ))
             ) : (
-              <div className="text-center py-8 text-gray-400">
+              <div 
+                className="text-center py-8 text-gray-400"
+                style={{ fontFamily: 'Inter' }}
+              >
                 No connection requests yet
               </div>
             )}
