@@ -2,7 +2,7 @@
 
 import { MapPin } from "lucide-react"
 import { useState } from "react"
-import WavyPattern from "@/assets/Group 190.png";
+import wavy1Svg from "@/assets/wavy1.svg";
 import { paymentService } from "@/lib/payment";
 
 interface BookingConfirmationProps {
@@ -290,8 +290,27 @@ export function BookingConfirmation({
       </div>
 
       {/* Wavy Pattern */}
-      <div className="relative h-32 overflow-hidden">
-        <img src={WavyPattern} alt="Wavy pattern" className="object-cover object-top w-full h-full absolute inset-0" />
+      <div 
+        style={{
+          position: 'absolute',
+          bottom: '104px',
+          left: 0,
+          right: 0,
+          height: '300px',
+          overflow: 'hidden',
+          zIndex: 5
+        }}
+      >
+        <img 
+          src={wavy1Svg} 
+          alt="Wavy pattern"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center'
+          }}
+        />
       </div>
 
       {/* Bottom Buttons */}
