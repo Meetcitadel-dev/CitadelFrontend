@@ -156,6 +156,7 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
             color: '#000',
             fontSize: '16px',
             fontWeight: '600',
+            fontFamily: 'Inter',
             border: 'none',
             background: 'transparent',
             cursor: 'pointer',
