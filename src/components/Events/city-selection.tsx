@@ -50,7 +50,13 @@ export function CitySelection({ onClose, onCitySelect }: CitySelectionProps) {
       {/* Content */}
       <div className="flex-1 px-6">
         <div className="text-center" style={{ marginTop: '30px' }}>
-          <h2 className="text-white text-4xl font-bold mb-2">
+          <h2 
+            className="text-white font-bold mb-2"
+            style={{
+              fontSize: '28px',
+              fontFamily: '"Roboto Serif"'
+            }}
+          >
             Select <span className="text-green-400 italic">CITY</span>
           </h2>
           <p 

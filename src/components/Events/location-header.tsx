@@ -21,7 +21,7 @@ export function LocationHeader({ city, venue }: LocationHeaderProps) {
         }}
       >
         <MapPin className="w-4 h-4" />
-        <span className="text-sm font-medium">{city}</span>
+        <span className="text-sm font-medium" style={{ fontFamily: 'Inter' }}>{city}</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="19" height="13" viewBox="0 0 19 13" fill="none">
           <path d="M0 4.43164H19V8.56799H0V4.43164Z" fill="#E6E7E8"/>
           <path d="M16.0312 0H2.96875C1.00136 0 0 1.45511 0 3.24999V4.4318H19V3.24999C19 1.45511 17.9986 0 16.0312 0Z" fill="#FF9933"/>

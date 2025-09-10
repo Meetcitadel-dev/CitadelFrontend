@@ -25,6 +25,7 @@ export function BookButton({ isEnabled, onClick }: BookButtonProps) {
         cursor: isEnabled ? 'pointer' : 'not-allowed',
         fontSize: '16px',
         fontWeight: '500',
+        fontFamily: 'Inter',
         transition: 'all 0.2s ease'
       }}
     >
