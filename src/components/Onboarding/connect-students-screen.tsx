@@ -228,25 +228,24 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
 
       
 
-      {/* Bottom Content */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <div className="absolute bottom-0 left-0 right-0 h-48 overflow-hidden" style={{ pointerEvents: 'none', bottom: '-20px' }}>
-          <svg
-            viewBox="0 0 400 180"
-            className="w-full h-full"
-            preserveAspectRatio="none"
-            style={{ transform: 'scale(1.2)', transformOrigin: '50% 100%' }}
-          >
-            {/* Multiple parallel wavy lines flowing horizontally - positioned lower and larger */}
-            <path d="M-50,80 Q50,70 150,80 T350,80 T550,80" stroke="#1bea7b" strokeWidth="8" fill="none" />
-            <path d="M-50,95 Q50,85 150,95 T350,95 T550,95" stroke="#1bea7b" strokeWidth="8" fill="none" />
-            <path d="M-50,110 Q50,100 150,110 T350,110 T550,110" stroke="#1bea7b" strokeWidth="8" fill="none" />
-            <path d="M-50,125 Q50,115 150,125 T350,125 T550,125" stroke="#1bea7b" strokeWidth="8" fill="none" />
-            <path d="M-50,140 Q50,130 150,140 T350,140 T550,140" stroke="#1bea7b" strokeWidth="8" fill="none" />
-            <path d="M-50,155 Q50,145 150,155 T350,155 T550,155" stroke="#1bea7b" strokeWidth="8" fill="none" />
-            <path d="M-50,170 Q50,160 150,170 T350,170 T550,170" stroke="#1bea7b" strokeWidth="8" fill="none" />
-          </svg>
-        </div>
+      {/* Wavy Pattern at Bottom */}
+      <div 
+        className="absolute bottom-0 left-0 w-full"
+        style={{ 
+          height: '150px',
+          overflow: 'hidden'
+        }}
+      >
+        <img 
+          src="/src/assets/wavy2.svg" 
+          alt="Wavy pattern"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'bottom'
+          }}
+        />
       </div>
     </div>
   )
