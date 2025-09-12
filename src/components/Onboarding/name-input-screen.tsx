@@ -44,7 +44,7 @@ export default function NameInputScreen({ value, gender: initialGender, onContin
       </div>
 
       {/* Title */}
-      <div style={{ padding: "0 16px", marginBottom: 24 }}>
+      <div style={{ padding: "0 16px", marginBottom: 24, marginTop: 30 }}>
         <h1
           style={{
             fontFamily: "'Roboto Serif', serif",

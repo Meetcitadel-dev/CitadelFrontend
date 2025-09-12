@@ -78,7 +78,7 @@ export default function LoginEmailScreen({ onContinue, onBack }: LoginEmailScree
       </div>
 
       {/* Title */}
-      <div style={{ padding: '0 16px', marginBottom: 24 }}>
+      <div style={{ padding: '0 16px', marginBottom: 24, marginTop: 30 }}>
         <h1 style={{ fontFamily: "'Roboto Serif', serif", fontWeight: 700, fontSize: 32, margin: 0, textAlign: 'left', letterSpacing: '-0.5px' }}>Login</h1>
       </div>
 
