@@ -195,8 +195,8 @@ export default function MobileProfileScreen() {
       `}</style>
       {/* Scrollable Content Container */}
       <div className="h-full overflow-y-auto pb-20 hide-scrollbar">
-        {/* Top Icons */}
-        <div className="absolute top-4 right-4 z-20 flex gap-3">
+        {/* Top Icons - Now scrolls with content */}
+        <div className="relative top-4 right-4 z-20 flex justify-end gap-3 mb-4">
           <button onClick={() => navigate("/settings")}>
             <Settings className="w-6 h-6 text-white" />
           </button>
