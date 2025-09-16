@@ -17,7 +17,7 @@ interface Message {
       // Current user's messages (right side, green)
       return (
         <div className="flex justify-end">
-          <div className="bg-green-600 text-white rounded-2xl rounded-br-md px-4 py-2 max-w-[80%]">
+          <div className="text-white rounded-2xl rounded-br-md px-4 py-2 max-w-[80%]" style={{ backgroundColor: '#133422' }}>
             <p className="text-sm">{message.text}</p>
           </div>
         </div>
@@ -32,7 +32,7 @@ interface Message {
           alt={message.senderName}
           className="w-8 h-8 rounded-full object-cover flex-shrink-0"
         />
-        <div className="bg-gray-800 text-white rounded-2xl rounded-bl-md px-4 py-2 max-w-[80%]">
+        <div className="text-white rounded-2xl rounded-bl-md px-4 py-2 max-w-[80%]" style={{ backgroundColor: '#1C1C1C' }}>
           <p className="text-sm">{message.text}</p>
         </div>
       </div>

@@ -759,8 +759,11 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
               <div className={`flex ${message.isSent ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-xs px-4 py-3 rounded-2xl ${
-                    message.isSent ? "bg-green-600 text-white ml-12" : "bg-gray-800 text-white mr-12"
+                    message.isSent ? "text-white ml-12" : "text-white mr-12"
                   }`}
+                  style={{
+                    backgroundColor: message.isSent ? '#133422' : '#1C1C1C'
+                  }}
                 >
                   <p className="text-sm">{message.text}</p>
                 </div>

@@ -96,10 +96,8 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
             senderId: data.message.senderId,
             senderName: data.message.senderName,
             senderAvatar: data.message.senderAvatar || "",
-            isCurrentUser: currentUserId ? data.message.senderId === currentUserId : false
+            isCurrentUser: currentUserId ? String(data.message.senderId) === String(currentUserId) : false
           }
-          
-          console.log('Adding new message from WebSocket:', data.message.id)
           return [...prev, newMsg]
         })
       }
@@ -157,7 +155,7 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
             senderId: msg.senderId,
             senderName: msg.senderName,
             senderAvatar: msg.senderAvatar || "",
-            isCurrentUser: currentUserId ? msg.senderId === currentUserId : false
+            isCurrentUser: currentUserId ? String(msg.senderId) === String(currentUserId) : false
           }))
           
           setMessages(convertedMessages)
