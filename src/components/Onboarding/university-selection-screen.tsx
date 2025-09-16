@@ -49,7 +49,7 @@ export default function UniversitySelectionScreen({ value, onContinue, onBack }:
   return (
     <div style={{ minHeight: '100vh', background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif" }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', padding: '0 0 0 8px', paddingTop: 35, height: 56 }}>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '0 0 0 24px', paddingTop: 35, height: 56 }}>
         <button 
           onClick={onBack}
           style={{ background: 'none', border: 'none', padding: 0, marginRight: 0 }}
@@ -61,7 +61,7 @@ export default function UniversitySelectionScreen({ value, onContinue, onBack }:
       </div>
 
       {/* Title */}
-      <div style={{ padding: '0 16px', marginBottom: 16, marginTop: 30 }}>
+      <div style={{ padding: '0 16px 0 24px', marginBottom: 16, marginTop: 28 }}>
         <h1 style={{ fontFamily: "'Roboto Serif', serif", fontWeight: 700, fontSize: 32, margin: 0, textAlign: 'left', letterSpacing: '-0.5px' }}>Your university</h1>
       </div>
 

@@ -32,7 +32,7 @@ export default function NameInputScreen({ value, gender: initialGender, onContin
       }}
     >
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", padding: "0 0 0 8px", paddingTop: 32, height: 56 }}>
+      <div style={{ display: "flex", alignItems: "center", padding: "0 0 0 24px", paddingTop: 35, height: 56 }}>
         <button 
           onClick={onBack}
           style={{ background: "none", border: "none", padding: 0, marginRight: 0 }}
@@ -44,7 +44,7 @@ export default function NameInputScreen({ value, gender: initialGender, onContin
       </div>
 
       {/* Title */}
-      <div style={{ padding: "0 16px", marginBottom: 16, marginTop: 30 }}>
+      <div style={{ padding: "0 16px 0 24px", marginBottom: 16, marginTop: 28 }}>
         <h1
           style={{
             fontFamily: "'Roboto Serif', serif",

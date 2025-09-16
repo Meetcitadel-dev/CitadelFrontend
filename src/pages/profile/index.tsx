@@ -203,7 +203,7 @@ export default function MobileProfileScreen() {
         </div>
 
         {/* Profile Image with Gradient Overlay and Info Block */}
-        <div className="relative h-[65vh] w-full">
+        <div className="relative w-full" style={{ height: '586px' }}>
           <img
             src={proxyImageUrl(profileImageUrl) || "/placeholder.svg"}
             alt="Profile"
@@ -224,22 +224,29 @@ export default function MobileProfileScreen() {
                   {/* Skills */}
                   <div className="flex items-center gap-2 mt-2">
                     <Briefcase className="w-4 h-4 text-white/80" />
-                    <span className="text-white/90 text-sm">
-                      {profile.skills && profile.skills.length > 0 ? profile.skills.join(', ') : '--'}
-                    </span>
+                  <span className="text-white/90" style={{ fontSize: '12px' }}>
+                    {profile.skills && profile.skills.length > 0 
+                      ? profile.skills.join(', ') 
+                      : 'No skills listed'
+                    }
+                  </span>
                   </div>
                   {/* Education */}
                   <div className="flex items-center gap-2 mt-1">
                     <GraduationCap className="w-4 h-4 text-white/80" />
-                    <span className="text-white/90 text-sm">
-                      {profile.university && profile.degree ? `${profile.university} • ${profile.degree}` : '--'}
-                    </span>
+                  <span className="text-white/90" style={{ fontSize: '12px' }}>
+                    {profile.university || 'Unknown University'} • {profile.degree || 'Unknown Degree'}
+                  </span>
                   </div>
                 </div>
                 {/* Year Badge */}
-                <div className="bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2">
-                  <div className="text-white/60 text-xs font-medium text-center">Year</div>
-                  <div className="text-white text-2xl font-bold text-center">{convertOrdinalToNumber(profile.year)}</div>
+                <div className="flex flex-col">
+                  <div className="px-4 flex items-center justify-center" style={{ width: '57px', height: '19px', backgroundColor: '#ffffff', borderRadius: '14px 14px 0 0' }}>
+                    <div className="text-black text-center" style={{ fontSize: '10px', fontFamily: 'Inter', fontWeight: '700' }}>Year</div>
+                  </div>
+                  <div className="px-4 flex items-center justify-center" style={{ width: '57px', height: '50px', borderRadius: '0 0 14px 14px', backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
+                    <div className="text-white text-center" style={{ fontSize: '36px', fontFamily: 'Inter', fontWeight: '800' }}>{convertOrdinalToNumber(profile.year) || '--'}</div>
+                  </div>
                 </div>
               </div>
             </div>
