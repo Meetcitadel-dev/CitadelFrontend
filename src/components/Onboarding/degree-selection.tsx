@@ -124,7 +124,8 @@ export default function DegreeSelection({ value, onContinue, onBack }: { value?:
                 <button
                   key={year}
                   style={{
-                    padding: '10px 18px',
+                    width: 52,
+                    height: 44,
                     borderRadius: 12,
                     fontWeight: 600,
                     fontSize: 13,
@@ -133,6 +134,9 @@ export default function DegreeSelection({ value, onContinue, onBack }: { value?:
                     border: 'none',
                     cursor: 'pointer',
                     transition: 'background 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                   onClick={() => handleYearSelect(year)}
                 >
