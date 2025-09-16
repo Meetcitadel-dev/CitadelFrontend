@@ -153,9 +153,16 @@ class ChatSocketService {
       timestamp: string;
     };
   }) => void) {
-    if (!this.socket) return;
+    if (!this.socket) {
+      console.error('Socket not available for group message listener');
+      return;
+    }
     
-    this.socket.on('group-message', callback);
+    console.log('Setting up group-message listener');
+    this.socket.on('group-message', (data) => {
+      console.log('Received group-message event:', data);
+      callback(data);
+    });
   }
 
   // Listen for member joined group
@@ -212,7 +219,10 @@ class ChatSocketService {
 
   // Join a group room
   joinGroup(groupId: string) {
-    if (!this.socket) return;
+    if (!this.socket) {
+      console.error('Socket not available for joining group');
+      return;
+    }
     
     console.log('Joining group room:', groupId);
     this.socket.emit('join-group', { groupId });
@@ -228,9 +238,12 @@ class ChatSocketService {
 
   // Send a group message
   sendGroupMessage(groupId: string, message: string) {
-    if (!this.socket) return;
+    if (!this.socket) {
+      console.error('Socket not available for sending group message');
+      return;
+    }
     
-    console.log('Sending group message:', { groupId, message });
+    console.log('Sending group message via WebSocket:', { groupId, message });
     this.socket.emit('send-group-message', {
       groupId,
       content: message

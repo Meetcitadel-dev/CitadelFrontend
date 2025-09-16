@@ -62,11 +62,32 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
 
   // Connect to WebSocket and join group room
   useEffect(() => {
+    console.log('Group Chat: Setting up WebSocket for group:', groupId)
+    
     // Connect to WebSocket if not already connected
     chatSocketService.connect()
 
-    // Join the group room
-    chatSocketService.joinGroup(groupId)
+    // Wait a bit for connection to establish, then join the group room
+    const joinGroupWithDelay = () => {
+      setTimeout(() => {
+        chatSocketService.joinGroup(groupId)
+      }, 100)
+    }
+    
+    joinGroupWithDelay()
+
+    // Cleanup function
+    return () => {
+      console.log('Group Chat: Cleaning up WebSocket listeners')
+      chatSocketService.off('group-message')
+      chatSocketService.off('group-updated')
+      chatSocketService.leaveGroup(groupId)
+    }
+  }, [groupId])
+
+  // Set up event listeners (separate useEffect to avoid re-registering on currentUserId changes)
+  useEffect(() => {
+    if (!currentUserId) return
 
     // Listen for new group messages
     const handleGroupMessage = (data: {
@@ -80,7 +101,9 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
         timestamp: string;
       };
     }) => {
+      console.log('Group Chat: Received group message event:', data)
       if (data.groupId === groupId) {
+        console.log('Group Chat: Processing message for current group')
         // Check if this message is already in the list to prevent duplicates
         setMessages(prev => {
           const messageExists = prev.some(msg => msg.id === data.message.id)
@@ -96,10 +119,13 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
             senderId: data.message.senderId,
             senderName: data.message.senderName,
             senderAvatar: data.message.senderAvatar || "",
-            isCurrentUser: currentUserId ? String(data.message.senderId) === String(currentUserId) : false
+            isCurrentUser: String(data.message.senderId) === String(currentUserId)
           }
+          console.log('Group Chat: Adding new message to state:', newMsg)
           return [...prev, newMsg]
         })
+      } else {
+        console.log('Group Chat: Message not for current group, ignoring')
       }
     }
 
@@ -121,14 +147,15 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
     }
 
     // Set up event listeners
+    console.log('Group Chat: Setting up event listeners')
     chatSocketService.onGroupMessage(handleGroupMessage)
     chatSocketService.onGroupUpdated(handleGroupUpdated)
 
     // Cleanup function
     return () => {
+      console.log('Group Chat: Cleaning up event listeners')
       chatSocketService.off('group-message')
       chatSocketService.off('group-updated')
-      chatSocketService.leaveGroup(groupId)
     }
   }, [groupId, currentUserId])
 
@@ -206,6 +233,7 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
         setSending(true)
         
         // Send message via WebSocket for real-time delivery
+        console.log('Group Chat: Sending message via WebSocket')
         chatSocketService.sendGroupMessage(groupId, newMessage.trim())
         
         // Also send via REST API for persistence
