@@ -19,6 +19,8 @@ interface ActiveChatsProps {
   setActiveTab: (tab: "active" | "matches") => void
   onChatSelect: (chatId: string, isGroup?: boolean) => void
   onPlusClick?: () => void
+  // Provide a way for parent to receive a function to update unread counts locally
+  onUnreadCountUpdate?: (fn: (chatId: string, unreadCount: number, isGroup: boolean) => void) => void
 }
 
 interface Conversation {
@@ -43,7 +45,7 @@ interface ChatItem {
   isOnline?: boolean;
 }
 
-export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onPlusClick }: ActiveChatsProps) {
+export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onPlusClick, onUnreadCountUpdate }: ActiveChatsProps) {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [groupChats, setGroupChats] = useState<GroupChat[]>([])
   const [loading, setLoading] = useState(true)
@@ -101,7 +103,30 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onP
     }
 
     fetchData()
-  }, [])
+  }, []) // Remove refreshTrigger dependency
+
+  // Function to update unread count locally (WhatsApp-style)
+  const updateUnreadCount = (chatId: string, unreadCount: number, isGroup: boolean) => {
+    if (isGroup) {
+      setGroupChats(prev => prev.map(group => 
+        group.id === chatId ? { ...group, unreadCount } : group
+      ))
+    } else {
+      setConversations(prev => prev.map(conv => 
+        conv.id === chatId ? { ...conv, unreadCount } : conv
+      ))
+    }
+  }
+
+  // Expose the update function to parent component (parent should store it as a value)
+  useEffect(() => {
+    if (onUnreadCountUpdate) {
+      // Pass a stable wrapper; no dependencies so it won't change every render
+      onUnreadCountUpdate((chatId, unreadCount, isGroup) => {
+        updateUnreadCount(chatId, unreadCount, isGroup)
+      })
+    }
+  }, [onUnreadCountUpdate])
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp)

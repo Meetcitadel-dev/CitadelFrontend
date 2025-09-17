@@ -19,6 +19,7 @@ interface GroupChatScreenProps {
   groupAvatar?: string
   memberCount: number
   onHeaderClick?: () => void // New prop for header click navigation
+  onUnreadCountChange?: () => void // New prop to notify parent of unread count changes
 }
 
 interface Message {
@@ -31,7 +32,7 @@ interface Message {
   isCurrentUser: boolean
 }
 
-export default function GroupChatScreen({ onBack, groupId, groupName, groupAvatar, memberCount, onHeaderClick }: GroupChatScreenProps) {
+export default function GroupChatScreen({ onBack, groupId, groupName, groupAvatar, memberCount, onHeaderClick, onUnreadCountChange }: GroupChatScreenProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
   const [showOptionsMenu, setShowOptionsMenu] = useState(false)
@@ -62,26 +63,38 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
 
   // Connect to WebSocket and join group room
   useEffect(() => {
-    console.log('Group Chat: Setting up WebSocket for group:', groupId)
     
-    // Connect to WebSocket if not already connected
-    chatSocketService.connect()
-
-    // Wait a bit for connection to establish, then join the group room
-    const joinGroupWithDelay = () => {
-      setTimeout(() => {
-        chatSocketService.joinGroup(groupId)
-      }, 100)
-    }
     
-    joinGroupWithDelay()
+    // Don't connect here - connection is managed by parent component
+    // Just join the group room
+    chatSocketService.joinGroup(groupId)
 
     // Cleanup function
     return () => {
-      console.log('Group Chat: Cleaning up WebSocket listeners')
+      
       chatSocketService.off('group-message')
       chatSocketService.off('group-updated')
       chatSocketService.leaveGroup(groupId)
+      
+      // Mark messages as read when leaving the chat
+      const markAsReadOnExit = async () => {
+        try {
+          const token = getAuthToken()
+          if (token) {
+            await markGroupMessagesAsRead(groupId, token)
+            
+            
+            // Notify parent component of unread count change
+            if (onUnreadCountChange) {
+              onUnreadCountChange()
+            }
+          }
+        } catch (error) {
+          console.error('Error marking messages as read on exit:', error)
+        }
+      }
+      
+      markAsReadOnExit()
     }
   }, [groupId])
 
@@ -101,16 +114,19 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
         timestamp: string;
       };
     }) => {
-      console.log('Group Chat: Received group message event:', data)
+      
       if (data.groupId === groupId) {
-        console.log('Group Chat: Processing message for current group')
+        
         // Check if this message is already in the list to prevent duplicates
         setMessages(prev => {
           const messageExists = prev.some(msg => msg.id === data.message.id)
           if (messageExists) {
-            console.log('Message already exists, skipping duplicate:', data.message.id)
+            
             return prev
           }
+
+          // Determine if message belongs to current user
+          const isActuallyCurrentUser = String(data.message.senderId) === String(currentUserId)
 
           const newMsg: Message = {
             id: data.message.id,
@@ -119,13 +135,20 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
             senderId: data.message.senderId,
             senderName: data.message.senderName,
             senderAvatar: data.message.senderAvatar || "",
-            isCurrentUser: String(data.message.senderId) === String(currentUserId)
+            isCurrentUser: isActuallyCurrentUser
           }
-          console.log('Group Chat: Adding new message to state:', newMsg)
+          
+          
+          // Notify parent component of unread count change if message is from another user
+          if (!newMsg.isCurrentUser && onUnreadCountChange) {
+            
+            onUnreadCountChange()
+          }
+          
           return [...prev, newMsg]
         })
       } else {
-        console.log('Group Chat: Message not for current group, ignoring')
+        
       }
     }
 
@@ -142,20 +165,34 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
     }) => {
       if (data.groupId === groupId) {
         // You can update group info here if needed
-        console.log('Group updated:', data.group)
+        
+      }
+    }
+
+    // Listen for unread count updates
+    const handleUnreadCountUpdate = (data: {
+      groupId?: string;
+      conversationId?: string;
+      unreadCount: number;
+    }) => {
+      if (data.groupId === groupId && onUnreadCountChange) {
+        
+        onUnreadCountChange()
       }
     }
 
     // Set up event listeners
-    console.log('Group Chat: Setting up event listeners')
+    
     chatSocketService.onGroupMessage(handleGroupMessage)
     chatSocketService.onGroupUpdated(handleGroupUpdated)
+    chatSocketService.onUnreadCountUpdate(handleUnreadCountUpdate)
 
     // Cleanup function
     return () => {
-      console.log('Group Chat: Cleaning up event listeners')
+      
       chatSocketService.off('group-message')
       chatSocketService.off('group-updated')
+      chatSocketService.off('unread-count-update')
     }
   }, [groupId, currentUserId])
 
@@ -189,6 +226,11 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
           
           // Mark messages as read
           await markGroupMessagesAsRead(groupId, token)
+          
+          // Notify parent component of unread count change
+          if (onUnreadCountChange) {
+            onUnreadCountChange()
+          }
         } else {
           setError('Failed to load messages')
         }
@@ -233,7 +275,7 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
         setSending(true)
         
         // Send message via WebSocket for real-time delivery
-        console.log('Group Chat: Sending message via WebSocket')
+        
         chatSocketService.sendGroupMessage(groupId, newMessage.trim())
         
         // Also send via REST API for persistence
@@ -264,11 +306,11 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
             // Check if message already exists (from WebSocket)
             const messageExists = prev.some(msg => msg.id === response.message.id)
             if (messageExists) {
-              console.log('Message already exists from WebSocket, skipping REST API duplicate:', response.message.id)
+              
               return prev
             }
             
-            console.log('Adding new message from REST API:', response.message.id)
+            
             return [...prev, newMsg]
           })
           

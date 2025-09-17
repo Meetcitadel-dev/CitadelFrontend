@@ -67,11 +67,6 @@ enum MatchCase {
 }
 
 export default function ChatConversation({ onBack, conversationId, userId, isFromMatches = false, isGroupChat = false, onHeaderClick }: ChatConversationProps) {
-  console.log('🚀 ChatConversation rendered with props:', {
-    conversationId,
-    userId,
-    isFromMatches
-  })
   const [messages, setMessages] = useState<Message[]>([])
   const [conversationInfo, setConversationInfo] = useState<ConversationInfo | null>(null)
   const [inputValue, setInputValue] = useState("")

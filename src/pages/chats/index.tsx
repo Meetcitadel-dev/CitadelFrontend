@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useSearchParams } from "react-router-dom"
 import ActiveChats from "../../components/Chats/ActiveChats"
 import MatchesChats from "../../components/Chats/MatchesChats"
@@ -10,7 +10,7 @@ import EditGroupScreen from "../../components/Chats/GroupChats/edit-group-screen
 import Navbar from "../../components/Common/navbar"
 import { Search, Calendar, MessageCircle, Bell, User, ArrowLeft } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { getConversationByUserId, fetchGroupChat } from "@/lib/api"
+import { getConversationByUserId, fetchGroupChat, getCurrentUserProfile } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
 import { chatSocketService } from "@/lib/socket"
 import type { GroupChat } from "@/types"
@@ -23,6 +23,13 @@ export default function ChatApp() {
   const [showGroupChat, setShowGroupChat] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<GroupChat | null>(null)
   const [showEditGroup, setShowEditGroup] = useState(false)
+  const [updateUnreadCount, setUpdateUnreadCount] = useState<((chatId: string, unreadCount: number, isGroup: boolean) => void) | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+
+  // Stable callback to prevent infinite re-renders
+  const handleUnreadCountUpdate = useCallback((fn: (chatId: string, unreadCount: number, isGroup: boolean) => void) => {
+    setUpdateUnreadCount(() => fn)
+  }, [])
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -35,15 +42,56 @@ export default function ChatApp() {
     { icon: User, label: "Profile", onClick: () => navigate("/profile"), active: location.pathname === "/profile" },
   ];
 
-  // Initialize WebSocket connection when component mounts
+  // Get current user and join user room for global notifications
   useEffect(() => {
-    chatSocketService.connect()
+    const getCurrentUser = async () => {
+      try {
+        const token = getAuthToken()
+        if (!token) return
+
+        const response = await getCurrentUserProfile(token)
+        if (response.success && response.data) {
+          setCurrentUserId(String(response.data.id))
+        }
+      } catch (error) {
+        console.error('Error fetching current user:', error)
+      }
+    }
+
+    getCurrentUser()
+  }, [])
+
+  // Initialize WebSocket connection and join user room
+  useEffect(() => {
+    // Only connect if not already connected
+    if (!chatSocketService.getConnectionStatus()) {
+      chatSocketService.connect()
+    }
+    
+    // Join user room for global notifications
+    if (currentUserId) {
+      chatSocketService.joinUserRoom(currentUserId)
+    }
+    
+    // Listen for unread count updates (WhatsApp-style real-time updates)
+    const handleUnreadCountUpdate = (data: {
+      chatId: string;
+      unreadCount: number;
+      isGroup: boolean;
+    }) => {
+      if (updateUnreadCount) {
+        updateUnreadCount(data.chatId, data.unreadCount, data.isGroup)
+      }
+    }
+    
+    chatSocketService.onUnreadCountUpdate(handleUnreadCountUpdate)
     
     // Cleanup on unmount
     return () => {
-      chatSocketService.disconnect()
+      chatSocketService.off('unread-count-update')
+      // Don't disconnect here - let the socket service manage its own lifecycle
     }
-  }, [])
+  }, [updateUnreadCount, currentUserId])
 
   // Handle URL parameters for direct chat access
   useEffect(() => {
@@ -80,7 +128,7 @@ export default function ChatApp() {
   const handleGroupCreated = (groupId: string) => {
     // Group was created successfully, you can optionally refresh the chat list
     // or navigate to the group chat
-    console.log('Group created:', groupId);
+    
   };
 
   const handleChatSelect = async (chatId: string, isGroup?: boolean) => {
@@ -144,7 +192,7 @@ export default function ChatApp() {
           groupId={selectedChat!}
           onGroupUpdated={() => {
             // Optionally refresh the group data
-            console.log('Group updated');
+            
           }}
         />
       );
@@ -159,6 +207,12 @@ export default function ChatApp() {
           groupAvatar={selectedGroup.avatar || ""}
           memberCount={selectedGroup.memberCount}
           onHeaderClick={() => setShowEditGroup(true)}
+          onUnreadCountChange={() => {
+            // Update unread count locally (WhatsApp-style)
+            if (updateUnreadCount && selectedChat) {
+              updateUnreadCount(selectedChat, 0, true) // Set to 0 when entering chat
+            }
+          }}
         />
       );
     }
@@ -200,6 +254,7 @@ export default function ChatApp() {
           setActiveTab={setActiveTab} 
           onChatSelect={handleChatSelect}
           onPlusClick={handlePlusClick}
+          onUnreadCountUpdate={handleUnreadCountUpdate}
         />
       ) : (
         <MatchesChats

@@ -27,13 +27,13 @@ class ChatSocketService {
     });
 
     this.socket.on('connect', () => {
-      console.log('WebSocket connected successfully');
+      
       this.isConnected = true;
       this.reconnectAttempts = 0;
     });
 
     this.socket.on('disconnect', (reason) => {
-      console.log('WebSocket disconnected:', reason);
+      
       this.isConnected = false;
       
       if (reason === 'io server disconnect') {
@@ -158,9 +158,9 @@ class ChatSocketService {
       return;
     }
     
-    console.log('Setting up group-message listener');
+    
     this.socket.on('group-message', (data) => {
-      console.log('Received group-message event:', data);
+      
       callback(data);
     });
   }
@@ -205,6 +205,17 @@ class ChatSocketService {
     this.socket.on('group-updated', callback);
   }
 
+  // Listen for unread count updates
+  onUnreadCountUpdate(callback: (data: {
+    groupId?: string;
+    conversationId?: string;
+    unreadCount: number;
+  }) => void) {
+    if (!this.socket) return;
+    
+    this.socket.on('unread-count-update', callback);
+  }
+
   // Listen for typing indicators in groups
   onGroupTyping(callback: (data: {
     groupId: string;
@@ -224,7 +235,7 @@ class ChatSocketService {
       return;
     }
     
-    console.log('Joining group room:', groupId);
+    
     this.socket.emit('join-group', { groupId });
   }
 
@@ -232,7 +243,7 @@ class ChatSocketService {
   leaveGroup(groupId: string) {
     if (!this.socket) return;
     
-    console.log('Leaving group room:', groupId);
+    
     this.socket.emit('leave-group', { groupId });
   }
 
@@ -243,7 +254,7 @@ class ChatSocketService {
       return;
     }
     
-    console.log('Sending group message via WebSocket:', { groupId, message });
+    
     this.socket.emit('send-group-message', {
       groupId,
       content: message
@@ -265,6 +276,13 @@ class ChatSocketService {
     if (!this.socket) return;
     
     this.socket.emit('mark-group-read', { groupId });
+  }
+
+  // Join user-specific room for global notifications
+  joinUserRoom(userId: string) {
+    if (!this.socket) return;
+    
+    this.socket.emit('join-user-room', { userId });
   }
 
   // Remove event listeners
