@@ -102,9 +102,24 @@ export default function UserProfileScreen() {
             id: profileData.id,
             name: profileData.name,
             email: profileData.email,
-            university: profileData.university?.name || '',
-            degree: profileData.degree || '',
-            year: profileData.year || '',
+            // Fallbacks for institute/college name
+            university: profileData.university?.name 
+              || profileData.universityName 
+              || profileData.college 
+              || profileData.institute 
+              || profileData.instituteName 
+              || '',
+            // Fallbacks for branch/degree
+            degree: profileData.degree 
+              || profileData.branch 
+              || profileData.course 
+              || profileData.department 
+              || '',
+            // Fallbacks for year
+            year: profileData.year 
+              || profileData.yearOfStudy 
+              || profileData.graduationYear 
+              || '',
             skills: profileData.skills || [],
             aboutMe: profileData.aboutMe,
             sports: profileData.sports,
@@ -299,7 +314,7 @@ export default function UserProfileScreen() {
                   <div className="flex items-center gap-2 mt-1">
                     <GraduationCap className="w-4 h-4 text-white/80" />
                   <span className="text-white/90" style={{ fontSize: '12px' }}>
-                      {userProfile.university && userProfile.degree ? `${userProfile.university} • ${userProfile.degree}` : '--'}
+                      {userProfile.university || 'Unknown University'} • {userProfile.degree || 'Unknown Degree'}
                     </span>
                   </div>
                 </div>
