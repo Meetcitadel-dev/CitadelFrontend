@@ -352,7 +352,7 @@ export default function UserProfileScreen() {
               disabled={userProfile.connectionStatus !== 'connected'}
             >
               <span className="text-base font-semibold">
-                {userProfile.connectionStatus === 'connected' ? 'Message' : 'Connect to Message'}
+                Message
               </span>
             </button>
 
