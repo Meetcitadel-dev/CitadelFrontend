@@ -239,7 +239,7 @@ export default function UserProfileScreen() {
         </div>
 
         {/* Profile Image with Gradient Overlay and Info Block */}
-        <div className="relative h-[65vh] w-full">
+        <div className="relative w-full" style={{ height: '586px' }}>
           <img
             src={profileImageUrl || "/placeholder.svg"}
             alt="Profile"
@@ -270,7 +270,15 @@ export default function UserProfileScreen() {
                 {userProfile.connectionStatus === 'not_connected' && (
                   <button 
                     onClick={() => handleConnectionAction('connect')}
-                    className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold inline-block hover:bg-blue-600"
+                    className="bg-transparent text-white inline-block hover:bg-white/10"
+                    style={{ 
+                      width: '90px', 
+                      height: '25px', 
+                      borderRadius: '5px', 
+                      fontSize: '12px', 
+                      fontWeight: '600',
+                      border: '2px solid #ffffff'
+                    }}
                   >
                     Connect
                   </button>
@@ -283,23 +291,27 @@ export default function UserProfileScreen() {
                   {/* Skills */}
                   <div className="flex items-center gap-2 mt-2">
                     <Briefcase className="w-4 h-4 text-white/80" />
-                    <span className="text-white/90 text-sm">
+                  <span className="text-white/90" style={{ fontSize: '12px' }}>
                       {userProfile.skills && userProfile.skills.length > 0 ? userProfile.skills.join(', ') : '--'}
                     </span>
                   </div>
                   {/* Education */}
                   <div className="flex items-center gap-2 mt-1">
                     <GraduationCap className="w-4 h-4 text-white/80" />
-                    <span className="text-white/90 text-sm">
+                  <span className="text-white/90" style={{ fontSize: '12px' }}>
                       {userProfile.university && userProfile.degree ? `${userProfile.university} • ${userProfile.degree}` : '--'}
                     </span>
                   </div>
                 </div>
-                {/* Year Badge */}
-                <div className="bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2">
-                  <div className="text-white/60 text-xs font-medium text-center">Year</div>
-                  <div className="text-white text-2xl font-bold text-center">{convertOrdinalToNumber(userProfile.year) || '--'}</div>
+              {/* Year Badge - match Explore style */}
+              <div className="flex flex-col">
+                <div className="px-4 flex items-center justify-center" style={{ width: '57px', height: '19px', backgroundColor: '#ffffff', borderRadius: '14px 14px 0 0' }}>
+                  <div className="text-black text-center" style={{ fontSize: '10px', fontFamily: 'Inter', fontWeight: '700' }}>Year</div>
                 </div>
+                <div className="px-4 flex items-center justify-center" style={{ width: '57px', height: '50px', borderRadius: '0 0 14px 14px', backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
+                  <div className="text-white text-center" style={{ fontSize: '36px', fontFamily: 'Inter', fontWeight: '800' }}>{convertOrdinalToNumber(userProfile.year) || '--'}</div>
+                </div>
+              </div>
               </div>
             </div>
           </div>
