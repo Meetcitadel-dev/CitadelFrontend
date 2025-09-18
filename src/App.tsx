@@ -8,9 +8,47 @@ import ChatApp from "./pages/chats";
 import SettingsPage from "./pages/settings";
 import EventsPage from "./pages/events";
 import UserProfilePage from "./pages/profile";
+import { useEffect } from "react";
+import { getAuthToken, prefetchImages } from "@/lib/utils";
+import { fetchExploreProfiles, getCurrentUserProfile } from "@/lib/api";
 import UserProfileScreen from "./pages/user-profile";
 
 export default function App() {
+  useEffect(() => {
+    const warmImages = async () => {
+      try {
+        const token = getAuthToken()
+        if (!token) return
+
+        const urls: string[] = []
+
+        // Current user's hero and gallery images
+        const profileRes = await getCurrentUserProfile(token)
+        if (profileRes?.success && profileRes.data?.images) {
+          const imgs = profileRes.data.images
+          const hero = imgs[0]?.cloudfrontUrl
+          if (hero) urls.push(hero)
+          imgs.slice(1, 5).forEach((img: any) => img?.cloudfrontUrl && urls.push(img.cloudfrontUrl))
+        }
+
+        // Initial explore profiles (first page)
+        const exploreRes = await fetchExploreProfiles({ limit: 10, offset: 0, token })
+        if (exploreRes?.success && Array.isArray(exploreRes.profiles)) {
+          exploreRes.profiles.slice(0, 8).forEach((p: any) => {
+            if (p?.profileImage) urls.push(p.profileImage)
+          })
+        }
+
+        prefetchImages(Array.from(new Set(urls)))
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    // warm shortly after boot
+    const t = setTimeout(warmImages, 50)
+    return () => clearTimeout(t)
+  }, [])
   return (
     <BrowserRouter>
       <Routes>

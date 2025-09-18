@@ -99,3 +99,13 @@ export function debounce<T extends (...args: any[]) => any>(
     timeout = setTimeout(() => func(...args), wait);
   };
 }
+
+export function prefetchImages(urls: string[]): void {
+  if (!Array.isArray(urls) || urls.length === 0) return
+  urls.forEach((url) => {
+    if (typeof url === 'string' && url) {
+      const img = new Image()
+      img.src = url
+    }
+  })
+}

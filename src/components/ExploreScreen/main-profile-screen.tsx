@@ -386,6 +386,17 @@ export default function MobileProfileScreen() {
     }
   }
 
+  // Prefetch next profile images to make swipes instant (must be before any conditional returns)
+  useEffect(() => {
+    const preloadCount = 3
+    const urls: string[] = []
+    for (let i = 1; i <= preloadCount; i++) {
+      const next = profiles[currentProfileIndex + i]
+      if (next && next.profileImage) urls.push(next.profileImage)
+    }
+    urls.forEach((u) => { const img = new Image(); img.src = u })
+  }, [currentProfileIndex, profiles])
+
   if (loading && profiles.length === 0) {
     return (
       <div className="relative w-full h-screen bg-black flex items-center justify-center">
@@ -424,17 +435,6 @@ export default function MobileProfileScreen() {
   const currentProfile = profiles[currentProfileIndex]
   const connectionStatus = currentProfile.connectionState?.status || 'not_connected'
  
-  // Prefetch next profile images to make swipes instant
-  useEffect(() => {
-    const preloadCount = 3
-    const urls: string[] = []
-    for (let i = 1; i <= preloadCount; i++) {
-      const next = profiles[currentProfileIndex + i]
-      if (next && next.profileImage) urls.push(next.profileImage)
-    }
-    urls.forEach((u) => { const img = new Image(); img.src = u })
-  }, [currentProfileIndex, profiles])
-
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
       {/* Top Icons */}
