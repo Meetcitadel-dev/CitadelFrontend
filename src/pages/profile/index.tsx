@@ -167,20 +167,7 @@ export default function MobileProfileScreen() {
   // Get gallery images (user's uploaded images or defaults)
   const galleryImages = profile.uploadedImages || [ForestProfile, Realisticprofile, Oceanprofile, Buildingprofile]
 
-  // Function to proxy S3 URLs to bypass CORS (for development)
-  const proxyImageUrl = (url: string) => {
-    if (url && url.includes('meetcitadel.s3.ap-south-1.amazonaws.com')) {
-      // Use a CORS proxy for development - try multiple options
-      try {
-        // Option 1: Use a public CORS proxy
-        return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
-      } catch (error) {
-        // Option 2: Fallback to direct URL (might work if CORS is fixed)
-        return url
-      }
-    }
-    return url
-  }
+  // Removed CORS proxy indirection; images load directly from CDN
 
   console.log('Render - Profile image URL:', profileImageUrl)
   console.log('Render - Gallery images:', galleryImages)
@@ -195,19 +182,20 @@ export default function MobileProfileScreen() {
       `}</style>
       {/* Scrollable Content Container */}
       <div className="h-full overflow-y-auto pb-20 hide-scrollbar">
-        {/* Top Icons - Now scrolls with content */}
-        <div className="relative top-4 right-4 z-20 flex justify-end gap-3 mb-4">
-          <button onClick={() => navigate("/settings")}>
-            <Settings className="w-6 h-6 text-white" />
-          </button>
-        </div>
-
         {/* Profile Image with Gradient Overlay and Info Block */}
         <div className="relative w-full" style={{ height: '586px' }}>
+          {/* Settings Icon - overlay, does not affect layout */}
+          <div className="absolute top-4 right-4 z-20">
+            <button onClick={() => navigate("/settings")}> 
+              <Settings className="w-6 h-6 text-white" />
+            </button>
+          </div>
           <img
-            src={proxyImageUrl(profileImageUrl) || "/placeholder.svg"}
+            src={profileImageUrl || "/placeholder.svg"}
             alt="Profile"
             className="object-cover absolute inset-0 w-full h-full"
+            fetchPriority="high"
+            decoding="async"
             onLoad={() => console.log('Profile image loaded successfully:', profileImageUrl)}
             onError={(e) => console.error('Profile image failed to load:', profileImageUrl, e)}
           />
@@ -303,9 +291,10 @@ export default function MobileProfileScreen() {
           {/* Photo Gallery Section */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <img
-              src={proxyImageUrl(galleryImages[0]) || ForestProfile}
+              src={galleryImages[0] || ForestProfile}
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
+              loading="lazy"
               onLoad={() => console.log('Gallery image 1 loaded:', galleryImages[0])}
               onError={(e) => console.error('Gallery image 1 failed to load:', galleryImages[0], e)}
             />
@@ -318,9 +307,10 @@ export default function MobileProfileScreen() {
           {/* Photo Gallery Section */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <img
-              src={proxyImageUrl(galleryImages[1]) || Realisticprofile}
+              src={galleryImages[1] || Realisticprofile}
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
+              loading="lazy"
               onLoad={() => console.log('Gallery image 2 loaded:', galleryImages[1])}
               onError={(e) => console.error('Gallery image 2 failed to load:', galleryImages[1], e)}
             />
@@ -332,9 +322,10 @@ export default function MobileProfileScreen() {
 
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <img
-              src={proxyImageUrl(galleryImages[2]) || Oceanprofile}
+              src={galleryImages[2] || Oceanprofile}
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
+              loading="lazy"
               onLoad={() => console.log('Gallery image 3 loaded:', galleryImages[2])}
               onError={(e) => console.error('Gallery image 3 failed to load:', galleryImages[2], e)}
             />
@@ -347,9 +338,10 @@ export default function MobileProfileScreen() {
 
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <img
-              src={proxyImageUrl(galleryImages[3]) || Buildingprofile}
+              src={galleryImages[3] || Buildingprofile}
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
+              loading="lazy"
               onLoad={() => console.log('Gallery image 4 loaded:', galleryImages[3])}
               onError={(e) => console.error('Gallery image 4 failed to load:', galleryImages[3], e)}
             />

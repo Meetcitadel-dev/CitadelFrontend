@@ -33,6 +33,8 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
               width={200}
               height={240}
               className="w-full h-60 object-cover"
+              loading="lazy"
+              decoding="async"
             />
             <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1">
               <span className="text-white text-sm font-medium">{profile.year}</span>

@@ -220,17 +220,7 @@ export default function UserProfileScreen() {
   // Get gallery images (user's uploaded images or defaults)
   const galleryImages = userProfile.uploadedImages || [ForestProfile, Realisticprofile, Oceanprofile, Buildingprofile]
 
-  // Function to proxy S3 URLs to bypass CORS (for development)
-  const proxyImageUrl = (url: string) => {
-    if (url && url.includes('meetcitadel.s3.ap-south-1.amazonaws.com')) {
-      try {
-        return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
-      } catch (error) {
-        return url
-      }
-    }
-    return url
-  }
+  // Removed CORS proxy indirection; images load directly from CDN
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
@@ -251,9 +241,11 @@ export default function UserProfileScreen() {
         {/* Profile Image with Gradient Overlay and Info Block */}
         <div className="relative h-[65vh] w-full">
           <img
-            src={proxyImageUrl(profileImageUrl) || "/placeholder.svg"}
+            src={profileImageUrl || "/placeholder.svg"}
             alt="Profile"
             className="object-cover absolute inset-0 w-full h-full"
+            fetchPriority="high"
+            decoding="async"
             onLoad={() => console.log('Profile image loaded successfully:', profileImageUrl)}
             onError={(e) => console.error('Profile image failed to load:', profileImageUrl, e)}
           />
@@ -379,9 +371,10 @@ export default function UserProfileScreen() {
           {/* Photo Gallery Section */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <img
-              src={proxyImageUrl(galleryImages[0]) || ForestProfile}
+              src={galleryImages[0] || ForestProfile}
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
+              loading="lazy"
               onLoad={() => console.log('Gallery image 1 loaded:', galleryImages[0])}
               onError={(e) => console.error('Gallery image 1 failed to load:', galleryImages[0], e)}
             />
@@ -394,9 +387,10 @@ export default function UserProfileScreen() {
           {/* Photo Gallery Section */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <img
-              src={proxyImageUrl(galleryImages[1]) || Realisticprofile}
+              src={galleryImages[1] || Realisticprofile}
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
+              loading="lazy"
               onLoad={() => console.log('Gallery image 2 loaded:', galleryImages[1])}
               onError={(e) => console.error('Gallery image 2 failed to load:', galleryImages[1], e)}
             />
@@ -408,9 +402,10 @@ export default function UserProfileScreen() {
 
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <img
-              src={proxyImageUrl(galleryImages[2]) || Oceanprofile}
+              src={galleryImages[2] || Oceanprofile}
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
+              loading="lazy"
               onLoad={() => console.log('Gallery image 3 loaded:', galleryImages[2])}
               onError={(e) => console.error('Gallery image 3 failed to load:', galleryImages[2], e)}
             />
@@ -423,9 +418,10 @@ export default function UserProfileScreen() {
 
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <img
-              src={proxyImageUrl(galleryImages[3]) || Buildingprofile}
+              src={galleryImages[3] || Buildingprofile}
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
+              loading="lazy"
               onLoad={() => console.log('Gallery image 4 loaded:', galleryImages[3])}
               onError={(e) => console.error('Gallery image 4 failed to load:', galleryImages[3], e)}
             />
