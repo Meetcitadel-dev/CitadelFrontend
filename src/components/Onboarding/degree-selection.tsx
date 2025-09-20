@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 const degrees = ["B.Tech", "B.Des", "B.A.", "B.Sc", "BBA", "M.Tech", "M.A.", "PhD", "B.Pharm", "MCA", "LLB"]
 

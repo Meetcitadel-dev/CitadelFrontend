@@ -25,7 +25,6 @@ function SortIcon() {
 }
 
 export function ProfileHeader({
-  isSearchView,
   searchQuery,
   onSearchQueryChange,
   onSearchFocus,

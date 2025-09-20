@@ -14,7 +14,7 @@ interface PaymentSuccessProps {
   onClose: () => void
 }
 
-export function PaymentSuccess({ bookingDetails, onClose }: PaymentSuccessProps) {
+export function PaymentSuccess({ bookingDetails }: PaymentSuccessProps) {
   const navigate = useNavigate();
 
   const handleViewBookings = () => {

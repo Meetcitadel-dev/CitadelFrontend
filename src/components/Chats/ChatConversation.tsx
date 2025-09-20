@@ -1,7 +1,7 @@
 
 
 import { useState, useEffect, useRef } from "react"
-import { ArrowLeft, MoreVertical, Mic, Send, Heart, MessageCircle, X } from "lucide-react"
+import { ArrowLeft, MoreVertical, Mic, Send, Heart, X } from "lucide-react"
 import BlockUserModal from "./BlockUserModal"
 import ChatDropdown from "./ChatDropdown"
 import { 
@@ -21,8 +21,6 @@ import {
 } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
 import { chatSocketService } from "@/lib/socket"
-import { useWebSocket } from "@/lib/hooks/useWebSocket"
-import { generateIceBreakingPrompt } from "@/lib/adjectiveUtils"
 
 interface ChatConversationProps {
   onBack: () => void
@@ -66,7 +64,7 @@ enum MatchCase {
   CASE_3 = 'CASE_3'  // Never Connected + Match
 }
 
-export default function ChatConversation({ onBack, conversationId, userId, isFromMatches = false, isGroupChat = false, onHeaderClick }: ChatConversationProps) {
+export default function ChatConversation({ onBack, conversationId, userId, isFromMatches = false, onHeaderClick }: ChatConversationProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [conversationInfo, setConversationInfo] = useState<ConversationInfo | null>(null)
   const [inputValue, setInputValue] = useState("")
@@ -74,14 +72,13 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
   const [showBlockModal, setShowBlockModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
-  const [connectionMethod, setConnectionMethod] = useState<'websocket' | 'polling' | 'none'>('none')
-  const { isConnected } = useWebSocket()
+  const [, setConnectionMethod] = useState<'websocket' | 'polling' | 'none'>('none')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Enhanced state for match and connection flow
   const [matchState, setMatchState] = useState<MatchState | null>(null)
   const [isMatched, setIsMatched] = useState(false)
-  const [isConnectedToMatch, setIsConnectedToMatch] = useState(false)
+  const [, setIsConnectedToMatch] = useState(false)
   const [showConnectButton, setShowConnectButton] = useState(false)
   const [showCrossButton, setShowCrossButton] = useState(false)
   const [connecting, setConnecting] = useState(false)

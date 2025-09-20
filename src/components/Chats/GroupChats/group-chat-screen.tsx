@@ -2,7 +2,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, MoreVertical, Mic, Send } from "lucide-react"
+import { ArrowLeft, MoreVertical, Send } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import ChatMessage from "./chat-message"
@@ -10,7 +10,6 @@ import GroupOptionsMenu from "./group-options-menu"
 import { fetchGroupMessages, sendGroupMessage, markGroupMessagesAsRead, getCurrentUserProfile } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
 import { chatSocketService } from "@/lib/socket"
-import type { GroupMessage } from "@/types"
 
 interface GroupChatScreenProps {
   onBack: () => void
@@ -40,7 +39,6 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
   const [error, setError] = useState<string | null>(null)
   const [sending, setSending] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-  const [pendingMessageId, setPendingMessageId] = useState<string | null>(null)
 
   // Get current user ID
   useEffect(() => {
@@ -288,9 +286,6 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
         const response = await sendGroupMessage(groupId, newMessage.trim(), token)
         
         if (response.success && response.message) {
-          // Store the pending message ID to prevent duplicates
-          setPendingMessageId(response.message.id)
-          
           // Add the new message to the list (it will also come via WebSocket)
           const newMsg: Message = {
             id: response.message.id,
@@ -315,11 +310,6 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
           })
           
           setNewMessage("")
-          
-          // Clear pending message ID after a short delay
-          setTimeout(() => {
-            setPendingMessageId(null)
-          }, 1000)
         } else {
           setError('Failed to send message')
         }

@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import GroupOptionsMenu from "./group-options-menu"
 import MemberItem from "./member-item"
-import { fetchGroupChat, updateGroupChat, removeGroupMember, addGroupMembers, leaveGroupChat } from "@/lib/api"
+import { fetchGroupChat, updateGroupChat, removeGroupMember, leaveGroupChat } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
-import type { GroupChat, GroupMember } from "@/types"
+import type { GroupChat } from "@/types"
 import { getCurrentUserProfile } from "@/lib/api"
 
 interface EditGroupScreenProps {
@@ -26,7 +26,6 @@ export default function EditGroupScreen({ onBack, groupId, onGroupUpdated }: Edi
   const [editingName, setEditingName] = useState(false)
   const [newGroupName, setNewGroupName] = useState("")
   const [saving, setSaving] = useState(false)
-  const [removingMember, setRemovingMember] = useState<string | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [showAddMembersModal, setShowAddMembersModal] = useState(false)
 
@@ -116,7 +115,6 @@ export default function EditGroupScreen({ onBack, groupId, onGroupUpdated }: Edi
     if (!group) return
 
     try {
-      setRemovingMember(memberId)
       setError(null)
       
       const token = getAuthToken()
@@ -141,8 +139,6 @@ export default function EditGroupScreen({ onBack, groupId, onGroupUpdated }: Edi
     } catch (error) {
       console.error('Error removing member:', error)
       setError('Failed to remove member')
-    } finally {
-      setRemovingMember(null)
     }
   }
 

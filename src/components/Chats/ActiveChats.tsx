@@ -173,7 +173,7 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onP
       name: group.name,
       profileImage: group.avatar,
       lastMessage: group.lastMessage?.content,
-      lastMessageTime: group.lastMessage?.timestamp,
+      lastMessageTime: group.lastMessage?.timestamp ? new Date(group.lastMessage.timestamp).toISOString() : undefined,
       unreadCount: group.unreadCount,
       isGroup: true,
       isOnline: false

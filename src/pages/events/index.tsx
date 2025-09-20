@@ -49,11 +49,6 @@ export default function DinnerBooking() {
     budget: "$",
     vegetarianOnly: false,
   })
-  const [additionalPrefs, setAdditionalPrefs] = useState({
-    relationshipStatus: "",
-    mealPreference: "",
-    wantToDrink: false,
-  })
   const navigate = useNavigate();
   const location = useLocation();
   const navItems = [
@@ -133,8 +128,7 @@ export default function DinnerBooking() {
     setCurrentScreen("additional-preferences")
   }
 
-  const handleAdditionalPreferences = (preferences: any) => {
-    setAdditionalPrefs(preferences)
+  const handleAdditionalPreferences = () => {
     setCurrentScreen("booking-confirmation")
   }
 

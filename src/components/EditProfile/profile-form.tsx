@@ -53,14 +53,6 @@ export default function ProfileForm({ profileData, updateProfileData }: ProfileF
     updateProfileData({ [field]: value })
   }
 
-  const handleDateChange = (field: string, value: string) => {
-    updateProfileData({
-      dateOfBirth: {
-        ...profileData.dateOfBirth,
-        [field]: value,
-      },
-    })
-  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

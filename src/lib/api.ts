@@ -1,5 +1,5 @@
 import { apiClient } from './apiClient';
-import type { ExploreResponse, ConnectionRequest, AdjectiveSelection, AdjectiveMatchResponse } from '@/types';
+import type { ExploreResponse, ConnectionRequest, AdjectiveSelection, AdjectiveMatchResponse, NotificationResponse, AcceptRejectRequest } from '@/types';
 
 // Fetch list of universities with optional search, limit, offset
 export async function fetchUniversities(params?: { search?: string; limit?: number; offset?: number }) {
@@ -82,7 +82,7 @@ export function submitOnboardingData(data: any, token?: string) {
     {
       method: 'POST',
       body: data,
-      token: authToken,
+      token: authToken || undefined,
     }
   );
 }

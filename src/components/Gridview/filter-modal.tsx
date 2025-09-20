@@ -21,23 +21,6 @@ interface FilterModalProps {
   initialYears: string[]
 }
 
-const collegesAndSkills = [
-  "Masters' Union",
-  "IIT Delhi",
-  "Plaksha University",
-  "IIM Indore",
-  "Data Science",
-  "Machine Learning",
-  "Cybersecurity",
-  "Digital Marketing",
-  "Web Development",
-  "Graphic Design",
-  "Artificial Intelligence",
-  "Python",
-  "JavaScript",
-  "React",
-  "Node.js",
-]
 
 const universities = [
   "Masters' Union",

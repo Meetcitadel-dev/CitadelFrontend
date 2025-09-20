@@ -8,7 +8,7 @@ import GroupChatApp from "../../components/Chats/GroupChats"
 import GroupChatScreen from "../../components/Chats/GroupChats/group-chat-screen"
 import EditGroupScreen from "../../components/Chats/GroupChats/edit-group-screen"
 import Navbar from "../../components/Common/navbar"
-import { Search, Calendar, MessageCircle, Bell, User, ArrowLeft } from "lucide-react"
+import { Search, Calendar, MessageCircle, Bell, User } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { getConversationByUserId, fetchGroupChat, getCurrentUserProfile } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
@@ -75,12 +75,14 @@ export default function ChatApp() {
     
     // Listen for unread count updates (WhatsApp-style real-time updates)
     const handleUnreadCountUpdate = (data: {
-      chatId: string;
+      groupId?: string;
+      conversationId?: string;
       unreadCount: number;
-      isGroup: boolean;
     }) => {
       if (updateUnreadCount) {
-        updateUnreadCount(data.chatId, data.unreadCount, data.isGroup)
+        const chatId = data.groupId || data.conversationId || '';
+        const isGroup = !!data.groupId;
+        updateUnreadCount(chatId, data.unreadCount, isGroup)
       }
     }
     
@@ -125,7 +127,7 @@ export default function ChatApp() {
     setShowGroupChat(false);
   };
 
-  const handleGroupCreated = (groupId: string) => {
+  const handleGroupCreated = () => {
     // Group was created successfully, you can optionally refresh the chat list
     // or navigate to the group chat
     

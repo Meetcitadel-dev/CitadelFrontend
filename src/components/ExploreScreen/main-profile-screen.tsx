@@ -1,4 +1,4 @@
-import { Grid3X3, Info, Briefcase, GraduationCap, Search, Calendar, MessageCircle, Bell, User, LayoutGrid, X, Heart } from "lucide-react"
+import { Info, Briefcase, GraduationCap, Search, Calendar, MessageCircle, Bell, User, LayoutGrid } from "lucide-react"
 import { useState, useEffect } from "react"
 import Navbar from "../Common/navbar";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -8,18 +8,14 @@ import {
   manageConnection, 
   selectAdjective, 
   trackProfileView, 
-  checkAdjectiveSelection,
   getUserGender,
-  getAdjectiveSelections,
   getMatchState,
   getAvailableAdjectives
 } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
 import type { ExploreProfile, ConnectionRequest, AdjectiveSelection, AdjectiveDisplayData } from "@/types"
 import { 
-  generateAdjectiveDisplay, 
-  generateIceBreakingPrompt,
-  checkForMatch 
+  generateIceBreakingPrompt
 } from "@/lib/adjectiveUtils"
 
 // Add Inter font import for this page only
@@ -44,16 +40,15 @@ export default function MobileProfileScreen() {
   const [error, setError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
   const [offset, setOffset] = useState(0)
-  const [trackingView, setTrackingView] = useState(false)
-  const [hasSelectedAdjective, setHasSelectedAdjective] = useState(false)
-  const [checkingAdjective, setCheckingAdjective] = useState(false)
   
   // New state for enhanced adjective system
   const [userGender, setUserGender] = useState<string>('')
-  const [availableAdjectives, setAvailableAdjectives] = useState<string[]>([])
+  const [, setAvailableAdjectives] = useState<string[]>([])
   const [adjectiveDisplay, setAdjectiveDisplay] = useState<AdjectiveDisplayData | null>(null)
-  const [matchState, setMatchState] = useState<any>(null)
+  const [, setMatchState] = useState<any>(null)
   const [loadingAdjectives, setLoadingAdjectives] = useState(false)
+  const [, setTrackingView] = useState(false)
+  const [, setHasSelectedAdjective] = useState(false)
   
   const navigate = useNavigate();
   const location = useLocation();

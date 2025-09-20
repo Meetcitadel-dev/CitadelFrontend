@@ -24,7 +24,7 @@ const delhiAreas: Area[] = [
   { id: "hauz-khas", name: "Hauz Khas" },
 ]
 
-export function AreaSelection({ onBack, onClose, onAreaSelect, cityName }: AreaSelectionProps) {
+export function AreaSelection({ onBack, onClose, onAreaSelect }: AreaSelectionProps) {
   const [selectedArea, setSelectedArea] = useState<string | null>(null)
 
   const handleAreaClick = (area: Area) => {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef } from "react"
 import { X } from "lucide-react"
 
 interface UploadBoxProps {

@@ -59,7 +59,7 @@ export default function CreateGroupScreen({ onBack, onGroupCreated }: CreateGrou
     fetchConnections()
   }, [])
 
-  const handleAddMember = (memberId: string, memberName: string) => {
+  const handleAddMember = (memberId: string) => {
     if (!selectedMembers.includes(memberId)) {
       setSelectedMembers([...selectedMembers, memberId])
     }
@@ -195,7 +195,7 @@ export default function CreateGroupScreen({ onBack, onGroupCreated }: CreateGrou
               key={connection.id}
               connection={connection}
               isSelected={selectedMembers.includes(connection.id)}
-              onAdd={() => handleAddMember(connection.id, connection.name)}
+              onAdd={() => handleAddMember(connection.id)}
             />
           ))
         )}

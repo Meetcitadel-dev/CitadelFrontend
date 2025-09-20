@@ -6,9 +6,12 @@ class ChatSocketService {
   private isConnected = false;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
+  private reconnectTimeout: NodeJS.Timeout | null = null;
+  private isConnecting = false;
 
   connect() {
-    if (this.socket?.connected) {
+    // Prevent multiple simultaneous connection attempts
+    if (this.socket?.connected || this.isConnecting) {
       return;
     }
 
@@ -18,54 +21,125 @@ class ChatSocketService {
       return;
     }
 
-    // Connect to your backend WebSocket endpoint
+    this.isConnecting = true;
+
+    // Connect to your backend WebSocket endpoint with better configuration
     this.socket = io('http://localhost:3000', {
       auth: {
         token: token
       },
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      timeout: 10000, // 10 second timeout
+      forceNew: true, // Force new connection
+      reconnection: true,
+      reconnectionAttempts: this.maxReconnectAttempts,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      maxReconnectionAttempts: this.maxReconnectAttempts,
+      // Add namespace to avoid conflicts with Vite HMR
+      path: '/socket.io/',
+      // Ensure we don't interfere with Vite's WebSocket
+      autoConnect: true
     });
 
     this.socket.on('connect', () => {
-      
+      console.log('Chat WebSocket connected successfully');
       this.isConnected = true;
+      this.isConnecting = false;
       this.reconnectAttempts = 0;
+      // Clear any pending reconnect timeout
+      if (this.reconnectTimeout) {
+        clearTimeout(this.reconnectTimeout);
+        this.reconnectTimeout = null;
+      }
     });
 
     this.socket.on('disconnect', (reason) => {
-      
+      console.log('Chat WebSocket disconnected:', reason);
       this.isConnected = false;
+      this.isConnecting = false;
       
-      if (reason === 'io server disconnect') {
-        // Server disconnected us, try to reconnect
-        this.reconnect();
+      // Only attempt reconnection for certain disconnect reasons
+      if (reason === 'io server disconnect' || reason === 'transport close') {
+        this.scheduleReconnect();
       }
     });
 
     this.socket.on('connect_error', (error) => {
-      console.error('WebSocket connection error:', error);
+      console.error('Chat WebSocket connection error:', error.message);
       this.isConnected = false;
+      this.isConnecting = false;
       
-      if (this.reconnectAttempts < this.maxReconnectAttempts) {
-        setTimeout(() => {
-          this.reconnect();
-        }, 1000 * (this.reconnectAttempts + 1)); // Exponential backoff
+      // Don't reconnect for authentication errors
+      if (error.message.includes('Authentication') || error.message.includes('401')) {
+        console.error('Authentication failed, not attempting reconnection');
+        return;
       }
+      
+      this.scheduleReconnect();
+    });
+
+    // Handle reconnection events
+    this.socket.on('reconnect', (attemptNumber) => {
+      console.log(`Chat WebSocket reconnected after ${attemptNumber} attempts`);
+      this.isConnected = true;
+      this.reconnectAttempts = 0;
+    });
+
+    this.socket.on('reconnect_attempt', (attemptNumber) => {
+      console.log(`Chat WebSocket reconnection attempt ${attemptNumber}`);
+    });
+
+    this.socket.on('reconnect_error', (error) => {
+      console.error('Chat WebSocket reconnection error:', error);
+    });
+
+    this.socket.on('reconnect_failed', () => {
+      console.error('Chat WebSocket reconnection failed after maximum attempts');
+      this.isConnected = false;
     });
   }
 
-  private reconnect() {
-    this.reconnectAttempts++;
-    if (this.reconnectAttempts <= this.maxReconnectAttempts) {
-      this.connect();
+  private scheduleReconnect() {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error('Maximum reconnection attempts reached');
+      return;
     }
+
+    // Clear any existing timeout
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+    }
+
+    this.reconnectAttempts++;
+    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts - 1), 10000); // Exponential backoff, max 10s
+    
+    console.log(`Scheduling chat WebSocket reconnection attempt ${this.reconnectAttempts} in ${delay}ms`);
+    
+    this.reconnectTimeout = setTimeout(() => {
+      if (!this.isConnected && !this.isConnecting) {
+        this.connect();
+      }
+    }, delay);
+  }
+
+  private reconnect() {
+    this.scheduleReconnect();
   }
 
   disconnect() {
+    // Clear any pending reconnection
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
       this.isConnected = false;
+      this.isConnecting = false;
+      this.reconnectAttempts = 0;
     }
   }
 
@@ -295,6 +369,34 @@ class ChatSocketService {
   // Get connection status
   getConnectionStatus() {
     return this.isConnected;
+  }
+
+  // Check if backend is available
+  async checkBackendAvailability(): Promise<boolean> {
+    try {
+      const response = await fetch('http://localhost:3000/health', {
+        method: 'GET',
+        timeout: 5000
+      } as any);
+      return response.ok;
+    } catch (error) {
+      console.log('Backend not available:', error);
+      return false;
+    }
+  }
+
+  // Initialize connection with backend check
+  async initializeConnection() {
+    const isBackendAvailable = await this.checkBackendAvailability();
+    if (isBackendAvailable) {
+      this.connect();
+    } else {
+      console.log('Backend not available, will retry connection later');
+      // Retry after 5 seconds
+      setTimeout(() => {
+        this.initializeConnection();
+      }, 5000);
+    }
   }
 }
 

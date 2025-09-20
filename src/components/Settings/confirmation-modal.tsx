@@ -16,7 +16,6 @@ export default function ConfirmationModal({
   isOpen,
   onClose,
   onConfirm,
-  title,
   message,
   confirmText,
   cancelText,

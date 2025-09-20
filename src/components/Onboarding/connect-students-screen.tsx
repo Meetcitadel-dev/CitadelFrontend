@@ -1,4 +1,3 @@
-import Connecting1 from '@/assets/sign up animation 1 (1).png'
 import Rectangle4 from '@/assets/Rectangle 4.png'
 import Rectangle2 from '@/assets/Rectangle 2.png'
 import Rectangle1 from '@/assets/a man teaching, realistic man image, cinemtic, man wearing casual clothes.png'

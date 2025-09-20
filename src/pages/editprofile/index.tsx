@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import { ChevronLeft } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import ProfileImageUpload from "@/components/EditProfile/profile-image-upload"
 import ProfileForm from "@/components/EditProfile/profile-form"
 import { getCurrentUserProfile, updateUserProfile } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"

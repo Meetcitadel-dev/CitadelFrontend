@@ -54,7 +54,7 @@ interface UserProfile {
   // Updated to reflect actual connection counts
   connectionsCount?: number; // Total connections the profile has
   mutualConnectionsCount?: number; // Common connections between current user and profile
-  connectionStatus?: 'connected' | 'requested' | 'not_connected' | 'blocked';
+  connectionStatus?: 'connected' | 'requested' | 'not_connected' | 'blocked' | 'pending';
 }
 
 export default function UserProfileScreen() {
@@ -102,24 +102,12 @@ export default function UserProfileScreen() {
             id: profileData.id,
             name: profileData.name,
             email: profileData.email,
-            // Fallbacks for institute/college name
-            university: profileData.university?.name 
-              || profileData.universityName 
-              || profileData.college 
-              || profileData.institute 
-              || profileData.instituteName 
-              || '',
-            // Fallbacks for branch/degree
-            degree: profileData.degree 
-              || profileData.branch 
-              || profileData.course 
-              || profileData.department 
-              || '',
-            // Fallbacks for year
-            year: profileData.year 
-              || profileData.yearOfStudy 
-              || profileData.graduationYear 
-              || '',
+            // University name
+            university: profileData.university?.name || '',
+            // Degree
+            degree: profileData.degree || '',
+            // Year
+            year: profileData.year || '',
             skills: profileData.skills || [],
             aboutMe: profileData.aboutMe,
             sports: profileData.sports,
