@@ -390,6 +390,8 @@ export default function UserProfileScreen() {
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
               loading="lazy"
+              decoding="async"
+              fetchPriority="low"
               onLoad={() => console.log('Gallery image 1 loaded:', galleryImages[0])}
               onError={(e) => console.error('Gallery image 1 failed to load:', galleryImages[0], e)}
             />
@@ -406,6 +408,8 @@ export default function UserProfileScreen() {
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
               loading="lazy"
+              decoding="async"
+              fetchPriority="low"
               onLoad={() => console.log('Gallery image 2 loaded:', galleryImages[1])}
               onError={(e) => console.error('Gallery image 2 failed to load:', galleryImages[1], e)}
             />
@@ -421,6 +425,8 @@ export default function UserProfileScreen() {
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
               loading="lazy"
+              decoding="async"
+              fetchPriority="low"
               onLoad={() => console.log('Gallery image 3 loaded:', galleryImages[2])}
               onError={(e) => console.error('Gallery image 3 failed to load:', galleryImages[2], e)}
             />
@@ -437,6 +443,8 @@ export default function UserProfileScreen() {
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
               loading="lazy"
+              decoding="async"
+              fetchPriority="low"
               onLoad={() => console.log('Gallery image 4 loaded:', galleryImages[3])}
               onError={(e) => console.error('Gallery image 4 failed to load:', galleryImages[3], e)}
             />

@@ -102,9 +102,126 @@ export function debounce<T extends (...args: any[]) => any>(
 
 export function prefetchImages(urls: string[]): void {
   if (!Array.isArray(urls) || urls.length === 0) return
-  urls.forEach((url) => {
+  
+  // Remove duplicates and filter valid URLs
+  const uniqueUrls = Array.from(new Set(urls.filter(url => typeof url === 'string' && url)))
+  
+  uniqueUrls.forEach((url, index) => {
+    try {
+      const img = new Image()
+      
+      // Set high priority for first few images
+      if (index < 3) {
+        img.fetchPriority = 'high'
+      }
+      
+      // Add error handling to prevent console errors
+      img.onerror = () => {
+        // Silently handle errors - don't spam console
+      }
+      
+      img.src = url
+    } catch (error) {
+      // Silently handle any errors during prefetching
+    }
+  })
+}
+
+/**
+ * Enhanced prefetching with priority and error handling
+ */
+export function prefetchImagesWithPriority(urls: string[], priority: 'high' | 'low' = 'low'): void {
+  if (!Array.isArray(urls) || urls.length === 0) return
+  
+  const uniqueUrls = Array.from(new Set(urls.filter(url => typeof url === 'string' && url)))
+  
+  uniqueUrls.forEach((url) => {
+    try {
+      const img = new Image()
+      img.fetchPriority = priority
+      img.onerror = () => {
+        // Silently handle errors
+      }
+      img.src = url
+    } catch (error) {
+      // Silently handle any errors
+    }
+  })
+}
+
+/**
+ * Prefetch images in batches to avoid overwhelming the browser
+ */
+export function prefetchImagesBatched(urls: string[], batchSize: number = 5): void {
+  if (!Array.isArray(urls) || urls.length === 0) return
+  
+  const uniqueUrls = Array.from(new Set(urls.filter(url => typeof url === 'string' && url)))
+  
+  // Process in batches with small delays
+  for (let i = 0; i < uniqueUrls.length; i += batchSize) {
+    const batch = uniqueUrls.slice(i, i + batchSize)
+    
+    setTimeout(() => {
+      batch.forEach((url, index) => {
+        try {
+          const img = new Image()
+          img.fetchPriority = index === 0 ? 'high' : 'low'
+          img.onerror = () => {}
+          img.src = url
+        } catch (error) {
+          // Silently handle errors
+        }
+      })
+    }, i * 50) // Small delay between batches
+  }
+}
+
+/**
+ * Track image loading performance
+ */
+export function trackImagePerformance(src: string, startTime?: number): void {
+  if (typeof window === 'undefined') return
+  
+  const loadStart = startTime || performance.now()
+  
+  const img = new Image()
+  img.onload = () => {
+    const loadTime = performance.now() - loadStart
+    console.log(`✅ Image loaded: ${src} (${loadTime.toFixed(2)}ms)`)
+    
+    // Track slow images
+    if (loadTime > 1000) {
+      console.warn(`⚠️ Slow image load: ${src} (${loadTime.toFixed(2)}ms)`)
+    }
+  }
+  
+  img.onerror = () => {
+    const loadTime = performance.now() - loadStart
+    console.error(`❌ Image failed: ${src} (${loadTime.toFixed(2)}ms)`)
+  }
+  
+  img.src = src
+}
+
+/**
+ * Preload critical images with performance tracking
+ */
+export function preloadCriticalImages(urls: string[]): void {
+  if (!Array.isArray(urls) || urls.length === 0) return
+  
+  const startTime = performance.now()
+  
+  urls.forEach((url, index) => {
     if (typeof url === 'string' && url) {
       const img = new Image()
+      img.fetchPriority = 'high'
+      img.onload = () => {
+        const loadTime = performance.now() - startTime
+        console.log(`🚀 Critical image ${index + 1}/${urls.length} loaded: ${loadTime.toFixed(2)}ms`)
+      }
+      img.onerror = () => {
+        console.error(`❌ Critical image failed: ${url}`)
+      }
       img.src = url
     }
   })

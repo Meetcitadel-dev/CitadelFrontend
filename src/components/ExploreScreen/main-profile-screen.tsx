@@ -12,7 +12,7 @@ import {
   getMatchState,
   getAvailableAdjectives
 } from "@/lib/api"
-import { getAuthToken } from "@/lib/utils"
+import { getAuthToken, prefetchImagesWithPriority } from "@/lib/utils"
 import type { ExploreProfile, ConnectionRequest, AdjectiveSelection, AdjectiveDisplayData } from "@/types"
 import { 
   generateIceBreakingPrompt
@@ -381,15 +381,36 @@ export default function MobileProfileScreen() {
     }
   }
 
-  // Prefetch next profile images to make swipes instant (must be before any conditional returns)
+  // Enhanced prefetching for next profile images to make swipes instant
   useEffect(() => {
-    const preloadCount = 3
-    const urls: string[] = []
+    const preloadCount = 5 // Increased from 3 for better performance
+    const highPriorityUrls: string[] = []
+    const lowPriorityUrls: string[] = []
+    
     for (let i = 1; i <= preloadCount; i++) {
       const next = profiles[currentProfileIndex + i]
-      if (next && next.profileImage) urls.push(next.profileImage)
+      if (next && next.profileImage) {
+        if (i <= 2) {
+          // First 2 images get high priority
+          highPriorityUrls.push(next.profileImage)
+        } else {
+          // Rest get low priority
+          lowPriorityUrls.push(next.profileImage)
+        }
+      }
     }
-    urls.forEach((u) => { const img = new Image(); img.src = u })
+    
+    // Prefetch high priority images immediately
+    if (highPriorityUrls.length > 0) {
+      prefetchImagesWithPriority(highPriorityUrls, 'high')
+    }
+    
+    // Prefetch low priority images with delay
+    if (lowPriorityUrls.length > 0) {
+      setTimeout(() => {
+        prefetchImagesWithPriority(lowPriorityUrls, 'low')
+      }, 100)
+    }
   }, [currentProfileIndex, profiles])
 
   if (loading && profiles.length === 0) {
@@ -448,6 +469,11 @@ export default function MobileProfileScreen() {
           src={currentProfile.profileImage || ProfileImage} 
           alt="Profile" 
           className="object-cover absolute inset-0 w-full h-full" 
+          fetchPriority="high"
+          decoding="async"
+          loading="eager"
+          onLoad={() => console.log('Explore profile image loaded successfully:', currentProfile.profileImage)}
+          onError={(e) => console.error('Explore profile image failed to load:', currentProfile.profileImage, e)}
         />
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90" />

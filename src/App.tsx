@@ -9,7 +9,7 @@ import SettingsPage from "./pages/settings";
 import EventsPage from "./pages/events";
 import UserProfilePage from "./pages/profile";
 import { useEffect } from "react";
-import { getAuthToken, prefetchImages } from "@/lib/utils";
+import { getAuthToken, prefetchImages, prefetchImagesWithPriority, prefetchImagesBatched, preloadCriticalImages } from "@/lib/utils";
 import { fetchExploreProfiles, getCurrentUserProfile } from "@/lib/api";
 import UserProfileScreen from "./pages/user-profile";
 
@@ -20,26 +20,40 @@ export default function App() {
         const token = getAuthToken()
         if (!token) return
 
-        const urls: string[] = []
+        const highPriorityUrls: string[] = []
+        const lowPriorityUrls: string[] = []
 
-        // Current user's hero and gallery images
+        // Current user's hero and gallery images - HIGH PRIORITY
         const profileRes = await getCurrentUserProfile(token)
         if (profileRes?.success && profileRes.data?.images) {
           const imgs = profileRes.data.images
           const hero = imgs[0]?.cloudfrontUrl
-          if (hero) urls.push(hero)
-          imgs.slice(1, 5).forEach((img: any) => img?.cloudfrontUrl && urls.push(img.cloudfrontUrl))
+          if (hero) highPriorityUrls.push(hero)
+          imgs.slice(1, 5).forEach((img: any) => img?.cloudfrontUrl && highPriorityUrls.push(img.cloudfrontUrl))
         }
 
-        // Initial explore profiles (first page)
+        // Initial explore profiles (first page) - HIGH PRIORITY for first 3, LOW for rest
         const exploreRes = await fetchExploreProfiles({ limit: 10, offset: 0, token })
         if (exploreRes?.success && Array.isArray(exploreRes.profiles)) {
-          exploreRes.profiles.slice(0, 8).forEach((p: any) => {
-            if (p?.profileImage) urls.push(p.profileImage)
+          exploreRes.profiles.slice(0, 3).forEach((p: any) => {
+            if (p?.profileImage) highPriorityUrls.push(p.profileImage)
+          })
+          exploreRes.profiles.slice(3, 8).forEach((p: any) => {
+            if (p?.profileImage) lowPriorityUrls.push(p.profileImage)
           })
         }
 
-        prefetchImages(Array.from(new Set(urls)))
+        // Prefetch high priority images immediately with performance tracking
+        if (highPriorityUrls.length > 0) {
+          preloadCriticalImages(highPriorityUrls)
+        }
+
+        // Prefetch low priority images in batches with delay
+        if (lowPriorityUrls.length > 0) {
+          setTimeout(() => {
+            prefetchImagesBatched(lowPriorityUrls, 3)
+          }, 200)
+        }
       } catch (e) {
         // ignore
       }
