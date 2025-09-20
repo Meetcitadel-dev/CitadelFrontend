@@ -26,6 +26,9 @@ export default function ProfileSection({ name, subtitle, profileImage }: Profile
             height: '100%',
             objectFit: 'cover'
           }}
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
         />
       </div>
       <h2 

@@ -31,6 +31,9 @@ export default function RequestItem({ request, onAccept, onReject, isProcessing 
           src={request.requesterProfileImage || EllipseImg} 
           alt={request.requesterName} 
           className="w-full h-full object-cover" 
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
         />
       </div>
       <div className="flex-1">

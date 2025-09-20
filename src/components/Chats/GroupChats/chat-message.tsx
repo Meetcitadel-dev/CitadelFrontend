@@ -31,6 +31,9 @@ interface Message {
           src={message.senderAvatar || "/placeholder.svg"}
           alt={message.senderName}
           className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
         />
         <div className="text-white rounded-2xl rounded-bl-md px-4 py-2 max-w-[80%]" style={{ backgroundColor: '#1C1C1C' }}>
           <p className="text-sm">{message.text}</p>

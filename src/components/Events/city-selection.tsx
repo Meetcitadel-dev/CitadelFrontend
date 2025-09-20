@@ -98,6 +98,9 @@ export function CitySelection({ onClose, onCitySelect }: CitySelectionProps) {
                 style={{
                   borderRadius: '15px'
                 }}
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
               />
               <div className="absolute inset-0 bg-black/40" style={{ borderRadius: '15px' }}></div>
               <div className="absolute inset-0 flex flex-col justify-center items-center p-4">

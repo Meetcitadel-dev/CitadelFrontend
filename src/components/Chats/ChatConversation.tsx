@@ -652,6 +652,9 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
               src={conversationInfo?.profileImage || "/placeholder.svg?height=40&width=40"}
               alt={conversationInfo?.name || "User"}
               className="w-10 h-10 rounded-full object-cover mr-3"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
             />
             <div className="flex-1">
               <h1 className="text-lg font-semibold">

@@ -339,6 +339,9 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
               src={groupAvatar || "/images/profile.png"}
               alt={groupName}
               className="w-10 h-10 rounded-full object-cover"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
             />
             <h1 className="text-xl font-medium">{groupName}</h1>
           </div>
@@ -360,6 +363,9 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
               src={groupAvatar || "/images/profile.png"}
               alt={groupName}
               className="w-10 h-10 rounded-full object-cover"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
             />
             <h1 className="text-xl font-medium">{groupName}</h1>
           </div>
@@ -392,6 +398,9 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
             src={groupAvatar || "/images/profile.png"}
             alt={groupName}
             className="w-10 h-10 rounded-full object-cover"
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
           />
           <h1 className="text-xl font-medium">{groupName}</h1>
         </div>

@@ -30,6 +30,9 @@ export default function MemberItem({
           src={member.avatar || "/placeholder.svg"}
           alt={member.name}
           className="w-12 h-12 rounded-full object-cover"
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
         />
         <div>
           <h3 className="text-green-400 font-medium">{member.name}</h3>

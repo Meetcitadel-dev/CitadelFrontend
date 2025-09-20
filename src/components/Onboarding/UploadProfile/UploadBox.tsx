@@ -56,12 +56,18 @@ export default function UploadBox({
           src={uploadedImageUrl}
           alt="Uploaded"
           className="w-full h-full object-cover rounded-lg"
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
         />
       ) : selectedImage ? (
         <img
           src={URL.createObjectURL(selectedImage)}
           alt="Selected"
           className="w-full h-full object-cover rounded-lg"
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
         />
       ) : (
         <div className="text-green-500 text-3xl font-light">+</div>

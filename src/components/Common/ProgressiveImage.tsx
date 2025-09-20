@@ -58,6 +58,9 @@ export default function ProgressiveImage({
           alt=""
           className="absolute inset-0 w-full h-full object-cover blur-sm scale-110"
           style={{ filter: 'blur(5px)' }}
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
         />
       )}
       

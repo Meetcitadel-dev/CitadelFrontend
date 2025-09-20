@@ -59,6 +59,9 @@ export function PaymentSuccess({ bookingDetails }: PaymentSuccessProps) {
                 width={64}
                 height={64}
                 className="object-cover w-full h-full"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
               />
             </div>
           </div>
