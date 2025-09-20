@@ -612,15 +612,17 @@ export function getAdjectiveSelections(targetUserId: string, token?: string) {
 }
 
 // Get available adjectives for a target user
-export function getAvailableAdjectives(targetUserId: string, token?: string) {
+export function getAvailableAdjectives(targetUserId: string, token?: string, sessionId?: string) {
+  const url = `/api/v1/enhanced-explore/adjectives/available/${targetUserId}${sessionId ? `?sessionId=${sessionId}` : ''}`;
   return apiClient<{
     success: boolean;
     adjectives: string[];
     hasPreviousSelection: boolean;
     previousSelection?: string;
+    sessionId?: string;
     message?: string;
   }>(
-    `/api/v1/enhanced-explore/adjectives/available/${targetUserId}`,
+    url,
     {
       method: 'GET',
       token,

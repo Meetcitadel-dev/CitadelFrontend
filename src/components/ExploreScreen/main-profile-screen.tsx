@@ -13,6 +13,7 @@ import {
   getAvailableAdjectives
 } from "@/lib/api"
 import { getAuthToken, prefetchImagesWithPriority } from "@/lib/utils"
+import sessionManager from "@/lib/sessionManager"
 import type { ExploreProfile, ConnectionRequest, AdjectiveSelection, AdjectiveDisplayData } from "@/types"
 import { 
   generateIceBreakingPrompt
@@ -34,9 +35,9 @@ const convertOrdinalToNumber = (year: string): string => {
 
 export default function MobileProfileScreen() {
   const [selectedTrait, setSelectedTrait] = useState("")
-  const [currentProfileIndex, setCurrentProfileIndex] = useState(0)
+  const [currentProfileIndex, setCurrentProfileIndex] = useState(() => sessionManager.getCurrentProfileIndex())
   const [loading, setLoading] = useState(true)
-  const [profiles, setProfiles] = useState<ExploreProfile[]>([])
+  const [profiles, setProfiles] = useState<ExploreProfile[]>(() => sessionManager.getProfiles())
   const [error, setError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
   const [offset, setOffset] = useState(0)
@@ -49,6 +50,9 @@ export default function MobileProfileScreen() {
   const [loadingAdjectives, setLoadingAdjectives] = useState(false)
   const [, setTrackingView] = useState(false)
   const [, setHasSelectedAdjective] = useState(false)
+  
+  // Session state for adjective persistence - now using global session manager
+  const [sessionId, setSessionId] = useState<string | null>(() => sessionManager.getSessionId())
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -80,9 +84,16 @@ export default function MobileProfileScreen() {
     loadUserGender()
   }, [])
 
-  // Load profiles from API
+  // Load profiles from API - only if we don't have cached profiles
   useEffect(() => {
     const loadProfiles = async () => {
+      // If we have cached profiles and it's the first load (offset === 0), use cached data
+      if (offset === 0 && sessionManager.getProfiles().length > 0) {
+        setProfiles(sessionManager.getProfiles())
+        setLoading(false)
+        return
+      }
+
       try {
         setLoading(true)
         setError(null)
@@ -115,11 +126,14 @@ export default function MobileProfileScreen() {
           }))
 
           if (offset === 0) {
-            // First load - replace profiles
+            // First load - replace profiles and cache them
             setProfiles(transformedProfiles)
+            sessionManager.setProfiles(transformedProfiles)
           } else {
             // Load more - append profiles
-            setProfiles(prev => [...prev, ...transformedProfiles])
+            const newProfiles = [...profiles, ...transformedProfiles]
+            setProfiles(newProfiles)
+            sessionManager.setProfiles(newProfiles)
           }
           setHasMore(response.hasMore)
         } else {
@@ -149,10 +163,16 @@ export default function MobileProfileScreen() {
         const token = getAuthToken()
         if (!token) return
 
-        // Get available adjectives from backend (already includes previous selection logic)
-        const availableAdjsResponse = await getAvailableAdjectives(String(currentProfile.id), token)
+        // Get available adjectives from backend with session persistence
+        const availableAdjsResponse = await getAvailableAdjectives(String(currentProfile.id), token, sessionId)
         if (availableAdjsResponse.success) {
           setAvailableAdjectives(availableAdjsResponse.adjectives)
+          
+          // Update session ID if provided by backend and save to global session
+          if (availableAdjsResponse.sessionId) {
+            setSessionId(availableAdjsResponse.sessionId)
+            sessionManager.setSessionId(availableAdjsResponse.sessionId)
+          }
           
           // Create adjective display directly from backend response
           const display: AdjectiveDisplayData = {
@@ -192,7 +212,7 @@ export default function MobileProfileScreen() {
     }
 
     loadAdjectivesAndMatchState()
-  }, [currentProfileIndex, profiles, userGender])
+  }, [currentProfileIndex, profiles, userGender, sessionId])
 
   // Track profile view when profile changes
   useEffect(() => {
@@ -233,7 +253,9 @@ export default function MobileProfileScreen() {
   const moveToNextProfile = () => {
     setTimeout(() => {
       if (currentProfileIndex < profiles.length - 1) {
-        setCurrentProfileIndex(prev => prev + 1)
+        const newIndex = currentProfileIndex + 1
+        setCurrentProfileIndex(newIndex)
+        sessionManager.setCurrentProfileIndex(newIndex)
         setSelectedTrait("")
         setAdjectiveDisplay(null)
         setMatchState(null)
@@ -241,6 +263,7 @@ export default function MobileProfileScreen() {
         // Load more profiles if we're at the end
         loadMoreProfiles()
         setCurrentProfileIndex(0)
+        sessionManager.setCurrentProfileIndex(0)
         setSelectedTrait("")
         setAdjectiveDisplay(null)
         setMatchState(null)
