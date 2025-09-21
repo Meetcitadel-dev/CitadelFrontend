@@ -71,10 +71,18 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
               </h3>
 
               <div className="flex items-center justify-center gap-1 mb-2">
-                <GraduationCap className="w-3 h-3 text-orange-500 flex-shrink-0" />
+                <GraduationCap 
+                  className="w-3 h-3 flex-shrink-0" 
+                  style={{ color: '#FBBC05' }}
+                />
                 <span
-                  className="text-gray-300 text-xs"
                   style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 'regular',
+                    fontSize: '12px',
+                    lineHeight: 'auto',
+                    letterSpacing: '0%',
+                    color: '#1BEA7B',
                     maxWidth: '120px',
                     display: 'inline-block',
                     whiteSpace: 'nowrap',
