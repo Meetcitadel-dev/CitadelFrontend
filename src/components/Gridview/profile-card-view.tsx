@@ -55,7 +55,20 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
 
           <div className="px-3 pb-3" style={{ height: '107px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div className="text-center">
-              <h3 className="text-green-400 font-semibold text-sm mb-1">{profile.name}</h3>
+              <h3 
+                className="mb-1"
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 'bold',
+                  fontSize: '18px',
+                  lineHeight: 'auto',
+                  letterSpacing: '0%',
+                  color: '#1BEA7B',
+                  textAlign: 'center'
+                }}
+              >
+                {profile.name}
+              </h3>
 
               <div className="flex items-center justify-center gap-1 mb-2">
                 <GraduationCap className="w-3 h-3 text-orange-500 flex-shrink-0" />
