@@ -49,7 +49,7 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
               decoding="async"
             />
             <div 
-              className="absolute bg-black/50 backdrop-blur-sm rounded-lg px-2 py-1"
+              className="absolute"
               style={{
                 left: '50%',
                 transform: 'translateX(-50%)',
