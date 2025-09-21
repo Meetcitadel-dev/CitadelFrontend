@@ -48,8 +48,27 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
               loading="lazy"
               decoding="async"
             />
-            <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm rounded-lg px-2 py-1">
-              <span className="text-white text-xs font-medium">{profile.year}</span>
+            <div 
+              className="absolute bg-black/50 backdrop-blur-sm rounded-lg px-2 py-1"
+              style={{
+                left: '50%',
+                transform: 'translateX(-50%)',
+                bottom: '8px'
+              }}
+            >
+              <span 
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: '600', // Semi Bold
+                  fontSize: '15px',
+                  lineHeight: 'auto',
+                  letterSpacing: '0%',
+                  color: '#FFFFFF',
+                  textAlign: 'center'
+                }}
+              >
+                Year {profile.year}
+              </span>
             </div>
           </div>
 
