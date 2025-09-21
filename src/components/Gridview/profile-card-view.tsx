@@ -27,8 +27,15 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
       {profiles.map((profile) => (
         <div 
           key={profile.id} 
-          className="bg-gray-900 rounded-2xl overflow-hidden"
-          style={{ width: '173px', height: '289px' }}
+          className="overflow-hidden"
+          style={{ 
+            width: '173px', 
+            height: '289px',
+            backgroundColor: '#111111',
+            borderRadius: '12px',
+            border: '1px solid #292929',
+            borderImage: 'none'
+          }}
         >
           <div className="relative">
             <img
