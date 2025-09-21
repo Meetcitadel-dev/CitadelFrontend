@@ -37,14 +37,14 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
             borderImage: 'none'
           }}
         >
-          <div className="relative">
+          <div className="relative flex justify-center items-center" style={{ height: '182px' }}>
             <img
               src={profile.image || "/placeholder.svg"}
               alt={profile.name}
-              width={173}
-              height={200}
-              className="w-full object-cover"
-              style={{ height: '200px' }}
+              width={143}
+              height={152}
+              className="object-cover"
+              style={{ width: '143px', height: '152px', borderRadius: '12px' }}
               loading="lazy"
               decoding="async"
             />
@@ -53,7 +53,7 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
             </div>
           </div>
 
-          <div className="p-3" style={{ height: '89px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div className="p-3" style={{ height: '107px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
               <h3 className="text-green-400 font-semibold text-sm mb-1 truncate">{profile.name}</h3>
 
