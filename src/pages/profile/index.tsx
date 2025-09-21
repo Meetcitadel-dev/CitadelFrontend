@@ -12,7 +12,7 @@ import {
 } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useState, useEffect } from "react"
-import ProfileImage from "@/assets/657e5f166ffee2019c3aa97b2117a5c1144d080e.png"
+// Removed unused ProfileImage import
 import Navbar from "@/components/Common/navbar"
 import ForestProfile from "@/assets/man, forest background behind.png"
 import Realisticprofile from "@/assets/man, realsitic background behind.png"
@@ -161,8 +161,8 @@ export default function MobileProfileScreen() {
     connectionsCount: 0
   }
 
-  // Get profile image (user's uploaded image or default)
-  const profileImageUrl = profile.profileImage || ProfileImage
+  // Get profile image (user's uploaded image or placeholder)
+  const profileImageUrl = profile.profileImage || "/placeholder.svg"
 
   // Get gallery images (user's uploaded images or defaults)
   const galleryImages = profile.uploadedImages || [ForestProfile, Realisticprofile, Oceanprofile, Buildingprofile]

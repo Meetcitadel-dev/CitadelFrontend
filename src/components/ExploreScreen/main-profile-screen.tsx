@@ -2,7 +2,7 @@ import { Info, Briefcase, GraduationCap, Search, Calendar, MessageCircle, Bell, 
 import { useState, useEffect } from "react"
 import Navbar from "../Common/navbar";
 import { useNavigate, useLocation } from "react-router-dom";
-import ProfileImage from "@/assets/657e5f166ffee2019c3aa97b2117a5c1144d080e.png"
+// Removed unused ProfileImage import
 import { 
   fetchExploreProfiles, 
   manageConnection, 
@@ -489,7 +489,7 @@ export default function MobileProfileScreen() {
       {/* Profile Image with Gradient Overlay and Info Block */}
       <div className="relative w-full" style={{ height: '586px' }}>
         <img 
-          src={currentProfile.profileImage || ProfileImage} 
+          src={currentProfile.profileImage || "/placeholder.svg"} 
           alt="Profile" 
           className="object-cover absolute inset-0 w-full h-full" 
           fetchPriority="high"

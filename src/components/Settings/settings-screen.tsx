@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Calendar, Bell, UserX, HelpCircle, Shield, LogOut, Trash2 } from "lucide-react"
-import profileImage from "@/assets/a college boy.png"
+// Remove the hardcoded profile image import
 import SettingsHeader from "./settings-header"
 import ProfileSection from "./profile-section"
 import SettingsMenuItem from "./settings-menu-item"
@@ -46,9 +46,9 @@ export default function SettingsScreen({
   const [userProfile, setUserProfile] = useState<UserProfile>({
     name: "Loading...",
     university: "Loading...",
-    profileImage: profileImage
+    profileImage: "/placeholder.svg" // Use a generic placeholder instead of someone else's photo
   })
-  const [, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
