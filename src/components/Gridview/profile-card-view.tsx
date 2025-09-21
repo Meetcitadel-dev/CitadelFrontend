@@ -53,7 +53,7 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
             </div>
           </div>
 
-          <div className="p-3" style={{ height: '107px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div className="px-3 pb-3" style={{ height: '107px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div className="text-center">
               <h3 className="text-green-400 font-semibold text-sm mb-1">{profile.name}</h3>
 
