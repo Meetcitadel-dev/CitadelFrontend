@@ -54,10 +54,10 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
           </div>
 
           <div className="p-3" style={{ height: '107px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <h3 className="text-green-400 font-semibold text-sm mb-1 truncate">{profile.name}</h3>
+            <div className="text-center">
+              <h3 className="text-green-400 font-semibold text-sm mb-1">{profile.name}</h3>
 
-              <div className="flex items-center gap-1 mb-2">
+              <div className="flex items-center justify-center gap-1 mb-2">
                 <GraduationCap className="w-3 h-3 text-orange-500 flex-shrink-0" />
                 <span
                   className="text-gray-300 text-xs"
