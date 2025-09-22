@@ -15,7 +15,7 @@ interface UserPreferences {
 
 export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["English"])
-  const [vegetarianOnly, setVegetarianOnly] = useState<boolean>(false)
+  
 
   const languages = [
     { id: "English", name: "English" },
@@ -32,14 +32,12 @@ export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
 
   
 
-  const handleVegetarianToggle = () => {
-    setVegetarianOnly(!vegetarianOnly)
-  }
+  
 
   const handleContinue = () => {
     const preferences: UserPreferences = {
       languages: selectedLanguages,
-      vegetarianOnly,
+      vegetarianOnly: false,
     }
     onSave(preferences)
   }
@@ -120,32 +118,7 @@ export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
 
           {/* Removed budget question per requirements */}
 
-          {/* Vegetarian Question */}
-          <div className="mb-8">
-            <div className="flex items-center" style={{ width: '345px', justifyContent: 'space-between', paddingRight: '16px' }}>
-              <span 
-                style={{
-                  width: '267px',
-                  color: '#FFFFFF',
-                  fontFamily: 'Inter',
-                  fontSize: '18px',
-                  fontStyle: 'normal',
-                  fontWeight: 700,
-                  lineHeight: '135%' // 24.3px
-                }}
-              >
-                I want only pure vegetarians at the table.
-              </span>
-              <button
-                onClick={handleVegetarianToggle}
-                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                  vegetarianOnly ? "border-green-400 bg-green-400" : "border-gray-400"
-                }`}
-              >
-                {vegetarianOnly && <div className="w-2 h-2 bg-white rounded-full"></div>}
-              </button>
-            </div>
-          </div>
+          {/* Vegetarian question moved to additional preferences */}
         </div>
       </div>
 

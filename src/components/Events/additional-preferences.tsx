@@ -11,11 +11,13 @@ interface AdditionalPreferencesProps {
 interface AdditionalPrefs {
   relationshipStatus: string
   mealPreference: string
+  vegetarianOnly: boolean
 }
 
 export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferencesProps) {
   const [relationshipStatus, setRelationshipStatus] = useState<string>("")
   const [mealPreference, setMealPreference] = useState<string>("")
+  const [vegetarianOnly, setVegetarianOnly] = useState<boolean>(false)
 
   const relationshipOptions = [
     { id: "single", name: "Single" },
@@ -33,6 +35,7 @@ export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferen
     const preferences: AdditionalPrefs = {
       relationshipStatus,
       mealPreference,
+      vegetarianOnly,
     }
     onContinue(preferences)
   }
@@ -179,7 +182,32 @@ export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferen
             </div>
           </div>
 
-          {/* Removed drink question per requirements */}
+          {/* Vegetarian Question (moved from previous step) */}
+          <div className="mb-8">
+            <div className="flex items-center" style={{ width: '345px', justifyContent: 'space-between', paddingRight: '16px' }}>
+              <span 
+                style={{
+                  width: '267px',
+                  color: '#FFFFFF',
+                  fontFamily: 'Inter',
+                  fontSize: '18px',
+                  fontStyle: 'normal',
+                  fontWeight: 700,
+                  lineHeight: '135%'
+                }}
+              >
+                I want only pure vegetarians at the table.
+              </span>
+              <button
+                onClick={() => setVegetarianOnly(!vegetarianOnly)}
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                  vegetarianOnly ? "border-green-400 bg-green-400" : "border-gray-400"
+                }`}
+              >
+                {vegetarianOnly && <div className="w-2 h-2 bg-white rounded-full"></div>}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

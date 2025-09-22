@@ -128,7 +128,8 @@ export default function DinnerBooking() {
     setCurrentScreen("additional-preferences")
   }
 
-  const handleAdditionalPreferences = () => {
+  const handleAdditionalPreferences = (additionalPrefs: any) => {
+    setUserPreferences((prev: any) => ({ ...prev, ...additionalPrefs }))
     setCurrentScreen("booking-confirmation")
   }
 
