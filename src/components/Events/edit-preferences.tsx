@@ -10,13 +10,11 @@ interface EditPreferencesProps {
 
 interface UserPreferences {
   languages: string[]
-  budget: string
   vegetarianOnly: boolean
 }
 
 export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["English"])
-  const [selectedBudget, setSelectedBudget] = useState<string>("500")
   const [vegetarianOnly, setVegetarianOnly] = useState<boolean>(false)
 
   const languages = [
@@ -24,11 +22,7 @@ export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
     { id: "Hindi", name: "Hindi" },
   ]
 
-  const budgetOptions = [
-    { id: "500", name: "500 Rs" },
-    { id: "1000", name: "1000 Rs" },
-    { id: "1500", name: "1500 Rs" },
-  ]
+  
 
   const handleLanguageToggle = (languageId: string) => {
     setSelectedLanguages((prev) =>
@@ -36,9 +30,7 @@ export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
     )
   }
 
-  const handleBudgetSelect = (budget: string) => {
-    setSelectedBudget(budget)
-  }
+  
 
   const handleVegetarianToggle = () => {
     setVegetarianOnly(!vegetarianOnly)
@@ -47,14 +39,13 @@ export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
   const handleContinue = () => {
     const preferences: UserPreferences = {
       languages: selectedLanguages,
-      budget: selectedBudget,
       vegetarianOnly,
     }
     onSave(preferences)
   }
 
-  // Check if first two questions are answered (at least one language and budget selected)
-  const canContinue = selectedLanguages.length > 0 && selectedBudget !== ""
+  // Check if required question is answered (at least one language selected)
+  const canContinue = selectedLanguages.length > 0
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
@@ -127,55 +118,7 @@ export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
             </div>
           </div>
 
-          {/* Budget Question */}
-          <div className="mb-8">
-            <h2 
-              style={{
-                display: 'flex',
-                width: '346px',
-                height: '47px',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                flexShrink: 0,
-                color: '#FFFFFF',
-                fontFamily: 'Inter',
-                fontSize: '18px',
-                fontStyle: 'normal',
-                fontWeight: 700,
-                lineHeight: '135%', // 24.3px
-                marginBottom: '24px'
-              }}
-            >
-              How much are you willing to spend at dinner?*
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {budgetOptions.map((option) => (
-                <button
-                  key={option.id}
-                  onClick={() => handleBudgetSelect(option.id)}
-                  className="flex items-center justify-between hover:bg-gray-700/50 transition-colors"
-                  style={{
-                    width: '345px',
-                    height: '60px',
-                    flexShrink: 0,
-                    borderRadius: '15px',
-                    background: '#111',
-                    border: 'none',
-                    padding: '16px'
-                  }}
-                >
-                  <span className="text-white text-lg font-medium">{option.name}</span>
-                  <div
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                      selectedBudget === option.id ? "border-green-400 bg-green-400" : "border-gray-400"
-                    }`}
-                  >
-                    {selectedBudget === option.id && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Removed budget question per requirements */}
 
           {/* Vegetarian Question */}
           <div className="mb-8">
