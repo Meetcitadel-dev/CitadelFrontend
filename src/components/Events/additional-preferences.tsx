@@ -11,13 +11,11 @@ interface AdditionalPreferencesProps {
 interface AdditionalPrefs {
   relationshipStatus: string
   mealPreference: string
-  wantToDrink: boolean
 }
 
 export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferencesProps) {
   const [relationshipStatus, setRelationshipStatus] = useState<string>("")
   const [mealPreference, setMealPreference] = useState<string>("")
-  const [wantToDrink, setWantToDrink] = useState<boolean>(false)
 
   const relationshipOptions = [
     { id: "single", name: "Single" },
@@ -35,7 +33,6 @@ export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferen
     const preferences: AdditionalPrefs = {
       relationshipStatus,
       mealPreference,
-      wantToDrink,
     }
     onContinue(preferences)
   }
@@ -182,32 +179,7 @@ export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferen
             </div>
           </div>
 
-          {/* Drink Question */}
-          <div className="mb-8">
-            <div className="flex items-center" style={{ width: '345px', justifyContent: 'space-between', paddingRight: '16px' }}>
-              <span 
-                style={{
-                  width: '267px',
-                  color: '#FFFFFF',
-                  fontFamily: 'Inter',
-                  fontSize: '18px',
-                  fontStyle: 'normal',
-                  fontWeight: 700,
-                  lineHeight: '135%' // 24.3px
-                }}
-              >
-                Do you want to drink?
-              </span>
-              <button
-                onClick={() => setWantToDrink(!wantToDrink)}
-                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                  wantToDrink ? "border-green-400 bg-green-400" : "border-gray-400"
-                }`}
-              >
-                {wantToDrink && <div className="w-2 h-2 bg-white rounded-full"></div>}
-              </button>
-            </div>
-          </div>
+          {/* Removed drink question per requirements */}
         </div>
       </div>
 
