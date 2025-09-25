@@ -35,7 +35,6 @@ class ChatSocketService {
       reconnectionAttempts: this.maxReconnectAttempts,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      maxReconnectionAttempts: this.maxReconnectAttempts,
       // Add namespace to avoid conflicts with Vite HMR
       path: '/socket.io/',
       // Ensure we don't interfere with Vite's WebSocket
@@ -123,9 +122,9 @@ class ChatSocketService {
     }, delay);
   }
 
-  private reconnect() {
-    this.scheduleReconnect();
-  }
+  // private reconnect() {
+  //   this.scheduleReconnect();
+  // }
 
   disconnect() {
     // Clear any pending reconnection

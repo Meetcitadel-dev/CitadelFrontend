@@ -9,7 +9,7 @@ import SettingsPage from "./pages/settings";
 import EventsPage from "./pages/events";
 import UserProfilePage from "./pages/profile";
 import { useEffect } from "react";
-import { getAuthToken, prefetchImages, prefetchImagesWithPriority, prefetchImagesBatched, preloadCriticalImages } from "@/lib/utils";
+import { getAuthToken, prefetchImagesBatched, preloadCriticalImages } from "@/lib/utils";
 import { fetchExploreProfiles, getCurrentUserProfile } from "@/lib/api";
 import UserProfileScreen from "./pages/user-profile";
 

@@ -164,7 +164,7 @@ export default function MobileProfileScreen() {
         if (!token) return
 
         // Get available adjectives from backend with session persistence
-        const availableAdjsResponse = await getAvailableAdjectives(String(currentProfile.id), token, sessionId)
+        const availableAdjsResponse = await getAvailableAdjectives(String(currentProfile.id), token, sessionId || undefined)
         if (availableAdjsResponse.success) {
           setAvailableAdjectives(availableAdjsResponse.adjectives)
           

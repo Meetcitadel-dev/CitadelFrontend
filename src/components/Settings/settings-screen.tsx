@@ -48,7 +48,7 @@ export default function SettingsScreen({
     university: "Loading...",
     profileImage: "/placeholder.svg" // Use a generic placeholder instead of someone else's photo
   })
-  const [loading, setLoading] = useState(true)
+  const [, setLoading] = useState(true)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -68,7 +68,7 @@ export default function SettingsScreen({
           setUserProfile({
             name: profileData.name,
             university: profileData.university?.name || "University not set",
-            profileImage: profileData.images?.[0]?.cloudfrontUrl || profileImage
+            profileImage: profileData.images?.[0]?.cloudfrontUrl || "/placeholder.svg"
           })
         }
       } catch (error) {
