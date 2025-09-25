@@ -10,7 +10,8 @@ import {
   trackProfileView, 
   getUserGender,
   getMatchState,
-  getAvailableAdjectives
+  getAvailableAdjectives,
+  getConnectionStatus
 } from "@/lib/api"
 import { getAuthToken, prefetchImagesWithPriority } from "@/lib/utils"
 import sessionManager from "@/lib/sessionManager"
@@ -90,8 +91,7 @@ export default function MobileProfileScreen() {
       // If we have cached profiles and it's the first load (offset === 0), use cached data
       if (offset === 0 && sessionManager.getProfiles().length > 0) {
         setProfiles(sessionManager.getProfiles())
-        setLoading(false)
-        return
+        // Do not return here; proceed to fetch fresh data to avoid stale connection statuses
       }
 
       try {
@@ -356,6 +356,38 @@ export default function MobileProfileScreen() {
       const token = getAuthToken()
       if (!token) return
 
+      // Optimistic UI update for immediate feedback
+      if (action === 'connect' || action === 'accept' || action === 'remove' || action === 'block' || action === 'unblock') {
+        const targetId = profiles[currentProfileIndex].id
+        setProfiles(prev => {
+          const updated = prev.map(profile => {
+            if (profile.id !== targetId) return profile
+            const prevState = profile.connectionState || {
+              id: String(Date.now()),
+              userId1: undefined,
+              userId2: undefined,
+              status: 'not_connected' as const,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }
+            let nextStatus = prevState.status
+            if (action === 'connect') nextStatus = 'requested'
+            if (action === 'accept') nextStatus = 'connected'
+            if (action === 'remove') nextStatus = 'not_connected'
+            if (action === 'block') nextStatus = 'blocked'
+            if (action === 'unblock') nextStatus = 'not_connected'
+            const nextState = {
+              ...prevState,
+              status: nextStatus,
+              updatedAt: new Date()
+            }
+            return { ...profile, connectionState: nextState }
+          })
+          sessionManager.setProfiles(updated)
+          return updated
+        })
+      }
+
               const request: ConnectionRequest = {
           targetUserId: String(profiles[currentProfileIndex].id),
           action: action
@@ -378,11 +410,15 @@ export default function MobileProfileScreen() {
         console.log('Transformed connection state:', transformedConnectionState)
 
         // Update the profile's connection state
-        setProfiles(prev => prev.map(profile => 
-          profile.id === profiles[currentProfileIndex].id 
-            ? { ...profile, connectionState: transformedConnectionState }
-            : profile
-        ))
+        setProfiles(prev => {
+          const updated = prev.map(profile => 
+            profile.id === profiles[currentProfileIndex].id 
+              ? { ...profile, connectionState: transformedConnectionState }
+              : profile
+          )
+          sessionManager.setProfiles(updated)
+          return updated
+        })
         
         // Show success message
         if (action === 'connect') {
@@ -391,16 +427,12 @@ export default function MobileProfileScreen() {
       } else {
         // Handle connection failure gracefully
         console.warn('Connection action failed:', response.message)
-        if (action === 'connect') {
-          alert(`Connection request sent to ${profiles[currentProfileIndex].name}!`)
-        }
+        alert(response.message || 'Connection action failed. Please try again.')
       }
     } catch (error) {
       console.error('Error managing connection:', error)
       // Show a fallback message even if API fails
-      if (action === 'connect') {
-        alert(`Connection request sent to ${profiles[currentProfileIndex].name}!`)
-      }
+      alert('Something went wrong managing the connection. Please try again.')
     }
   }
 
@@ -440,6 +472,7 @@ export default function MobileProfileScreen() {
     return (
       <div className="relative w-full h-screen bg-black flex items-center justify-center">
         <div className="text-white text-lg">Loading profiles...</div>
+        <Navbar navItems={navItems} />
       </div>
     )
   }
@@ -456,6 +489,7 @@ export default function MobileProfileScreen() {
             Try Again
           </button>
         </div>
+        <Navbar navItems={navItems} />
       </div>
     )
   }
@@ -467,6 +501,7 @@ export default function MobileProfileScreen() {
           <div className="mb-4">No more profiles available</div>
           <div className="text-sm text-gray-400">You've seen all available profiles!</div>
         </div>
+        <Navbar navItems={navItems} />
       </div>
     )
   }
@@ -474,6 +509,50 @@ export default function MobileProfileScreen() {
   const currentProfile = profiles[currentProfileIndex]
   const connectionStatus = currentProfile.connectionState?.status || 'not_connected'
  
+  // Poll connection status when pending/requested, and on tab focus
+  useEffect(() => {
+    if (!currentProfile) return
+    let intervalId: number | undefined
+
+    const fetchStatus = async () => {
+      try {
+        const token = getAuthToken()
+        if (!token) return
+        const res = await getConnectionStatus(String(currentProfile.id), token)
+        if (res.success && res.connectionState) {
+          const transformed = {
+            id: String(res.connectionState.id),
+            userId1: res.connectionState.requesterId ? String(res.connectionState.requesterId) : res.connectionState.userId1 ? String(res.connectionState.userId1) : undefined,
+            userId2: res.connectionState.targetId ? String(res.connectionState.targetId) : res.connectionState.userId2 ? String(res.connectionState.userId2) : undefined,
+            status: res.connectionState.status === 'pending' ? 'requested' : res.connectionState.status,
+            createdAt: new Date(res.connectionState.createdAt),
+            updatedAt: new Date(res.connectionState.updatedAt)
+          }
+          setProfiles(prev => {
+            const updated = prev.map(p => p.id === currentProfile.id ? { ...p, connectionState: transformed } : p)
+            sessionManager.setProfiles(updated)
+            return updated
+          })
+        }
+      } catch {}
+    }
+
+    const onFocus = () => fetchStatus()
+    window.addEventListener('focus', onFocus)
+
+    if (connectionStatus === 'requested') {
+      // poll every 5s until status changes
+      intervalId = window.setInterval(fetchStatus, 5000)
+      // also fetch immediately once
+      fetchStatus()
+    }
+
+    return () => {
+      window.removeEventListener('focus', onFocus)
+      if (intervalId) window.clearInterval(intervalId)
+    }
+  }, [currentProfileIndex, profiles, connectionStatus])
+
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
       {/* Top Icons */}
@@ -503,39 +582,23 @@ export default function MobileProfileScreen() {
         {/* Profile Info Block */}
         <div className="absolute bottom-0 left-0 right-0 z-10">
           <div className="w-full flex flex-col px-4" style={interFont}>
-            {/* Connection Status Badge */}
+            {/* Connection Status - preserve same outlined pill design, only change text */}
             <div className="mb-2">
-              {connectionStatus === 'connected' && (
-                <div className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold inline-block">
-                  Connected
-                </div>
-              )}
-              {connectionStatus === 'requested' && (
-                <div className="bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-semibold inline-block">
-                  Requested
-                </div>
-              )}
-              {connectionStatus === 'matched' && (
-                <div className="bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-semibold inline-block">
-                  Matched
-                </div>
-              )}
-              {connectionStatus === 'not_connected' && (
-                <button 
-                  onClick={() => handleConnectionAction('connect')}
-                  className="bg-transparent text-white inline-block hover:bg-white/10"
-                  style={{ 
-                    width: '90px', 
-                    height: '25px', 
-                    borderRadius: '5px', 
-                    fontSize: '12px', 
-                    fontWeight: '600',
-                    border: '2px solid #ffffff'
-                  }}
-                >
-                  Connect
-                </button>
-              )}
+              <button 
+                onClick={connectionStatus === 'not_connected' ? () => handleConnectionAction('connect') : undefined}
+                className="bg-transparent text-white inline-block hover:bg-white/10 disabled:opacity-100 disabled:cursor-default"
+                disabled={connectionStatus !== 'not_connected'}
+                style={{ 
+                  width: '90px', 
+                  height: '25px', 
+                  borderRadius: '5px', 
+                  fontSize: '12px', 
+                  fontWeight: '600',
+                  border: '2px solid #ffffff'
+                }}
+              >
+                {connectionStatus === 'requested' ? 'Requested' : connectionStatus === 'connected' ? 'Connected' : 'Connect'}
+              </button>
             </div>
             {/* Name and Year Row */}
             <div className="flex justify-between items-start">
