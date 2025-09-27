@@ -2,7 +2,7 @@ import Rectangle4 from '@/assets/Rectangle 4.png'
 import Rectangle2 from '@/assets/Rectangle 2.png'
 import Rectangle1 from '@/assets/a man teaching, realistic man image, cinemtic, man wearing casual clothes.png'
 import Rectangle3 from '@/assets/Rectangle 3.png'
-// removed wavylines assets; using inline SVG for waves
+import wavy2Svg from '@/assets/wavy2.svg'
 
 interface ConnectStudentsScreenProps {
   onContinue: () => void
@@ -237,7 +237,7 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
         }}
       >
         <img 
-          src="/src/assets/wavy2.svg" 
+          src={wavy2Svg} 
           alt="Wavy pattern"
           style={{
             width: '100%',
