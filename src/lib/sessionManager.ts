@@ -24,6 +24,8 @@ class SessionManager {
    * Load session from localStorage
    */
   private loadSession(): void {
+    if (typeof window === 'undefined') return
+    
     try {
       const stored = localStorage.getItem(SESSION_KEY);
       if (stored) {
@@ -47,6 +49,8 @@ class SessionManager {
    * Save session to localStorage
    */
   private saveSession(): void {
+    if (typeof window === 'undefined') return
+    
     if (this.session) {
       try {
         this.session.lastUpdated = Date.now();
@@ -131,7 +135,9 @@ class SessionManager {
    */
   clearSession(): void {
     this.session = null;
-    localStorage.removeItem(SESSION_KEY);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(SESSION_KEY);
+    }
   }
 
   /**

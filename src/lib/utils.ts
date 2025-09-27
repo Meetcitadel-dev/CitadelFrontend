@@ -6,16 +6,32 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getAuthToken(): string | null {
-  return localStorage.getItem('token') || sessionStorage.getItem('token')
+  if (typeof window === 'undefined') return null
+  try {
+    return localStorage.getItem('token') || sessionStorage.getItem('token')
+  } catch (error) {
+    console.error('Error accessing storage:', error)
+    return null
+  }
 }
 
 export function setAuthToken(token: string): void {
-  localStorage.setItem('token', token)
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem('token', token)
+  } catch (error) {
+    console.error('Error setting auth token:', error)
+  }
 }
 
 export function removeAuthToken(): void {
-  localStorage.removeItem('token')
-  sessionStorage.removeItem('token')
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.removeItem('token')
+    sessionStorage.removeItem('token')
+  } catch (error) {
+    console.error('Error removing auth token:', error)
+  }
 }
 
 // Temporary function for testing - remove this in production

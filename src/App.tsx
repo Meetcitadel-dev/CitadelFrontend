@@ -12,9 +12,14 @@ import { useEffect } from "react";
 import { getAuthToken, prefetchImagesBatched, preloadCriticalImages } from "@/lib/utils";
 import { fetchExploreProfiles, getCurrentUserProfile } from "@/lib/api";
 import UserProfileScreen from "./pages/user-profile";
+import { useClientOnly } from "@/lib/hooks/useClientOnly";
 
 export default function App() {
+  const isClient = useClientOnly()
+  
   useEffect(() => {
+    if (!isClient) return
+    
     const warmImages = async () => {
       try {
         const token = getAuthToken()
@@ -62,7 +67,7 @@ export default function App() {
     // warm shortly after boot
     const t = setTimeout(warmImages, 50)
     return () => clearTimeout(t)
-  }, [])
+  }, [isClient])
   return (
     <BrowserRouter>
       <Routes>
