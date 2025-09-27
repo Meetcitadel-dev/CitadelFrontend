@@ -66,14 +66,6 @@ export default function MobileProfileScreen() {
     setSessionId(sessionManager.getSessionId())
   }, [])
 
-  const navItems = [
-    { icon: Search, label: "Explore", onClick: () => navigate("/explore"), active: location.pathname === "/explore" },
-    { icon: Calendar, label: "Events", onClick: () => navigate("/events"), active: location.pathname === "/events" },
-    { icon: MessageCircle, label: "Chats", onClick: () => navigate("/chats"), active: location.pathname === "/chats" },
-    { icon: Bell, label: "Notifications", onClick: () => navigate("/notification"), active: location.pathname === "/notification" },
-    { icon: User, label: "Profile", onClick: () => navigate("/profile"), active: location.pathname === "/profile" },
-  ];
-
   // Load user's gender for adjective selection
   useEffect(() => {
     const loadUserGender = async () => {
@@ -161,6 +153,7 @@ export default function MobileProfileScreen() {
   // Load adjectives and match state for current profile
   useEffect(() => {
     const loadAdjectivesAndMatchState = async () => {
+      // Always run the effect, but handle conditions inside
       if (profiles.length === 0 || currentProfileIndex >= profiles.length) return
       
       const currentProfile = profiles[currentProfileIndex]
@@ -225,6 +218,7 @@ export default function MobileProfileScreen() {
   // Track profile view when profile changes
   useEffect(() => {
     const trackCurrentProfileView = async () => {
+      // Always run the effect, but handle conditions inside
       if (profiles.length === 0 || currentProfileIndex >= profiles.length) return
       
       const currentProfile = profiles[currentProfileIndex]
@@ -249,6 +243,102 @@ export default function MobileProfileScreen() {
     const timer = setTimeout(trackCurrentProfileView, 500)
     return () => clearTimeout(timer)
   }, [currentProfileIndex, profiles])
+
+  // Enhanced prefetching for next profile images to make swipes instant
+  useEffect(() => {
+    const preloadCount = 5 // Increased from 3 for better performance
+    const highPriorityUrls: string[] = []
+    const lowPriorityUrls: string[] = []
+    
+    for (let i = 1; i <= preloadCount; i++) {
+      const next = profiles[currentProfileIndex + i]
+      if (next && next.profileImage) {
+        if (i <= 2) {
+          // First 2 images get high priority
+          highPriorityUrls.push(next.profileImage)
+        } else {
+          // Rest get low priority
+          lowPriorityUrls.push(next.profileImage)
+        }
+      }
+    }
+    
+    // Prefetch high priority images immediately
+    if (highPriorityUrls.length > 0) {
+      prefetchImagesWithPriority(highPriorityUrls, 'high')
+    }
+    
+    // Prefetch low priority images with delay
+    if (lowPriorityUrls.length > 0) {
+      setTimeout(() => {
+        prefetchImagesWithPriority(lowPriorityUrls, 'low')
+      }, 100)
+    }
+  }, [currentProfileIndex, profiles])
+
+  // Poll connection status when pending/requested, and on tab focus
+  useEffect(() => {
+    // Always run the effect, but handle conditional logic inside
+    let intervalId: number | undefined
+
+    const fetchStatus = async () => {
+      const currentProfile = profiles[currentProfileIndex]
+      if (!currentProfile) return
+      
+      try {
+        const token = getAuthToken()
+        if (!token) return
+        const res = await getConnectionStatus(String(currentProfile.id), token)
+        if (res.success && res.connectionState) {
+          const transformed = {
+            id: String(res.connectionState.id),
+            userId1: res.connectionState.requesterId ? String(res.connectionState.requesterId) : res.connectionState.userId1 ? String(res.connectionState.userId1) : undefined,
+            userId2: res.connectionState.targetId ? String(res.connectionState.targetId) : res.connectionState.userId2 ? String(res.connectionState.userId2) : undefined,
+            status: res.connectionState.status === 'pending' ? 'requested' : res.connectionState.status,
+            createdAt: new Date(res.connectionState.createdAt),
+            updatedAt: new Date(res.connectionState.updatedAt)
+          }
+          setProfiles(prev => {
+            const updated = prev.map(p => p.id === currentProfile.id ? { ...p, connectionState: transformed } : p)
+            sessionManager.setProfiles(updated)
+            return updated
+          })
+        }
+      } catch {}
+    }
+
+    // Handle window check inside the effect
+    if (typeof window !== 'undefined') {
+      const onFocus = () => fetchStatus()
+      window.addEventListener('focus', onFocus)
+
+      const currentProfile = profiles[currentProfileIndex]
+      const connectionStatus = currentProfile?.connectionState?.status || 'not_connected'
+      
+      if (currentProfile && connectionStatus === 'requested') {
+        // poll every 5s until status changes
+        intervalId = window.setInterval(fetchStatus, 5000)
+        // also fetch immediately once
+        fetchStatus()
+      }
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        const onFocus = () => fetchStatus()
+        window.removeEventListener('focus', onFocus)
+        if (intervalId) window.clearInterval(intervalId)
+      }
+    }
+  }, [currentProfileIndex, profiles])
+
+  const navItems = [
+    { icon: Search, label: "Explore", onClick: () => navigate("/explore"), active: location.pathname === "/explore" },
+    { icon: Calendar, label: "Events", onClick: () => navigate("/events"), active: location.pathname === "/events" },
+    { icon: MessageCircle, label: "Chats", onClick: () => navigate("/chats"), active: location.pathname === "/chats" },
+    { icon: Bell, label: "Notifications", onClick: () => navigate("/notification"), active: location.pathname === "/notification" },
+    { icon: User, label: "Profile", onClick: () => navigate("/profile"), active: location.pathname === "/profile" },
+  ];
 
   // Load more profiles when needed
   const loadMoreProfiles = () => {
@@ -444,38 +534,6 @@ export default function MobileProfileScreen() {
     }
   }
 
-  // Enhanced prefetching for next profile images to make swipes instant
-  useEffect(() => {
-    const preloadCount = 5 // Increased from 3 for better performance
-    const highPriorityUrls: string[] = []
-    const lowPriorityUrls: string[] = []
-    
-    for (let i = 1; i <= preloadCount; i++) {
-      const next = profiles[currentProfileIndex + i]
-      if (next && next.profileImage) {
-        if (i <= 2) {
-          // First 2 images get high priority
-          highPriorityUrls.push(next.profileImage)
-        } else {
-          // Rest get low priority
-          lowPriorityUrls.push(next.profileImage)
-        }
-      }
-    }
-    
-    // Prefetch high priority images immediately
-    if (highPriorityUrls.length > 0) {
-      prefetchImagesWithPriority(highPriorityUrls, 'high')
-    }
-    
-    // Prefetch low priority images with delay
-    if (lowPriorityUrls.length > 0) {
-      setTimeout(() => {
-        prefetchImagesWithPriority(lowPriorityUrls, 'low')
-      }, 100)
-    }
-  }, [currentProfileIndex, profiles])
-
   if (loading && profiles.length === 0) {
     return (
       <div className="relative w-full h-screen bg-black flex items-center justify-center">
@@ -516,52 +574,6 @@ export default function MobileProfileScreen() {
 
   const currentProfile = profiles[currentProfileIndex]
   const connectionStatus = currentProfile.connectionState?.status || 'not_connected'
- 
-  // Poll connection status when pending/requested, and on tab focus
-  useEffect(() => {
-    if (!currentProfile) return
-    let intervalId: number | undefined
-
-    const fetchStatus = async () => {
-      try {
-        const token = getAuthToken()
-        if (!token) return
-        const res = await getConnectionStatus(String(currentProfile.id), token)
-        if (res.success && res.connectionState) {
-          const transformed = {
-            id: String(res.connectionState.id),
-            userId1: res.connectionState.requesterId ? String(res.connectionState.requesterId) : res.connectionState.userId1 ? String(res.connectionState.userId1) : undefined,
-            userId2: res.connectionState.targetId ? String(res.connectionState.targetId) : res.connectionState.userId2 ? String(res.connectionState.userId2) : undefined,
-            status: res.connectionState.status === 'pending' ? 'requested' : res.connectionState.status,
-            createdAt: new Date(res.connectionState.createdAt),
-            updatedAt: new Date(res.connectionState.updatedAt)
-          }
-          setProfiles(prev => {
-            const updated = prev.map(p => p.id === currentProfile.id ? { ...p, connectionState: transformed } : p)
-            sessionManager.setProfiles(updated)
-            return updated
-          })
-        }
-      } catch {}
-    }
-
-    if (typeof window === 'undefined') return
-
-    const onFocus = () => fetchStatus()
-    window.addEventListener('focus', onFocus)
-
-    if (connectionStatus === 'requested') {
-      // poll every 5s until status changes
-      intervalId = window.setInterval(fetchStatus, 5000)
-      // also fetch immediately once
-      fetchStatus()
-    }
-
-    return () => {
-      window.removeEventListener('focus', onFocus)
-      if (intervalId) window.clearInterval(intervalId)
-    }
-  }, [currentProfileIndex, profiles, connectionStatus])
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
