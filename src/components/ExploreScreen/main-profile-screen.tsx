@@ -60,11 +60,10 @@ export default function MobileProfileScreen() {
 
   // Initialize session data on client side only
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setCurrentProfileIndex(sessionManager.getCurrentProfileIndex())
-      setProfiles(sessionManager.getProfiles())
-      setSessionId(sessionManager.getSessionId())
-    }
+    // Remove window check - sessionManager handles this internally
+    setCurrentProfileIndex(sessionManager.getCurrentProfileIndex())
+    setProfiles(sessionManager.getProfiles())
+    setSessionId(sessionManager.getSessionId())
   }, [])
 
   const navItems = [

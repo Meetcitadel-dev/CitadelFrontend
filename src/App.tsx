@@ -67,7 +67,7 @@ export default function App() {
     // warm shortly after boot
     const t = setTimeout(warmImages, 50)
     return () => clearTimeout(t)
-  }, [isClient])
+  }, [])
   return (
     <BrowserRouter>
       <Routes>
