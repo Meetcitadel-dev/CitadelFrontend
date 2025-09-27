@@ -19,6 +19,13 @@ export default defineConfig({
       protocol: 'ws',     // Explicitly specify WebSocket protocol
     }
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
+  },
   define: {
     // Ensure proper environment detection
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')

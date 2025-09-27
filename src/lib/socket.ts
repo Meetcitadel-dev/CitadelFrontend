@@ -24,7 +24,8 @@ class ChatSocketService {
     this.isConnecting = true;
 
     // Connect to your backend WebSocket endpoint with better configuration
-    this.socket = io('http://localhost:3000', {
+    const baseUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000';
+    this.socket = io(baseUrl, {
       auth: {
         token: token
       },
@@ -373,7 +374,8 @@ class ChatSocketService {
   // Check if backend is available
   async checkBackendAvailability(): Promise<boolean> {
     try {
-      const response = await fetch('http://localhost:3000/health', {
+      const baseUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000';
+      const response = await fetch(baseUrl + '/health', {
         method: 'GET',
         timeout: 5000
       } as any);
