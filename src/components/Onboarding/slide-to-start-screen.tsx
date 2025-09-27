@@ -70,6 +70,8 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
   }
 
   useEffect(() => {
+    if (typeof document === 'undefined') return
+    
     if (isDragging) {
       document.addEventListener("mousemove", handleMouseMove)
       document.addEventListener("mouseup", handleMouseUp)

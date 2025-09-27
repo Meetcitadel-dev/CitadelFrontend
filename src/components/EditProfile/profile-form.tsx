@@ -45,8 +45,10 @@ export default function ProfileForm({ profileData, updateProfileData }: ProfileF
         setExtraCurricularOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    if (typeof document !== 'undefined') {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
   }, []);
 
   const handleInputChange = (field: string, value: string | string[]) => {

@@ -234,7 +234,7 @@ export default function ProfilesPage() {
 
   // Handle infinite scroll
   const handleScroll = useCallback(() => {
-    if (loadingMore || !hasMore) return
+    if (loadingMore || !hasMore || typeof window === 'undefined') return
 
     const scrollTop = window.scrollY
     const windowHeight = window.innerHeight
@@ -246,6 +246,8 @@ export default function ProfilesPage() {
   }, [loadingMore, hasMore, loadProfiles])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [handleScroll])

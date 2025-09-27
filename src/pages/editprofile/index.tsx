@@ -180,7 +180,11 @@ export default function EditProfileScreen({ onSave }: EditProfileScreenProps) {
         {/* Main Profile Photo */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 16 }}>
           <button
-            onClick={() => document.getElementById('main-photo-input')?.click()}
+            onClick={() => {
+              if (typeof document !== 'undefined') {
+                document.getElementById('main-photo-input')?.click()
+              }
+            }}
             style={{ width: 120, height: 120, border: '2px dashed #22FF88', borderRadius: 16, background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}
           >
             {profileData.mainPhoto ? (
@@ -205,7 +209,11 @@ export default function EditProfileScreen({ onSave }: EditProfileScreenProps) {
           {[0, 1, 2, 3].map((index) => (
             <button
               key={index}
-              onClick={() => document.getElementById(`additional-photo-input-${index}`)?.click()}
+              onClick={() => {
+                if (typeof document !== 'undefined') {
+                  document.getElementById(`additional-photo-input-${index}`)?.click()
+                }
+              }}
               style={{ width: 56, height: 56, border: '2px dashed #444', borderRadius: 12, background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
             >
               {profileData.additionalPhotos[index] ? (

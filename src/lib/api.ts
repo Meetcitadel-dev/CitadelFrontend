@@ -1,4 +1,5 @@
 import { apiClient } from './apiClient';
+import { getAuthToken } from './utils';
 import type { ExploreResponse, ConnectionRequest, AdjectiveSelection, AdjectiveMatchResponse, NotificationResponse, AcceptRejectRequest } from '@/types';
 
 // Fetch list of universities with optional search, limit, offset
@@ -75,7 +76,7 @@ export function verifyOTP(email: string, otp: string) {
 // Submit onboarding data
 export function submitOnboardingData(data: any, token?: string) {
   // If no token provided, try to get it from localStorage
-  const authToken = token || localStorage.getItem('token');
+  const authToken = token || getAuthToken();
   
   return apiClient<{ success: boolean; message?: string }>(
     '/api/v1/onboarding',

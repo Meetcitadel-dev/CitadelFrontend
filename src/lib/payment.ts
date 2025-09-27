@@ -80,6 +80,11 @@ export class PaymentService {
   // Load Razorpay script
   private loadRazorpayScript(): Promise<void> {
     return new Promise((resolve, reject) => {
+      if (typeof window === 'undefined' || typeof document === 'undefined') {
+        reject(new Error('Document not available'));
+        return;
+      }
+
       if (this.razorpayLoaded) {
         resolve();
         return;
@@ -213,6 +218,9 @@ export class PaymentService {
       };
 
       // Initialize Razorpay
+      if (typeof window === 'undefined' || !window.Razorpay) {
+        throw new Error('Razorpay not available');
+      }
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {

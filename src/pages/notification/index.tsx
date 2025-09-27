@@ -8,6 +8,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import NotificationItem from "@/components/Notification/NotificationItem"
 import RequestItem from "@/components/Notification/RequestItem"
 import LoadingSpinner from "@/components/Notification/LoadingSpinner"
+import { getAuthToken } from "@/lib/utils"
 import { fetchNotifications, handleConnectionRequest } from "@/lib/api"
 import type { ConnectionRequestNotification, AdjectiveNotification } from "@/types"
 
@@ -37,7 +38,7 @@ export default function NotificationsScreen() {
       try {
         setLoading(true)
         setError(null)
-        const token = localStorage.getItem('token')
+        const token = getAuthToken()
         const response = await fetchNotifications(token || undefined)
         
         if (response.success) {
@@ -62,7 +63,7 @@ export default function NotificationsScreen() {
   const handleAcceptRequest = async (requestId: string) => {
     try {
       setProcessingRequest(requestId)
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const response = await handleConnectionRequest(
         { requestId, action: 'accept' },
         token || undefined
@@ -94,7 +95,7 @@ export default function NotificationsScreen() {
   const handleRejectRequest = async (requestId: string) => {
     try {
       setProcessingRequest(requestId)
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const response = await handleConnectionRequest(
         { requestId, action: 'reject' },
         token || undefined

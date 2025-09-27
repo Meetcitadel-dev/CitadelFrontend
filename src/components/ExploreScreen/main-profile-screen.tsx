@@ -36,9 +36,9 @@ const convertOrdinalToNumber = (year: string): string => {
 
 export default function MobileProfileScreen() {
   const [selectedTrait, setSelectedTrait] = useState("")
-  const [currentProfileIndex, setCurrentProfileIndex] = useState(() => sessionManager.getCurrentProfileIndex())
+  const [currentProfileIndex, setCurrentProfileIndex] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [profiles, setProfiles] = useState<ExploreProfile[]>(() => sessionManager.getProfiles())
+  const [profiles, setProfiles] = useState<ExploreProfile[]>([])
   const [error, setError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
   const [offset, setOffset] = useState(0)
@@ -53,10 +53,19 @@ export default function MobileProfileScreen() {
   const [, setHasSelectedAdjective] = useState(false)
   
   // Session state for adjective persistence - now using global session manager
-  const [sessionId, setSessionId] = useState<string | null>(() => sessionManager.getSessionId())
+  const [sessionId, setSessionId] = useState<string | null>(null)
   
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Initialize session data on client side only
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCurrentProfileIndex(sessionManager.getCurrentProfileIndex())
+      setProfiles(sessionManager.getProfiles())
+      setSessionId(sessionManager.getSessionId())
+    }
+  }, [])
 
   const navItems = [
     { icon: Search, label: "Explore", onClick: () => navigate("/explore"), active: location.pathname === "/explore" },
@@ -536,6 +545,8 @@ export default function MobileProfileScreen() {
         }
       } catch {}
     }
+
+    if (typeof window === 'undefined') return
 
     const onFocus = () => fetchStatus()
     window.addEventListener('focus', onFocus)
