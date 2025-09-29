@@ -3,6 +3,7 @@ import Rectangle2 from '@/assets/Rectangle 2.png'
 import Rectangle1 from '@/assets/a man teaching, realistic man image, cinemtic, man wearing casual clothes.png'
 import Rectangle3 from '@/assets/Rectangle 3.png'
 import wavy2Svg from '@/assets/wavy2.svg'
+import { useEffect, useState } from 'react'
 
 interface ConnectStudentsScreenProps {
   onContinue: () => void
@@ -10,8 +11,39 @@ interface ConnectStudentsScreenProps {
 }
 
 export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectStudentsScreenProps) {
+  // Design reference size (based on the Figma/static layout)
+  const DESIGN_WIDTH = 390
+  const DESIGN_HEIGHT = 844
+
+  const [scale, setScale] = useState(1)
+
+  useEffect(() => {
+    const computeScale = () => {
+      const vw = window.innerWidth
+      const scaleX = vw / DESIGN_WIDTH
+      // Fill width to avoid left/right gaps; allow vertical overflow (clipped at top)
+      // This keeps the wavy bottom aligned to viewport bottom when we anchor the canvas
+      const s = scaleX
+      setScale(s)
+    }
+    computeScale()
+    window.addEventListener('resize', computeScale)
+    return () => window.removeEventListener('resize', computeScale)
+  }, [])
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Scaled design canvas to keep proportions constant across screens */}
+      <div
+        style={{
+          width: `${DESIGN_WIDTH}px`,
+          height: `${DESIGN_HEIGHT}px`,
+          position: 'absolute',
+          left: '50%',
+          bottom: 0,
+          transform: `translateX(-50%) scale(${scale})`,
+          transformOrigin: 'bottom center'
+        }}
+      >
       {/* Profile Images Container */}
       <div 
         className="absolute left-1/2 transform -translate-x-1/2"
@@ -19,7 +51,8 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
           top: '52px',
           width: '286px',
           height: '345px',
-          position: 'relative'
+          position: 'relative',
+          zIndex: 10
         }}
       >
         {/* Rectangle 4 - positioned at 42px from top, 36px from left */}
@@ -107,7 +140,8 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
           height: '142px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          zIndex: 10
         }}
       >
         <h1 
@@ -146,7 +180,8 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
           gap: '8px',
           flexShrink: 0,
           borderRadius: '48px',
-          background: '#1BEA7B'
+          background: '#1BEA7B',
+          zIndex: 10
         }}
       >
         <button
@@ -178,7 +213,8 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
           display: '-webkit-box',
           WebkitBoxOrient: 'vertical',
           WebkitLineClamp: 1,
-          textAlign: 'center'
+          textAlign: 'center',
+          zIndex: 10
         }}
       >
         <span 
@@ -243,9 +279,11 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            objectPosition: 'bottom'
+            objectPosition: 'bottom',
+            pointerEvents: 'none'
           }}
         />
+      </div>
       </div>
     </div>
   )
