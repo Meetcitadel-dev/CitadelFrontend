@@ -249,7 +249,7 @@ export default function ChatApp() {
   }
 
   return (
-    <div className="bg-black min-h-screen text-white pb-20">
+    <div className="relative bg-black h-screen overflow-hidden text-white">
       {activeTab === "active" ? (
         <ActiveChats 
           activeTab={activeTab} 

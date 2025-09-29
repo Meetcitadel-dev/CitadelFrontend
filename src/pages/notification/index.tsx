@@ -135,7 +135,7 @@ export default function NotificationsScreen() {
 
   if (loading) {
     return (
-      <div className="bg-black min-h-screen text-white pt-4">
+      <div className="relative bg-black h-screen overflow-hidden text-white pt-4">
         <div className="px-4 py-4">
           <h1 className="text-2xl font-bold mb-6">Notifications</h1>
         </div>
@@ -149,7 +149,7 @@ export default function NotificationsScreen() {
 
   if (error) {
     return (
-      <div className="bg-black min-h-screen text-white pt-4">
+      <div className="relative bg-black h-screen overflow-hidden text-white pt-4">
         <div className="px-4 py-4">
           <h1 className="text-2xl font-bold mb-6">Notifications</h1>
         </div>
@@ -174,7 +174,7 @@ export default function NotificationsScreen() {
   }
 
   return (
-    <div className="bg-black min-h-screen text-white pt-4">
+    <div className="relative bg-black h-screen overflow-hidden text-white pt-4">
       <div className="px-4 py-4">
         <h1 className="text-2xl font-bold mb-6">Notifications</h1>
       </div>
@@ -185,7 +185,7 @@ export default function NotificationsScreen() {
         requestCount={requestCount} 
       />
 
-      <div className="pb-20">
+      <div>
         {activeTab === "likes" ? (
           <div>
             {adjectiveNotifications.length > 0 ? (
