@@ -20,7 +20,11 @@ export default function ScaledCanvas({
   useEffect(() => {
     const computeScale = () => {
       const vw = window.innerWidth
-      const s = vw / width
+      const vh = window.innerHeight
+      const scaleX = vw / width
+      const scaleY = vh / height
+      const isSmallScreen = vw <= 480
+      const s = isSmallScreen ? scaleX : Math.min(scaleX, scaleY)
       setScale(s)
     }
     computeScale()
@@ -28,8 +32,13 @@ export default function ScaledCanvas({
     return () => window.removeEventListener('resize', computeScale)
   }, [width])
 
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 390
+  const isSmallScreen = vw <= 480
+  // On small screens: use requested anchor (default bottom). On larger screens: force center to ensure full visibility.
+  const effectiveAnchor = isSmallScreen ? anchor : 'center'
+
   const anchoredStyle =
-    anchor === 'center'
+    effectiveAnchor === 'center'
       ? {
           position: 'absolute' as const,
           top: '50%',

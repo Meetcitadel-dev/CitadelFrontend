@@ -235,6 +235,7 @@ export default function DinnerBooking() {
 
   // Main Booking Screen
   return (
+    <>
     <ScaledCanvas>
       <div className="w-[390px] h-[844px] flex flex-col relative">
       {/* Top Section - Image Background - fixed 330px height */}
@@ -309,9 +310,10 @@ export default function DinnerBooking() {
         </div>
       </div>
 
-      {/* Global Navbar */}
-      <Navbar navItems={navItems} />
-    </div>
+      </div>
     </ScaledCanvas>
+    {/* Global Navbar (outside scaler for consistent size) */}
+    <Navbar navItems={navItems} />
+    </>
   )
 }
