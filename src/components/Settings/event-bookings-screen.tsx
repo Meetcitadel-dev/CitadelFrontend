@@ -10,17 +10,16 @@ interface EventBookingsScreenProps {
 
 export default function EventBookingsScreen({ onBack }: EventBookingsScreenProps) {
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming")
-
-  const eventData = {
-    eventName: "Shift Lounge",
-    guestCount: 6,
-    date: "02 July 2025",
-    time: "8:00 PM",
-    location: "HSR, Bangalore",
-    rating: 4,
-    status: "booked" as const,
-    eventImage: "/placeholder.svg?height=48&width=48",
-  }
+  const events: Array<{
+    eventName: string
+    guestCount: number
+    date: string
+    time: string
+    location: string
+    rating: number
+    status: "booked" | "completed" | "cancelled"
+    eventImage?: string
+  }> = []
 
   return (
     <div className="w-full min-h-screen bg-black">
@@ -28,8 +27,15 @@ export default function EventBookingsScreen({ onBack }: EventBookingsScreenProps
       <div className="pt-6">
         <EventTabs activeTab={activeTab} onTabChange={setActiveTab} />
         <div className="pb-8">
-          <EventCard {...eventData} />
-          <EventCard {...eventData} />
+          {events.length === 0 ? (
+            <div className="px-4 py-12 text-center text-gray-400">
+              {activeTab === "upcoming" ? "No upcoming bookings." : "No past bookings."}
+            </div>
+          ) : (
+            events.map((evt, idx) => (
+              <EventCard key={idx} {...evt} />
+            ))
+          )}
         </div>
       </div>
     </div>
