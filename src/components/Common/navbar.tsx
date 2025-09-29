@@ -16,7 +16,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems = [] }) => (
   <div
     role="navigation"
     aria-label="Primary"
-    className="fixed bottom-0 left-0 right-0 z-30 bg-black/95 backdrop-blur-sm border-t border-white/10"
+    className="absolute bottom-0 left-0 right-0 bg-black/95 backdrop-blur-sm border-t border-white/10"
     style={{ height: '72px', fontFamily: 'Inter' }}
   >
     <div className="flex justify-between items-center px-4 h-full">

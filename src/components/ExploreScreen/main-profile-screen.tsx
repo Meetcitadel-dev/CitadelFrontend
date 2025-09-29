@@ -658,8 +658,8 @@ export default function MobileProfileScreen() {
         </div>
       </div>
 
-      {/* Personality Traits - reserve space for fixed navbar using padding */}
-      <div className="px-4 py-3 pb-[88px]">
+      {/* Personality Traits - fixed area to avoid overlap with navbar, no page scroll */}
+      <div className="px-4 py-3 mb-[88px]">
         {loadingAdjectives ? (
           <div className="grid grid-cols-2 gap-3">
             {[1, 2, 3, 4].map((i) => (
