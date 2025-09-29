@@ -16,6 +16,22 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
   const sliderRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // Keep the screen design proportions constant across devices
+  const DESIGN_WIDTH = 390
+  const DESIGN_HEIGHT = 844
+  const [scale, setScale] = useState(1)
+
+  useEffect(() => {
+    const computeScale = () => {
+      const vw = window.innerWidth
+      const scaleX = vw / DESIGN_WIDTH
+      setScale(scaleX)
+    }
+    computeScale()
+    window.addEventListener('resize', computeScale)
+    return () => window.removeEventListener('resize', computeScale)
+  }, [])
+
   const handleStart = () => {
     setIsDragging(true)
   }
@@ -89,6 +105,18 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Scaled design canvas */}
+      <div
+        style={{
+          width: `${DESIGN_WIDTH}px`,
+          height: `${DESIGN_HEIGHT}px`,
+          position: 'absolute',
+          left: '50%',
+          bottom: 0,
+          transform: `translateX(-50%) scale(${scale})`,
+          transformOrigin: 'bottom center'
+        }}
+      >
       {/* Images Container - Above Curved Background */}
       <div 
         className="absolute left-1/2 transform -translate-x-1/2"
@@ -323,5 +351,6 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
         </div>
       </div>
     </div>
+      </div>
   )
 }
