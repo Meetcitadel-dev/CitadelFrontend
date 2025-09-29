@@ -10,36 +10,13 @@ interface BlockedUsersScreenProps {
 
 export default function BlockedUsersScreen({ onBack }: BlockedUsersScreenProps) {
   const [searchQuery, setSearchQuery] = useState("")
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: "Deniyal Shifer",
-      location: "IIT Delhi",
-      profileImage: "/placeholder.svg?height=48&width=48",
-      isBlocked: true,
-    },
-    {
-      id: 2,
-      name: "Deniyal Shifer",
-      location: "IIT Delhi",
-      profileImage: "/placeholder.svg?height=48&width=48",
-      isBlocked: false,
-    },
-    {
-      id: 3,
-      name: "Deniyal Shifer",
-      location: "IIT Delhi",
-      profileImage: "/placeholder.svg?height=48&width=48",
-      isBlocked: false,
-    },
-    {
-      id: 4,
-      name: "Deniyal Shifer",
-      location: "IIT Delhi",
-      profileImage: "/placeholder.svg?height=48&width=48",
-      isBlocked: true,
-    },
-  ])
+  const [users, setUsers] = useState<Array<{
+    id: number
+    name: string
+    location: string
+    profileImage: string
+    isBlocked: boolean
+  }>>([])
 
   const handleToggleBlock = (userId: number) => {
     setUsers((prev) => prev.map((user) => (user.id === userId ? { ...user, isBlocked: !user.isBlocked } : user)))
@@ -61,16 +38,22 @@ export default function BlockedUsersScreen({ onBack }: BlockedUsersScreenProps) 
         </div>
       </div>
       <div>
-        {users.map((user) => (
-          <UserCard
-            key={user.id}
-            name={user.name}
-            location={user.location}
-            profileImage={user.profileImage}
-            isBlocked={user.isBlocked}
-            onToggleBlock={() => handleToggleBlock(user.id)}
-          />
-        ))}
+        {users.length === 0 ? (
+          <div className="px-4 py-12 text-center text-gray-400">
+            No blocked users.
+          </div>
+        ) : (
+          users.map((user) => (
+            <UserCard
+              key={user.id}
+              name={user.name}
+              location={user.location}
+              profileImage={user.profileImage}
+              isBlocked={user.isBlocked}
+              onToggleBlock={() => handleToggleBlock(user.id)}
+            />
+          ))
+        )}
       </div>
     </div>
   )

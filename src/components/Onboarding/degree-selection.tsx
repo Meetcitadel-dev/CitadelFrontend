@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Search } from "lucide-react"
+import ScaledCanvas from './ScaledCanvas'
 
 const degrees = ["B.Tech", "B.Des", "B.A.", "B.Sc", "BBA", "M.Tech", "M.A.", "PhD", "B.Pharm", "MCA", "LLB"]
 
@@ -35,7 +36,8 @@ export default function DegreeSelection({ value, onContinue, onBack }: { value?:
   const canContinue = currentStep === "degree" ? selectedDegree : selectedYear
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif" }}>
+    <ScaledCanvas>
+      <div style={{ width: 390, height: 844, background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif" }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '0 0 0 24px', paddingTop: 35, height: 56 }}>
         <button 
@@ -171,6 +173,7 @@ export default function DegreeSelection({ value, onContinue, onBack }: { value?:
           Continue
         </button>
       </div>
-    </div>
+      </div>
+    </ScaledCanvas>
   );
 }

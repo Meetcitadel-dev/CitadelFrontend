@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { Search, X } from "lucide-react"
+import ScaledCanvas from './ScaledCanvas'
 
 interface SkillsetsScreenProps {
   value?: string[]
@@ -94,7 +95,8 @@ export default function SkillsetsScreen({ value, onContinue, onBack }: Skillsets
   const isSkillsValid = selectedSkills.length >= 1 && selectedSkills.length <= 5
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif", display: 'flex', flexDirection: 'column' }}>
+    <ScaledCanvas>
+      <div style={{ width: 390, height: 844, background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif", display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '0 0 0 24px', paddingTop: 35, height: 56 }}>
                 <button 
@@ -221,6 +223,7 @@ export default function SkillsetsScreen({ value, onContinue, onBack }: Skillsets
           Continue
         </button>
       </div>
-    </div>
+      </div>
+    </ScaledCanvas>
   )
 }

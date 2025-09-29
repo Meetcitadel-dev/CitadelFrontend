@@ -2,6 +2,7 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
+import ScaledCanvas from './ScaledCanvas'
 // ... existing code ...
 import { verifyOTP } from '@/lib/api'
 import { setAuthToken } from '@/lib/utils'
@@ -75,7 +76,8 @@ export default function OTPInputScreen({ email, onContinue, onBack }: OTPInputSc
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif" }}>
+    <ScaledCanvas>
+      <div style={{ width: 390, height: 844, background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif" }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '0 0 0 24px', paddingTop: 35, height: 56 }}>
                 <button 
@@ -157,6 +159,7 @@ export default function OTPInputScreen({ email, onContinue, onBack }: OTPInputSc
           {loading ? 'Verifying...' : 'Continue'}
         </button>
       </div>
-    </div>
+      </div>
+    </ScaledCanvas>
   )
 }

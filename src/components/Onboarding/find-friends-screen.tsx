@@ -1,5 +1,6 @@
 import { useState } from "react"
 import Contactimg from '@/assets/1e10bdd1afdcc6bfb91f29a8440a94b1f71cf64b.png'
+import ScaledCanvas from './ScaledCanvas'
 
 interface FindFriendsScreenProps {
   onAllowContacts: () => void
@@ -31,7 +32,8 @@ export default function FindFriendsScreen({ onAllowContacts, onSkip }: FindFrien
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <ScaledCanvas>
+      <div className="w-[390px] h-[844px] bg-black text-white flex flex-col">
              {/* Main content */}
                <div className="flex-1 flex flex-col">
           {/* Title with exact Figma specifications - positioned absolutely */}
@@ -131,5 +133,6 @@ export default function FindFriendsScreen({ onAllowContacts, onSkip }: FindFrien
           </div>
         </div>
       </div>
+    </ScaledCanvas>
     )
   }
