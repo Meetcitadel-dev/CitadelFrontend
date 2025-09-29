@@ -1,6 +1,7 @@
 import type React from "react"
 
 import { useState } from "react"
+import ScaledCanvas from './ScaledCanvas'
 // ... existing code ...
 import { sendEmailOTP } from '@/lib/api'
 
@@ -61,7 +62,8 @@ export default function EmailInputScreen({ value, onContinue, onBack }: EmailInp
   const isEmailComplete = email && isCollegeEmail(email)
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif" }}>
+    <ScaledCanvas>
+      <div style={{ width: 390, height: 844, background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif" }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '0 0 0 24px', paddingTop: 35, height: 56 }}>
                 <button 
@@ -131,6 +133,7 @@ export default function EmailInputScreen({ value, onContinue, onBack }: EmailInp
           {loading ? 'Sending OTP...' : 'Continue'}
         </button>
       </div>
-    </div>
+      </div>
+    </ScaledCanvas>
   )
 }
