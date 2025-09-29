@@ -576,7 +576,7 @@ export default function MobileProfileScreen() {
   const connectionStatus = currentProfile.connectionState?.status || 'not_connected'
 
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden">
+    <div className="relative w-full h-screen bg-black overflow-hidden flex flex-col">
       {/* Top Icons */}
       <div className="absolute top-4 right-4 z-20 flex gap-3">
         <button onClick={() => navigate('/gridview')}>
@@ -588,7 +588,7 @@ export default function MobileProfileScreen() {
       </div>
 
       {/* Profile Image with Gradient Overlay and Info Block */}
-      <div className="relative w-full" style={{ height: '586px' }}>
+      <div className="relative w-full flex-grow min-h-0">
         <img 
           src={currentProfile.profileImage || "/placeholder.svg"} 
           alt="Profile" 
@@ -658,40 +658,40 @@ export default function MobileProfileScreen() {
         </div>
       </div>
 
-      {/* Personality Traits */}
-      <div className="px-4 absolute bottom-0 left-0 right-0" style={{ bottom: '106px' }}>
+      {/* Personality Traits - fixed area to avoid overlap with navbar, no page scroll */}
+      <div className="px-4 py-3 mb-[88px]">
         {loadingAdjectives ? (
           <div className="grid grid-cols-2 gap-3">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="rounded-2xl bg-gray-800 animate-pulse" style={{ width: '176px', height: '62px' }}>
+              <div key={i} className="rounded-2xl bg-gray-800 animate-pulse w-full h-[56px]">
                 <div className="h-6 bg-gray-700 rounded"></div>
               </div>
             ))}
           </div>
         ) : adjectiveDisplay ? (
           <div className="grid grid-cols-2 gap-3">
-            {adjectiveDisplay.allAdjectives.map((trait) => (
+            {adjectiveDisplay.allAdjectives.slice(0, 4).map((trait) => (
               <button
                 key={trait}
                 onClick={() => handleTraitSelection(trait)}
                 disabled={selectedTrait !== ""}
-                className={`rounded-2xl text-center transition-all ${
+                style={{ height: '56px', fontFamily: 'Inter' }}
+                className={`rounded-2xl text-center transition-all w-full text-base ${
                   selectedTrait === trait 
                     ? "bg-green-500 text-black" 
                     : selectedTrait !== "" 
                       ? "bg-gray-500 text-gray-300 cursor-not-allowed"
                       : "bg-white/10 backdrop-blur-sm text-green-400 hover:bg-white/20"
                 }`}
-                style={{ width: '176px', height: '62px', fontFamily: 'Inter' }}
               >
-                <span className="text-lg font-semibold">{trait}</span>
+                <span className="font-semibold">{trait}</span>
               </button>
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="rounded-2xl bg-gray-800" style={{ width: '176px', height: '62px' }}>
+              <div key={i} className="rounded-2xl bg-gray-800 w-full h-[56px]">
                 <div className="h-6 bg-gray-700 rounded"></div>
               </div>
             ))}
