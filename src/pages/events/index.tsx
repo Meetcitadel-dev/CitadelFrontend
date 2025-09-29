@@ -15,6 +15,7 @@ import { LocationHeader } from "@/components/Events/location-header"
 import { BookingHeader } from "@/components/Events/booking-header"
 import { TimeSlot } from "@/components/Events/time-slot"
 import { BookButton } from "@/components/Events/book-button"
+import ScaledCanvas from "@/components/Onboarding/ScaledCanvas"
 
 
 interface TimeSlotData {
@@ -234,7 +235,8 @@ export default function DinnerBooking() {
 
   // Main Booking Screen
   return (
-    <div className="min-h-screen flex flex-col">
+    <ScaledCanvas>
+      <div className="w-[390px] h-[844px] flex flex-col relative">
       {/* Top Section - Image Background - fixed 330px height */}
       <div 
         className="relative overflow-hidden" 
@@ -310,5 +312,6 @@ export default function DinnerBooking() {
       {/* Global Navbar */}
       <Navbar navItems={navItems} />
     </div>
+    </ScaledCanvas>
   )
 }
