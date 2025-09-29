@@ -12,8 +12,8 @@ interface EventCardProps {
   time: string
   location: string
   rating: number
-  status: "booked" | "completed"
-  eventImage: string
+  status: "booked" | "completed" | "cancelled"
+  eventImage?: string
 }
 
 export default function EventCard({
