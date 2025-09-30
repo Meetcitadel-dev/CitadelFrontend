@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { ChevronLeft } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import ProfileForm from "@/components/EditProfile/profile-form"
-import { getCurrentUserProfile, updateUserProfile } from "@/lib/api"
+import { getCurrentUserProfile, updateUserProfile, uploadImage, assignImageToSlot } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
 
 interface EditProfileScreenProps {
@@ -94,6 +94,33 @@ export default function EditProfileScreen({ onSave }: EditProfileScreenProps) {
       if (!token) {
         console.error('No authentication token found')
         return
+      }
+
+      // 1) Upload and assign images to slots if selected
+      try {
+        // Slot 0: main profile image
+        if (profileData.mainPhoto) {
+          const uploaded = await uploadImage(profileData.mainPhoto, token)
+          const userImageId = uploaded?.data?.id ?? uploaded?.id
+          if (userImageId != null) {
+            await assignImageToSlot({ slot: 0, userImageId: Number(userImageId) }, token)
+          }
+        }
+
+        // Slots 1..4: additional photos
+        for (let i = 0; i < profileData.additionalPhotos.length; i++) {
+          const file = profileData.additionalPhotos[i]
+          if (file) {
+            const uploaded = await uploadImage(file, token)
+            const userImageId = uploaded?.data?.id ?? uploaded?.id
+            if (userImageId != null) {
+              await assignImageToSlot({ slot: i + 1, userImageId: Number(userImageId) }, token)
+            }
+          }
+        }
+      } catch (uploadAssignErr) {
+        console.error('Image upload/assign failed:', uploadAssignErr)
+        // Continue to save other profile fields so user changes aren't lost
       }
 
       // Prepare data for API

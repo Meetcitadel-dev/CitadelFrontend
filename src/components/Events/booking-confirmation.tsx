@@ -3,6 +3,7 @@
 import { MapPin } from "lucide-react"
 import { useState } from "react"
 import wavy1Svg from "@/assets/wavy1.svg";
+import CafeImage from "@/assets/cafe.png";
 import { paymentService } from "@/lib/payment";
 
 interface BookingConfirmationProps {
@@ -174,13 +175,12 @@ export function BookingConfirmation({
                 flexShrink: 0,
                 aspectRatio: '1/1',
                 borderRadius: '8px',
-                background: 'url(<path-to-image>) lightgray 50% / cover no-repeat',
                 overflow: 'hidden'
               }}
             >
               <img
-                src="/placeholder.svg"
-                alt="Restaurant"
+                src={CafeImage}
+                alt="Cafe"
                 style={{
                   width: '100%',
                   height: '100%',

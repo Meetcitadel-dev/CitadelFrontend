@@ -52,6 +52,8 @@ interface UserProfile {
   phoneNumber?: string;
   profileImage?: string;
   uploadedImages?: string[];
+  // Slot-based display (0 profile, 1-4 gallery)
+  slots?: Array<{ slot: number; url: string | null }>;
   connectionsCount?: number; // Updated to reflect actual connections
 }
 
@@ -102,8 +104,22 @@ export default function MobileProfileScreen() {
             teams: profileData.teams || undefined,
             portfolioLink: profileData.portfolioLink || undefined,
             phoneNumber: profileData.phoneNumber || undefined,
-            profileImage: profileData.images?.[0]?.cloudfrontUrl, // Use first image as profile
-            uploadedImages: profileData.images?.map((img: any) => img.cloudfrontUrl) || [],
+            // Use slot 0 as profile image when provided; fallback to legacy images[0]
+            profileImage: profileData.slots?.find((s: any) => s.slot === 0)?.image?.cloudfrontUrl
+              || profileData.images?.[0]?.cloudfrontUrl,
+            // Build slots array 0..4; if slots not provided by backend, fallback from images
+            slots: [0,1,2,3,4].map((i) => {
+              const slotUrl = profileData.slots?.find((s: any) => s.slot === i)?.image?.cloudfrontUrl
+              if (slotUrl) return { slot: i, url: slotUrl }
+              // Fallback: derive from legacy images array
+              if (!profileData.slots || profileData.slots.length === 0) {
+                const legacyUrl = profileData.images?.[i]?.cloudfrontUrl || null
+                return { slot: i, url: legacyUrl }
+              }
+              return { slot: i, url: null }
+            }),
+            // Legacy gallery (not used for primary render anymore)
+            uploadedImages: (profileData.images?.slice(1) || []).map((img: any) => img.cloudfrontUrl),
             connectionsCount: 0 // We'll update this with actual connections count
           }
           
@@ -144,7 +160,9 @@ export default function MobileProfileScreen() {
   }
 
   // Use user data or fallback to defaults
-  const profile = userProfile || {
+  const profile: UserProfile = userProfile || {
+    id: "0",
+    email: "",
     name: "Your Name",
     university: "Your University",
     degree: "Your Degree",
@@ -158,14 +176,29 @@ export default function MobileProfileScreen() {
     portfolioLink: undefined,
     profileImage: undefined,
     uploadedImages: [],
-    connectionsCount: 0
+    connectionsCount: 0,
+    slots: [
+      { slot: 0, url: null },
+      { slot: 1, url: null },
+      { slot: 2, url: null },
+      { slot: 3, url: null },
+      { slot: 4, url: null },
+    ],
   }
 
   // Get profile image (user's uploaded image or placeholder)
   const profileImageUrl = profile.profileImage || "/placeholder.svg"
 
-  // Get gallery images (user's uploaded images or defaults)
-  const galleryImages = profile.uploadedImages || [ForestProfile, Realisticprofile, Oceanprofile, Buildingprofile]
+  // Get gallery images from slots 1..4; fallback to defaults
+  const galleryImages = [1,2,3,4]
+    .map((i) => profile.slots?.[i]?.url)
+    .filter(Boolean) as string[]
+  const galleryWithFallbacks = [
+    galleryImages[0] || (ForestProfile as unknown as string),
+    galleryImages[1] || (Realisticprofile as unknown as string),
+    galleryImages[2] || (Oceanprofile as unknown as string),
+    galleryImages[3] || (Buildingprofile as unknown as string),
+  ]
 
   // Removed CORS proxy indirection; images load directly from CDN
 
@@ -291,7 +324,7 @@ export default function MobileProfileScreen() {
           {/* Photo Gallery Section */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <img
-              src={galleryImages[0] || ForestProfile}
+              src={galleryWithFallbacks[0]}
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
               loading="lazy"
@@ -309,7 +342,7 @@ export default function MobileProfileScreen() {
           {/* Photo Gallery Section */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <img
-              src={galleryImages[1] || Realisticprofile}
+              src={galleryWithFallbacks[1]}
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
               loading="lazy"
@@ -326,7 +359,7 @@ export default function MobileProfileScreen() {
 
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <img
-              src={galleryImages[2] || Oceanprofile}
+              src={galleryWithFallbacks[2]}
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
               loading="lazy"
@@ -344,7 +377,7 @@ export default function MobileProfileScreen() {
 
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <img
-              src={galleryImages[3] || Buildingprofile}
+              src={galleryWithFallbacks[3]}
               alt="Profile Gallery"
               className="w-full h-auto object-contain rounded-xl"
               loading="lazy"

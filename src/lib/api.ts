@@ -117,6 +117,29 @@ export async function uploadImage(file: File, token?: string) {
   return response.json();
 }
 
+// Assign an uploaded image to a specific slot (0..4)
+export function assignImageToSlot(params: { slot: number; userImageId: number }, token?: string) {
+  return apiClient<{ success: boolean; message?: string }>(
+    '/api/profile/images/slot',
+    {
+      method: 'PUT',
+      body: params,
+      token,
+    }
+  );
+}
+
+// Clear a specific slot (0..4)
+export function clearImageSlot(slot: number, token?: string) {
+  return apiClient<{ success: boolean; message?: string }>(
+    `/api/profile/images/slot/${slot}`,
+    {
+      method: 'DELETE',
+      token,
+    }
+  );
+}
+
 // Get user images
 export function getUserImages(token?: string) {
   return apiClient<{ success: boolean; images: any[] }>(
@@ -169,6 +192,7 @@ export function getCurrentUserProfile(token?: string) {
       teams?: string;
       portfolioLink?: string;
       phoneNumber?: string;
+      // Recent uploads library (not used for slot rendering)
       images: Array<{
         id: number;
         cloudfrontUrl: string;
@@ -176,6 +200,18 @@ export function getCurrentUserProfile(token?: string) {
         mimeType: string;
         fileSize: number;
         createdAt: string;
+      }>;
+      // Fixed display slots 0..4
+      slots?: Array<{
+        slot: number;
+        image: null | {
+          id: number;
+          cloudfrontUrl: string;
+          originalName?: string;
+          mimeType?: string;
+          fileSize?: number;
+          createdAt?: string;
+        };
       }>;
       createdAt: string;
       updatedAt: string;
