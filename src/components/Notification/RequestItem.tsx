@@ -1,6 +1,7 @@
 "use client"
 
 import { Check, X } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import EllipseImg from '@/assets/Ellipse 2812.png';
 import type { ConnectionRequestNotification } from '@/types';
 
@@ -12,6 +13,15 @@ interface RequestItemProps {
 }
 
 export default function RequestItem({ request, onAccept, onReject, isProcessing = false }: RequestItemProps) {
+  const navigate = useNavigate()
+
+  const goToProfile = () => {
+    // Prefer username slug if backend provides it in future; fallback to name
+    const slug = (request as any).requesterUsername || request.requesterName
+    if (slug) {
+      navigate(`/${encodeURIComponent(slug)}`)
+    }
+  }
   const handleAccept = () => {
     if (!isProcessing) {
       onAccept(request.id);
@@ -37,7 +47,9 @@ export default function RequestItem({ request, onAccept, onReject, isProcessing 
         />
       </div>
       <div className="flex-1">
-        <div className="text-green-500 font-medium text-sm">{request.requesterName}</div>
+        <button onClick={goToProfile} className="text-green-500 font-medium text-sm underline-offset-2 hover:underline">
+          {request.requesterName}
+        </button>
         <div className="text-gray-400 text-xs">{request.requesterLocation}</div>
       </div>
       <div className="flex gap-2">
