@@ -24,11 +24,30 @@ interface TimeSlotData {
   time: string
 }
 
-const timeSlots: TimeSlotData[] = [
-  { id: "1", date: "Wednesday, July 2", time: "8:00 PM" },
-  { id: "2", date: "Wednesday, July 9", time: "8:00 PM" },
-  { id: "3", date: "Wednesday, July 16", time: "8:00 PM" },
-]
+function getUpcomingWednesdays(count: number = 3): TimeSlotData[] {
+  const results: TimeSlotData[] = []
+  const today = new Date()
+  const todayDay = today.getDay() // 0=Sun, 1=Mon, ..., 3=Wed
+  const targetDay = 3 // Wednesday
+  let daysUntilNext = (targetDay - todayDay + 7) % 7
+  if (daysUntilNext === 0) {
+    daysUntilNext = 7 // if today is Wednesday, start from next Wednesday
+  }
+
+  for (let i = 0; i < count; i++) {
+    const date = new Date(today)
+    date.setDate(today.getDate() + daysUntilNext + i * 7)
+    const formatted = date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric'
+    })
+    results.push({ id: String(i + 1), date: formatted, time: '8:00 PM' })
+  }
+  return results
+}
+
+const timeSlots: TimeSlotData[] = getUpcomingWednesdays(3)
 
 type Screen =
   | "booking"
