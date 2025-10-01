@@ -66,38 +66,36 @@ export function AreaSelection({ onBack, onClose, onAreaSelect }: AreaSelectionPr
         </div>
 
         {/* Areas Grid */}
-        <div className="grid grid-cols-2 gap-4" style={{ marginTop: '30px', gap: '15px' }}>
+        <div className="grid grid-cols-2 gap-4" style={{ marginTop: '30px' }}>
           {delhiAreas.map((area) => (
             <button
               key={area.id}
               onClick={() => handleAreaClick(area)}
-              className={`relative transition-all duration-300 hover:scale-105 ${
-                selectedArea === area.id ? "ring-4 ring-green-400 scale-105" : ""
+              className={`relative w-full overflow-hidden transition-all duration-300 ${
+                selectedArea === area.id ? "ring-4 ring-green-400" : ""
               }`}
               style={{
-                width: '173px',
                 height: '102px',
                 borderRadius: '15px',
                 background: '#111',
-                border: 'none',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
+                border: 'none'
               }}
             >
-              <span 
-                style={{
-                  color: '#FFFFFF',
-                  textAlign: 'center',
-                  fontFamily: 'Inter',
-                  fontSize: '18px',
-                  fontStyle: 'normal',
-                  fontWeight: 600,
-                  lineHeight: '135%' // 24.3px
-                }}
-              >
-                {area.name}
-              </span>
+              <div className="flex h-full w-full items-center justify-center transition-transform duration-300 hover:scale-105">
+                <span 
+                  style={{
+                    color: '#FFFFFF',
+                    textAlign: 'center',
+                    fontFamily: 'Inter',
+                    fontSize: '18px',
+                    fontStyle: 'normal',
+                    fontWeight: 600,
+                    lineHeight: '135%'
+                  }}
+                >
+                  {area.name}
+                </span>
+              </div>
             </button>
           ))}
         </div>
