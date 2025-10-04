@@ -1,5 +1,5 @@
 import { Info, Briefcase, GraduationCap, Search, Calendar, MessageCircle, Bell, User, LayoutGrid } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Navbar from "../Common/navbar";
 import ProfileAvatar from "../Common/ProfileAvatar";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -55,6 +55,9 @@ export default function MobileProfileScreen() {
   
   // Session state for adjective persistence - now using global session manager
   const [sessionId, setSessionId] = useState<string | null>(null)
+  
+  // Use ref to track current profile ID to break dependency chain
+  const currentProfileIdRef = useRef<string | number | null>(null)
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -151,50 +154,8 @@ export default function MobileProfileScreen() {
     loadProfiles()
   }, [offset, navigate])
 
-  // Force refresh connection statuses when component mounts (only once)
-  useEffect(() => {
-    const refreshConnectionStatuses = async () => {
-      if (profiles.length === 0) return
-      
-      try {
-        const token = getAuthToken()
-        if (!token) return
-        
-        // Refresh connection status for all profiles
-        const refreshPromises = profiles.map(async (profile) => {
-          try {
-            const res = await getConnectionStatus(String(profile.id), token)
-            if (res.success && res.connectionState) {
-              const transformed = {
-                id: String(res.connectionState.id),
-                userId1: res.connectionState.requesterId ? String(res.connectionState.requesterId) : res.connectionState.userId1 ? String(res.connectionState.userId1) : undefined,
-                userId2: res.connectionState.targetId ? String(res.connectionState.targetId) : res.connectionState.userId2 ? String(res.connectionState.userId2) : undefined,
-                status: res.connectionState.status === 'pending' ? 'requested' : res.connectionState.status,
-                createdAt: new Date(res.connectionState.createdAt),
-                updatedAt: new Date(res.connectionState.updatedAt)
-              }
-              return { ...profile, connectionState: transformed }
-            }
-            return profile
-          } catch (error) {
-            console.error(`Error refreshing connection status for profile ${profile.id}:`, error)
-            return profile
-          }
-        })
-        
-        const updatedProfiles = await Promise.all(refreshPromises)
-        setProfiles(updatedProfiles)
-        sessionManager.setProfiles(updatedProfiles)
-      } catch (error) {
-        console.error('Error refreshing connection statuses:', error)
-      }
-    }
-    
-    // Only refresh once when profiles are first loaded (offset === 0)
-    if (profiles.length > 0 && offset === 0) {
-      refreshConnectionStatuses()
-    }
-  }, [offset]) // Only depend on offset, not profiles.length to avoid continuous refresh
+  // Removed aggressive connection status refresh to prevent multiple API calls
+  // Connection status will be updated through the normal polling mechanism
 
   // Load adjectives and match state for current profile
   useEffect(() => {
@@ -205,13 +166,23 @@ export default function MobileProfileScreen() {
       const currentProfile = profiles[currentProfileIndex]
       if (!currentProfile || !userGender) return
 
+      // Check if this is a new profile (different ID) or if adjectives haven't been loaded yet
+      const currentProfileId = String(currentProfile.id)
+      if (currentProfileIdRef.current === currentProfileId && adjectiveDisplay) {
+        // Same profile and adjectives already loaded, don't reload
+        return
+      }
+
+      // Update ref with new profile ID
+      currentProfileIdRef.current = currentProfileId
+
       try {
         setLoadingAdjectives(true)
         const token = getAuthToken()
         if (!token) return
 
         // Get available adjectives from backend with session persistence
-        const availableAdjsResponse = await getAvailableAdjectives(String(currentProfile.id), token, sessionId || undefined)
+        const availableAdjsResponse = await getAvailableAdjectives(currentProfileId, token, sessionId || undefined)
         if (availableAdjsResponse.success) {
           setAvailableAdjectives(availableAdjsResponse.adjectives)
           
@@ -235,10 +206,18 @@ export default function MobileProfileScreen() {
         } else {
           // Fallback to neutral adjectives if API fails
           setAvailableAdjectives(["Smart", "Funny", "Friendly", "Creative", "Optimistic", "Organized", "Adaptable", "Generous"])
+          // Create fallback display
+          const fallbackDisplay: AdjectiveDisplayData = {
+            selectedAdjective: '',
+            randomAdjectives: ["Smart", "Funny", "Friendly", "Creative"],
+            allAdjectives: ["Smart", "Funny", "Friendly", "Creative", "Optimistic", "Organized", "Adaptable", "Generous"],
+            isMatched: false
+          }
+          setAdjectiveDisplay(fallbackDisplay)
         }
 
         // Check match state
-        const matchResponse = await getMatchState(String(currentProfile.id), token)
+        const matchResponse = await getMatchState(currentProfileId, token)
         if (matchResponse.success && matchResponse.matchState) {
           setMatchState(matchResponse.matchState)
           if (adjectiveDisplay) {
@@ -259,7 +238,7 @@ export default function MobileProfileScreen() {
     }
 
     loadAdjectivesAndMatchState()
-  }, [currentProfileIndex, userGender, sessionId]) // Removed 'profiles' dependency to prevent continuous reloading
+  }, [currentProfileIndex, userGender, sessionId]) // Removed unstable profiles dependency
 
   // Track profile view when profile changes
   useEffect(() => {
@@ -361,9 +340,9 @@ export default function MobileProfileScreen() {
       const currentProfile = profiles[currentProfileIndex]
       const connectionStatus = currentProfile?.connectionState?.status || 'not_connected'
       
-      if (currentProfile && (connectionStatus === 'requested' || connectionStatus === 'not_connected')) {
-        // poll every 5s until status changes (for both requested and not_connected states)
-        intervalId = window.setInterval(fetchStatus, 5000)
+      if (currentProfile && connectionStatus === 'requested') {
+        // Only poll for 'requested' status, not 'not_connected' to reduce API calls
+        intervalId = window.setInterval(fetchStatus, 10000) // Increased to 10s to reduce calls
         // also fetch immediately once
         fetchStatus()
       }
