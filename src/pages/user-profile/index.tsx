@@ -55,7 +55,7 @@ interface UserProfile {
   // Updated to reflect actual connection counts
   connectionsCount?: number; // Total connections the profile has
   mutualConnectionsCount?: number; // Common connections between current user and profile
-  connectionStatus?: 'connected' | 'requested' | 'not_connected' | 'blocked' | 'pending';
+  connectionStatus?: 'connected' | 'requested' | 'not_connected' | 'blocked';
 }
 
 export default function UserProfileScreen() {
@@ -65,6 +65,24 @@ export default function UserProfileScreen() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showDropdown, setShowDropdown] = useState(false)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showDropdown) {
+        setShowDropdown(false)
+      }
+    }
+    
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showDropdown])
 
   const navItems = [
     { icon: Search, label: "Explore", onClick: () => navigate("/explore"), active: location.pathname === "/explore" },
@@ -122,10 +140,14 @@ export default function UserProfileScreen() {
             // Updated to reflect actual connection counts
             connectionsCount: profileData.connections?.length || 0,
             mutualConnectionsCount: profileData.mutualConnections?.length || 0,
-            connectionStatus: profileData.connectionState?.status || 'not_connected'
+            connectionStatus: profileData.connectionState?.status === 'accepted' ? 'connected' : 
+                             profileData.connectionState?.status === 'pending' ? 'requested' :
+                             profileData.connectionState?.status || 'not_connected'
           }
           
           console.log('Mapped user profile:', mappedProfile)
+          console.log('Connection status:', mappedProfile.connectionStatus)
+          console.log('Connection state from API:', profileData.connectionState)
           setUserProfile(mappedProfile)
         } else {
           setError(response.message || 'Failed to load user profile')
@@ -172,7 +194,9 @@ export default function UserProfileScreen() {
         // Update the connection status
         setUserProfile(prev => prev ? {
           ...prev,
-          connectionStatus: response.connectionState?.status || 'not_connected'
+          connectionStatus: response.connectionState?.status === 'accepted' ? 'connected' : 
+                           response.connectionState?.status === 'pending' ? 'requested' :
+                           response.connectionState?.status || 'not_connected'
         } : null)
         
         // Show success message
@@ -262,14 +286,78 @@ export default function UserProfileScreen() {
               {/* Connection Status Badge */}
               <div className="mb-2">
                 {userProfile.connectionStatus === 'connected' && (
-                  <div className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold inline-block">
-                    Connected
+                  <div className="relative">
+                    <button 
+                      onClick={() => setShowDropdown(!showDropdown)}
+                      className="bg-transparent text-white inline-block hover:bg-white/10"
+                      style={{ 
+                        width: '90px', 
+                        height: '25px', 
+                        borderRadius: '5px', 
+                        fontSize: '12px', 
+                        fontWeight: '600',
+                        border: '2px solid #ffffff'
+                      }}
+                    >
+                      Connected
+                    </button>
+                    {showDropdown && (
+                      <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-600 rounded shadow-lg z-10">
+                        <button 
+                          onClick={() => {
+                            handleConnectionAction('remove')
+                            setShowDropdown(false)
+                          }}
+                          className="block w-full text-left px-3 py-2 text-white hover:bg-gray-700"
+                        >
+                          Remove
+                        </button>
+                        <button 
+                          onClick={() => {
+                            handleConnectionAction('block')
+                            setShowDropdown(false)
+                          }}
+                          className="block w-full text-left px-3 py-2 text-white hover:bg-gray-700"
+                        >
+                          Block
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
                 {userProfile.connectionStatus === 'requested' && (
-                  <div className="bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-semibold inline-block">
+                  <div 
+                    className="bg-transparent text-white inline-block"
+                    style={{ 
+                      width: '90px', 
+                      height: '25px', 
+                      borderRadius: '5px', 
+                      fontSize: '12px', 
+                      fontWeight: '600',
+                      border: '2px solid #ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
                     Requested
                   </div>
+                )}
+                {userProfile.connectionStatus === 'blocked' && (
+                  <button 
+                    onClick={() => handleConnectionAction('unblock')}
+                    className="bg-transparent text-white inline-block hover:bg-white/10"
+                    style={{ 
+                      width: '90px', 
+                      height: '25px', 
+                      borderRadius: '5px', 
+                      fontSize: '12px', 
+                      fontWeight: '600',
+                      border: '2px solid #ffffff'
+                    }}
+                  >
+                    Unblock
+                  </button>
                 )}
                 {userProfile.connectionStatus === 'not_connected' && (
                   <button 

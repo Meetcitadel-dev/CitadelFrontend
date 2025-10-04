@@ -3,22 +3,22 @@
  * Handles consistent default profile avatar selection across the application
  */
 
-// Import the SVG assets
-import Group940 from '@/assets/Group 940.svg'
-import Group941 from '@/assets/Group 941.svg'
-import Group942 from '@/assets/Group 942.svg'
-import Group943 from '@/assets/Group 943.svg'
-import Group944 from '@/assets/Group 944.svg'
-import Group945 from '@/assets/Group 945.svg'
+// Import the SVG assets as URLs
+import Group940Url from '@/assets/Group 940.svg?url'
+import Group941Url from '@/assets/Group 941.svg?url'
+import Group942Url from '@/assets/Group 942.svg?url'
+import Group943Url from '@/assets/Group 943.svg?url'
+import Group944Url from '@/assets/Group 944.svg?url'
+import Group945Url from '@/assets/Group 945.svg?url'
 
 // Array of available default avatars
 const DEFAULT_AVATARS = [
-  Group940,
-  Group941,
-  Group942,
-  Group943,
-  Group944,
-  Group945
+  Group940Url,
+  Group941Url,
+  Group942Url,
+  Group943Url,
+  Group944Url,
+  Group945Url
 ]
 
 /**
@@ -52,9 +52,11 @@ export function getDefaultAvatar(userId: string): string {
  * @returns The URL to display for the profile image
  */
 export function getProfileImageUrl(profileImage: string | null | undefined, userId: string): string {
-  // If user has uploaded a profile image, use it
+  // If user has uploaded a profile image, use it with cache-busting parameter
   if (profileImage && profileImage.trim() !== '') {
-    return profileImage
+    // Add cache-busting parameter to ensure fresh images are loaded
+    const separator = profileImage.includes('?') ? '&' : '?'
+    return `${profileImage}${separator}t=${Date.now()}`
   }
   
   // Otherwise, use a consistent default avatar based on user ID

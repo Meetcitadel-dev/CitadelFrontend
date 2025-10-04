@@ -86,15 +86,15 @@ export default function MobileProfileScreen() {
     loadUserGender()
   }, [])
 
-  // Load profiles from API - only if we don't have cached profiles
+  // Load profiles from API - always fetch fresh data
   useEffect(() => {
     const loadProfiles = async () => {
-      // If we have cached profiles and it's the first load (offset === 0), use cached data
-      if (offset === 0 && sessionManager.getProfiles().length > 0) {
-        setProfiles(sessionManager.getProfiles())
-        // Do not return here; proceed to fetch fresh data to avoid stale connection statuses
+      // Clear any cached session data to ensure fresh profile data
+      if (offset === 0) {
+        sessionManager.refreshSession()
       }
-
+      
+      // Always fetch fresh data from server to ensure latest profile images and connection status
       try {
         setLoading(true)
         setError(null)
@@ -150,6 +150,51 @@ export default function MobileProfileScreen() {
 
     loadProfiles()
   }, [offset, navigate])
+
+  // Force refresh connection statuses when component mounts (only once)
+  useEffect(() => {
+    const refreshConnectionStatuses = async () => {
+      if (profiles.length === 0) return
+      
+      try {
+        const token = getAuthToken()
+        if (!token) return
+        
+        // Refresh connection status for all profiles
+        const refreshPromises = profiles.map(async (profile) => {
+          try {
+            const res = await getConnectionStatus(String(profile.id), token)
+            if (res.success && res.connectionState) {
+              const transformed = {
+                id: String(res.connectionState.id),
+                userId1: res.connectionState.requesterId ? String(res.connectionState.requesterId) : res.connectionState.userId1 ? String(res.connectionState.userId1) : undefined,
+                userId2: res.connectionState.targetId ? String(res.connectionState.targetId) : res.connectionState.userId2 ? String(res.connectionState.userId2) : undefined,
+                status: res.connectionState.status === 'pending' ? 'requested' : res.connectionState.status,
+                createdAt: new Date(res.connectionState.createdAt),
+                updatedAt: new Date(res.connectionState.updatedAt)
+              }
+              return { ...profile, connectionState: transformed }
+            }
+            return profile
+          } catch (error) {
+            console.error(`Error refreshing connection status for profile ${profile.id}:`, error)
+            return profile
+          }
+        })
+        
+        const updatedProfiles = await Promise.all(refreshPromises)
+        setProfiles(updatedProfiles)
+        sessionManager.setProfiles(updatedProfiles)
+      } catch (error) {
+        console.error('Error refreshing connection statuses:', error)
+      }
+    }
+    
+    // Only refresh once when profiles are first loaded (offset === 0)
+    if (profiles.length > 0 && offset === 0) {
+      refreshConnectionStatuses()
+    }
+  }, [offset]) // Only depend on offset, not profiles.length to avoid continuous refresh
 
   // Load adjectives and match state for current profile
   useEffect(() => {
@@ -214,7 +259,7 @@ export default function MobileProfileScreen() {
     }
 
     loadAdjectivesAndMatchState()
-  }, [currentProfileIndex, profiles, userGender, sessionId])
+  }, [currentProfileIndex, userGender, sessionId]) // Removed 'profiles' dependency to prevent continuous reloading
 
   // Track profile view when profile changes
   useEffect(() => {
@@ -243,7 +288,7 @@ export default function MobileProfileScreen() {
     // Track view after a short delay to ensure profile is loaded
     const timer = setTimeout(trackCurrentProfileView, 500)
     return () => clearTimeout(timer)
-  }, [currentProfileIndex, profiles])
+  }, [currentProfileIndex, profiles.length]) // Use profiles.length to avoid array reference changes
 
   // Enhanced prefetching for next profile images to make swipes instant
   useEffect(() => {
@@ -275,7 +320,7 @@ export default function MobileProfileScreen() {
         prefetchImagesWithPriority(lowPriorityUrls, 'low')
       }, 100)
     }
-  }, [currentProfileIndex, profiles])
+  }, [currentProfileIndex, profiles.length]) // Use profiles.length to avoid array reference changes
 
   // Poll connection status when pending/requested, and on tab focus
   useEffect(() => {
@@ -316,8 +361,8 @@ export default function MobileProfileScreen() {
       const currentProfile = profiles[currentProfileIndex]
       const connectionStatus = currentProfile?.connectionState?.status || 'not_connected'
       
-      if (currentProfile && connectionStatus === 'requested') {
-        // poll every 5s until status changes
+      if (currentProfile && (connectionStatus === 'requested' || connectionStatus === 'not_connected')) {
+        // poll every 5s until status changes (for both requested and not_connected states)
         intervalId = window.setInterval(fetchStatus, 5000)
         // also fetch immediately once
         fetchStatus()
@@ -331,7 +376,7 @@ export default function MobileProfileScreen() {
         if (intervalId) window.clearInterval(intervalId)
       }
     }
-  }, [currentProfileIndex, profiles])
+  }, [currentProfileIndex, profiles.length]) // Use profiles.length to avoid array reference changes
 
   const navItems = [
     { icon: Search, label: "Explore", onClick: () => navigate("/explore"), active: location.pathname === "/explore" },

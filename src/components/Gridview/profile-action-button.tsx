@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 
 interface ProfileActionButtonProps {
-  status: "connect" | "remove" | "request" | "connected"
+  status: "connect" | "remove" | "request" | "requested" | "connected"
   onClick?: () => void
 }
 
@@ -22,6 +22,11 @@ export function ProfileActionButton({ status, onClick }: ProfileActionButtonProp
         return {
           text: "Request",
           className: "bg-gray-700 hover:bg-gray-600 text-white border-0",
+        }
+      case "requested":
+        return {
+          text: "Requested",
+          className: "bg-transparent text-white border-2 border-white hover:bg-white/10",
         }
       case "connected":
         return {

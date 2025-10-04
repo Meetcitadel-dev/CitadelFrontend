@@ -164,13 +164,13 @@ export default function ProfilesPage() {
   const convertToProfileFormat = (exploreProfile: ExploreProfile): Profile => {
     const connectionStatus = exploreProfile.connectionState?.status || 'not_connected'
     
-    let status: "connect" | "remove" | "request" | "connected"
+    let status: "connect" | "remove" | "request" | "requested" | "connected"
     switch (connectionStatus) {
       case 'connected':
         status = 'connected'
         break
       case 'requested':
-        status = 'request'
+        status = 'requested'
         break
       case 'not_connected':
         status = 'connect'
@@ -184,7 +184,7 @@ export default function ProfilesPage() {
       name: exploreProfile.name,
       university: exploreProfile.university?.name || 'Unknown University',
       year: exploreProfile.year || 'Unknown Year',
-      image: exploreProfile.profileImage || "/placeholder.svg?height=120&width=120",
+      image: exploreProfile.profileImage, // Let ProfileAvatar handle the default avatar logic
       status: status,
     }
   }
