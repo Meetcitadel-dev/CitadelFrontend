@@ -154,7 +154,7 @@ export default function DinnerBooking() {
   }
 
   const handlePreferencesContinue = () => {
-    setCurrentScreen("additional-preferences")
+    setCurrentScreen("booking-confirmation")
   }
 
   const handleBackToArea = () => {
@@ -169,9 +169,6 @@ export default function DinnerBooking() {
     setCurrentScreen("edit-preferences")
   }
 
-  const handleBackToAdditionalPrefs = () => {
-    setCurrentScreen("additional-preferences")
-  }
 
   const handlePayment = () => {
     // Payment will be handled by the BookingConfirmation component
@@ -232,7 +229,7 @@ export default function DinnerBooking() {
   if (currentScreen === "booking-confirmation") {
     return (
       <BookingConfirmation
-        onBack={handleBackToAdditionalPrefs}
+        onBack={handleBackToPreferences}
         onPayment={handlePayment}
         bookingDetails={bookingDetails}
         onPaymentSuccess={handlePaymentSuccess}
