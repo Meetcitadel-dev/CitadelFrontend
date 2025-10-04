@@ -59,6 +59,9 @@ export default function MobileProfileScreen() {
   // Use ref to track current profile ID to break dependency chain
   const currentProfileIdRef = useRef<string | number | null>(null)
   
+  // Use ref to prevent multiple API calls
+  const isLoadingRef = useRef<boolean>(false)
+  
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -92,6 +95,12 @@ export default function MobileProfileScreen() {
   // Load profiles from API - always fetch fresh data
   useEffect(() => {
     const loadProfiles = async () => {
+      // Prevent multiple API calls using ref
+      if (isLoadingRef.current) {
+        console.log('Skipping API call - already in progress')
+        return
+      }
+      
       // Clear any cached session data to ensure fresh profile data
       if (offset === 0) {
         sessionManager.refreshSession()
@@ -99,6 +108,7 @@ export default function MobileProfileScreen() {
       
       // Always fetch fresh data from server to ensure latest profile images and connection status
       try {
+        isLoadingRef.current = true
         setLoading(true)
         setError(null)
         
@@ -148,6 +158,7 @@ export default function MobileProfileScreen() {
         setError('Failed to load profiles')
       } finally {
         setLoading(false)
+        isLoadingRef.current = false
       }
     }
 
