@@ -1,5 +1,6 @@
 import { ProfileActionButton } from "./profile-action-button"
 import { GraduationCap } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 export interface Profile {
   id: number
@@ -16,10 +17,18 @@ interface ProfileCardViewProps {
 }
 
 export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardViewProps) {
+  const navigate = useNavigate()
+  
   const handleConnectionAction = (profileId: number, action: 'connect' | 'remove' | 'accept' | 'reject') => {
     if (onConnectionAction) {
       onConnectionAction(profileId.toString(), action)
     }
+  }
+
+  const handleProfileClick = (profile: Profile) => {
+    // Navigate to the profile page using the name (lowercase, no spaces)
+    const profileName = profile.name.toLowerCase().replace(/\s+/g, '')
+    navigate(`/${profileName}`)
   }
 
   return (
@@ -27,7 +36,7 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
       {profiles.map((profile) => (
         <div 
           key={profile.id} 
-          className="overflow-hidden"
+          className="overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
           style={{ 
             width: '173px', 
             height: '289px',
@@ -36,6 +45,7 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
             border: '1px solid #292929',
             borderImage: 'none'
           }}
+          onClick={() => handleProfileClick(profile)}
         >
           <div className="relative flex justify-center items-center" style={{ height: '182px' }}>
             <img
@@ -124,7 +134,8 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
 
             <ProfileActionButton 
               status={profile.status} 
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation() // Prevent triggering profile navigation
                 const action = profile.status === 'connect' ? 'connect' : 
                              profile.status === 'connected' ? 'remove' : 
                              profile.status === 'request' ? 'accept' : 'connect'

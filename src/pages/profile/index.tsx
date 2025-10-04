@@ -14,10 +14,6 @@ import { useNavigate, useLocation } from "react-router-dom"
 import { useState, useEffect } from "react"
 // Removed unused ProfileImage import
 import Navbar from "@/components/Common/navbar"
-import ForestProfile from "@/assets/man, forest background behind.png"
-import Realisticprofile from "@/assets/man, realsitic background behind.png"
-import Oceanprofile from "@/assets/man, ocean background behind.png"
-import Buildingprofile from "@/assets/man, building background behind.png"
 import { getCurrentUserProfile, getUserConnectionsCount } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
 
@@ -189,21 +185,10 @@ export default function MobileProfileScreen() {
   // Get profile image (user's uploaded image or placeholder)
   const profileImageUrl = profile.profileImage || "/placeholder.svg"
 
-  // Get gallery images from slots 1..4; fallback to defaults
-  const galleryImages = [1,2,3,4]
-    .map((i) => profile.slots?.[i]?.url)
-    .filter(Boolean) as string[]
-  const galleryWithFallbacks = [
-    galleryImages[0] || (ForestProfile as unknown as string),
-    galleryImages[1] || (Realisticprofile as unknown as string),
-    galleryImages[2] || (Oceanprofile as unknown as string),
-    galleryImages[3] || (Buildingprofile as unknown as string),
-  ]
 
   // Removed CORS proxy indirection; images load directly from CDN
 
   console.log('Render - Profile image URL:', profileImageUrl)
-  console.log('Render - Gallery images:', galleryImages)
   console.log('Render - Profile data:', profile)
 
   return (
@@ -323,16 +308,22 @@ export default function MobileProfileScreen() {
 
           {/* Photo Gallery Section */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <img
-              src={galleryWithFallbacks[0]}
-              alt="Profile Gallery"
-              className="w-full h-auto object-contain rounded-xl"
-              loading="lazy"
-              decoding="async"
-              fetchPriority="low"
-              onLoad={() => console.log('Gallery image 1 loaded:', galleryImages[0])}
-              onError={(e) => console.error('Gallery image 1 failed to load:', galleryImages[0], e)}
-            />
+            {profile.slots?.[1]?.url ? (
+              <img
+                src={profile.slots[1].url}
+                alt="Profile Gallery"
+                className="w-full h-auto object-contain rounded-xl"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+                onLoad={() => console.log('Gallery image 1 loaded:', profile.slots?.[1]?.url)}
+                onError={(e) => console.error('Gallery image 1 failed to load:', profile.slots?.[1]?.url, e)}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-32 rounded-xl bg-gray-800/50 border border-gray-600/30">
+                <span className="text-gray-400 text-sm font-medium">No image uploaded</span>
+              </div>
+            )}
           </div>
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <h3 className="text-white text-xl font-bold mb-3">Movies I like</h3>
@@ -341,16 +332,22 @@ export default function MobileProfileScreen() {
 
           {/* Photo Gallery Section */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <img
-              src={galleryWithFallbacks[1]}
-              alt="Profile Gallery"
-              className="w-full h-auto object-contain rounded-xl"
-              loading="lazy"
-              decoding="async"
-              fetchPriority="low"
-              onLoad={() => console.log('Gallery image 2 loaded:', galleryImages[1])}
-              onError={(e) => console.error('Gallery image 2 failed to load:', galleryImages[1], e)}
-            />
+            {profile.slots?.[2]?.url ? (
+              <img
+                src={profile.slots[2].url}
+                alt="Profile Gallery"
+                className="w-full h-auto object-contain rounded-xl"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+                onLoad={() => console.log('Gallery image 2 loaded:', profile.slots?.[2]?.url)}
+                onError={(e) => console.error('Gallery image 2 failed to load:', profile.slots?.[2]?.url, e)}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-32 rounded-xl bg-gray-800/50 border border-gray-600/30">
+                <span className="text-gray-400 text-sm font-medium">No image uploaded</span>
+              </div>
+            )}
           </div>
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <h3 className="text-white text-xl font-bold mb-3">TV Shows I watch</h3>
@@ -358,16 +355,22 @@ export default function MobileProfileScreen() {
           </div>
 
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <img
-              src={galleryWithFallbacks[2]}
-              alt="Profile Gallery"
-              className="w-full h-auto object-contain rounded-xl"
-              loading="lazy"
-              decoding="async"
-              fetchPriority="low"
-              onLoad={() => console.log('Gallery image 3 loaded:', galleryImages[2])}
-              onError={(e) => console.error('Gallery image 3 failed to load:', galleryImages[2], e)}
-            />
+            {profile.slots?.[3]?.url ? (
+              <img
+                src={profile.slots[3].url}
+                alt="Profile Gallery"
+                className="w-full h-auto object-contain rounded-xl"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+                onLoad={() => console.log('Gallery image 3 loaded:', profile.slots?.[3]?.url)}
+                onError={(e) => console.error('Gallery image 3 failed to load:', profile.slots?.[3]?.url, e)}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-32 rounded-xl bg-gray-800/50 border border-gray-600/30">
+                <span className="text-gray-400 text-sm font-medium">No image uploaded</span>
+              </div>
+            )}
           </div>
 
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
@@ -376,16 +379,22 @@ export default function MobileProfileScreen() {
           </div>
 
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <img
-              src={galleryWithFallbacks[3]}
-              alt="Profile Gallery"
-              className="w-full h-auto object-contain rounded-xl"
-              loading="lazy"
-              decoding="async"
-              fetchPriority="low"
-              onLoad={() => console.log('Gallery image 4 loaded:', galleryImages[3])}
-              onError={(e) => console.error('Gallery image 4 failed to load:', galleryImages[3], e)}
-            />
+            {profile.slots?.[4]?.url ? (
+              <img
+                src={profile.slots[4].url}
+                alt="Profile Gallery"
+                className="w-full h-auto object-contain rounded-xl"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+                onLoad={() => console.log('Gallery image 4 loaded:', profile.slots?.[4]?.url)}
+                onError={(e) => console.error('Gallery image 4 failed to load:', profile.slots?.[4]?.url, e)}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-32 rounded-xl bg-gray-800/50 border border-gray-600/30">
+                <span className="text-gray-400 text-sm font-medium">No image uploaded</span>
+              </div>
+            )}
           </div>
           
 
