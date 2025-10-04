@@ -152,7 +152,7 @@ export default function MobileProfileScreen() {
     }
 
     loadProfiles()
-  }, [offset, navigate])
+  }, [offset])
 
   // Removed aggressive connection status refresh to prevent multiple API calls
   // Connection status will be updated through the normal polling mechanism
