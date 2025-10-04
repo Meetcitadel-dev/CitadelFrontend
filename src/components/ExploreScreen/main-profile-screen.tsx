@@ -238,7 +238,7 @@ export default function MobileProfileScreen() {
     }
 
     loadAdjectivesAndMatchState()
-  }, [currentProfileIndex, userGender, sessionId]) // Removed unstable profiles dependency
+  }, [currentProfileIndex, userGender, sessionId, profiles.length]) // Add profiles.length to ensure it runs after profiles are loaded
 
   // Track profile view when profile changes
   useEffect(() => {
