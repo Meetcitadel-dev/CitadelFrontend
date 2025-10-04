@@ -126,18 +126,35 @@ export default function MobileProfileScreen() {
         })
 
         if (response.success) {
-          // Transform connection states to match frontend expectations
-          const transformedProfiles = response.profiles.map(profile => ({
-            ...profile,
-            connectionState: profile.connectionState ? {
-              id: String(profile.connectionState.id),
-              userId1: profile.connectionState.requesterId ? String(profile.connectionState.requesterId) : profile.connectionState.userId1 ? String(profile.connectionState.userId1) : undefined,
-              userId2: profile.connectionState.targetId ? String(profile.connectionState.targetId) : profile.connectionState.userId2 ? String(profile.connectionState.userId2) : undefined,
-              status: profile.connectionState.status === 'pending' ? 'requested' : profile.connectionState.status,
-              createdAt: new Date(profile.connectionState.createdAt),
-              updatedAt: new Date(profile.connectionState.updatedAt)
-            } : null
-          }))
+          // Transform connection states and profile images to match frontend expectations
+          const transformedProfiles = response.profiles.map(profile => {
+            // Debug: Log the profile data to understand what's being returned
+            console.log('Profile data from API:', {
+              id: profile.id,
+              name: profile.name,
+              profileImage: profile.profileImage,
+              slots: (profile as any).slots,
+              images: (profile as any).images
+            });
+            
+            // Process profile image the same way as detailed profile views
+            // Use slot 0 as profile image when provided; fallback to profileImage if no slots
+            const processedProfileImage = (profile as any).slots?.find((s: any) => s.slot === 0)?.image?.cloudfrontUrl
+              || profile.profileImage; // Fallback to profileImage if slots not available
+            
+            return {
+              ...profile,
+              profileImage: processedProfileImage, // Override with processed image
+              connectionState: profile.connectionState ? {
+                id: String(profile.connectionState.id),
+                userId1: profile.connectionState.requesterId ? String(profile.connectionState.requesterId) : profile.connectionState.userId1 ? String(profile.connectionState.userId1) : undefined,
+                userId2: profile.connectionState.targetId ? String(profile.connectionState.targetId) : profile.connectionState.userId2 ? String(profile.connectionState.userId2) : undefined,
+                status: profile.connectionState.status === 'pending' ? 'requested' : profile.connectionState.status,
+                createdAt: new Date(profile.connectionState.createdAt),
+                updatedAt: new Date(profile.connectionState.updatedAt)
+              } : null
+            }
+          })
 
           if (offset === 0) {
             // First load - replace profiles and cache them
@@ -316,6 +333,8 @@ export default function MobileProfileScreen() {
   useEffect(() => {
     // Always run the effect, but handle conditional logic inside
     let intervalId: number | undefined
+    let pollCount = 0
+    const MAX_POLL_ATTEMPTS = 6 // Poll for max 1 minute (6 * 10s)
 
     const fetchStatus = async () => {
       const currentProfile = profiles[currentProfileIndex]
@@ -334,18 +353,54 @@ export default function MobileProfileScreen() {
             createdAt: new Date(res.connectionState.createdAt),
             updatedAt: new Date(res.connectionState.updatedAt)
           }
-          setProfiles(prev => {
-            const updated = prev.map(p => p.id === currentProfile.id ? { ...p, connectionState: transformed } : p)
-            sessionManager.setProfiles(updated)
-            return updated
-          })
+          
+          // Only update if status actually changed to prevent unnecessary re-renders
+          const currentStatus = currentProfile.connectionState?.status
+          if (transformed.status !== currentStatus) {
+            setProfiles(prev => {
+              const updated = prev.map(p => p.id === currentProfile.id ? { ...p, connectionState: transformed } : p)
+              sessionManager.setProfiles(updated)
+              return updated
+            })
+          }
+          
+          // Stop polling if status is no longer 'requested'
+          if (transformed.status !== 'requested') {
+            if (intervalId) {
+              clearInterval(intervalId)
+              intervalId = undefined
+            }
+          }
+        } else if (res.success && res.connectionState === null) {
+          // If connection status API returns null, but we have connection data from profile load,
+          // don't override it - this handles the backend inconsistency
+          console.log('Connection status API returned null, keeping existing connection state')
+          
+          // If we don't have any connection state from profile load either, 
+          // try to fetch it from the profile endpoint as a fallback
+          if (!currentProfile.connectionState) {
+            console.log('No connection state found, this might be a backend data inconsistency')
+          }
         }
-      } catch {}
+      } catch (error) {
+        console.error('Error fetching connection status:', error)
+      }
+      
+      pollCount++
+      // Stop polling after max attempts to prevent infinite polling
+      if (pollCount >= MAX_POLL_ATTEMPTS && intervalId) {
+        console.log('Stopping connection status polling after max attempts')
+        clearInterval(intervalId)
+        intervalId = undefined
+      }
     }
 
     // Handle window check inside the effect
     if (typeof window !== 'undefined') {
-      const onFocus = () => fetchStatus()
+      const onFocus = () => {
+        pollCount = 0 // Reset poll count on focus
+        fetchStatus()
+      }
       window.addEventListener('focus', onFocus)
 
       const currentProfile = profiles[currentProfileIndex]
@@ -353,7 +408,7 @@ export default function MobileProfileScreen() {
       
       if (currentProfile && connectionStatus === 'requested') {
         // Only poll for 'requested' status, not 'not_connected' to reduce API calls
-        intervalId = window.setInterval(fetchStatus, 10000) // Increased to 10s to reduce calls
+        intervalId = window.setInterval(fetchStatus, 10000) // Poll every 10s
         // also fetch immediately once
         fetchStatus()
       }
@@ -610,6 +665,10 @@ export default function MobileProfileScreen() {
 
   const currentProfile = profiles[currentProfileIndex]
   const connectionStatus = currentProfile.connectionState?.status || 'not_connected'
+  
+  // Debug logging to help identify the issue
+  console.log('Current profile connection state:', currentProfile.connectionState)
+  console.log('Derived connection status:', connectionStatus)
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden flex flex-col">

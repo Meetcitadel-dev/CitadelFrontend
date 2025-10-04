@@ -52,11 +52,10 @@ export function getDefaultAvatar(userId: string): string {
  * @returns The URL to display for the profile image
  */
 export function getProfileImageUrl(profileImage: string | null | undefined, userId: string): string {
-  // If user has uploaded a profile image, use it with cache-busting parameter
+  // If user has uploaded a profile image, use it without cache-busting to prevent flickering
   if (profileImage && profileImage.trim() !== '') {
-    // Add cache-busting parameter to ensure fresh images are loaded
-    const separator = profileImage.includes('?') ? '&' : '?'
-    return `${profileImage}${separator}t=${Date.now()}`
+    // Remove cache-busting to prevent image flickering during re-renders
+    return profileImage
   }
   
   // Otherwise, use a consistent default avatar based on user ID

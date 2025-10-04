@@ -134,6 +134,16 @@ export interface ExploreProfile {
   skills: string[];
   profileImage?: string;
   uploadedImages?: string[];
+  // Add slots and images for proper profile image processing
+  slots?: Array<{
+    slot: number;
+    image?: {
+      cloudfrontUrl: string;
+    };
+  }>;
+  images?: Array<{
+    cloudfrontUrl: string;
+  }>;
   connectionState: ConnectionState | null;
   matchScore: number;
   selectedAdjectives: string[];

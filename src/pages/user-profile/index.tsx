@@ -50,8 +50,10 @@ interface UserProfile {
   teams?: string;
   portfolioLink?: string;
   phoneNumber?: string;
-  profileImage?: string;
+  profileImage?: string | null;
   uploadedImages?: string[];
+  // Slot-based display (0 profile, 1-4 gallery)
+  slots?: Array<{ slot: number; image: { cloudfrontUrl: string } | null }>;
   // Updated to reflect actual connection counts
   connectionsCount?: number; // Total connections the profile has
   mutualConnectionsCount?: number; // Common connections between current user and profile
@@ -135,8 +137,16 @@ export default function UserProfileScreen() {
             teams: profileData.teams,
             portfolioLink: profileData.portfolioLink,
             phoneNumber: profileData.phoneNumber,
-            profileImage: profileData.images?.[0]?.cloudfrontUrl,
-            uploadedImages: profileData.images?.map(img => img.cloudfrontUrl) || [],
+            // Use slot 0 as profile image when provided; no fallback to legacy images
+            profileImage: profileData.slots?.find((s: any) => s.slot === 0)?.image?.cloudfrontUrl || null,
+            // Build slots array 0..4; use only slots data, no fallback to legacy images
+            slots: [0,1,2,3,4].map((i) => {
+              const slotUrl = profileData.slots?.find((s: any) => s.slot === i)?.image?.cloudfrontUrl
+              if (slotUrl) return { slot: i, image: { cloudfrontUrl: slotUrl } }
+              return { slot: i, image: null }
+            }),
+            // Legacy gallery (not used for primary render anymore)
+            uploadedImages: (profileData.images?.slice(1) || []).map((img: any) => img.cloudfrontUrl),
             // Updated to reflect actual connection counts
             connectionsCount: profileData.connections?.length || 0,
             mutualConnectionsCount: profileData.mutualConnections?.length || 0,
@@ -244,8 +254,8 @@ export default function UserProfileScreen() {
 
   // Profile image is now handled by ProfileAvatar component
 
-  // Get gallery images (user's uploaded images only, no defaults)
-  const galleryImages = userProfile.uploadedImages || []
+  // Get gallery images from slots 1-4 (slot 0 is profile image)
+  const galleryImages = userProfile.slots?.slice(1, 5).map(slot => slot.image?.cloudfrontUrl).filter(Boolean) || []
 
   // Removed CORS proxy indirection; images load directly from CDN
 

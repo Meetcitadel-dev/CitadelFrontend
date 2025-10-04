@@ -47,7 +47,7 @@ interface UserProfile {
   teams?: string;
   portfolioLink?: string;
   phoneNumber?: string;
-  profileImage?: string;
+  profileImage?: string | null;
   uploadedImages?: string[];
   // Slot-based display (0 profile, 1-4 gallery)
   slots?: Array<{ slot: number; url: string | null }>;
@@ -101,18 +101,12 @@ export default function MobileProfileScreen() {
             teams: profileData.teams || undefined,
             portfolioLink: profileData.portfolioLink || undefined,
             phoneNumber: profileData.phoneNumber || undefined,
-            // Use slot 0 as profile image when provided; fallback to legacy images[0]
-            profileImage: profileData.slots?.find((s: any) => s.slot === 0)?.image?.cloudfrontUrl
-              || profileData.images?.[0]?.cloudfrontUrl,
-            // Build slots array 0..4; if slots not provided by backend, fallback from images
+            // Use slot 0 as profile image when provided; no fallback to legacy images
+            profileImage: profileData.slots?.find((s: any) => s.slot === 0)?.image?.cloudfrontUrl || null,
+            // Build slots array 0..4; use only slots data, no fallback to legacy images
             slots: [0,1,2,3,4].map((i) => {
               const slotUrl = profileData.slots?.find((s: any) => s.slot === i)?.image?.cloudfrontUrl
               if (slotUrl) return { slot: i, url: slotUrl }
-              // Fallback: derive from legacy images array
-              if (!profileData.slots || profileData.slots.length === 0) {
-                const legacyUrl = profileData.images?.[i]?.cloudfrontUrl || null
-                return { slot: i, url: legacyUrl }
-              }
               return { slot: i, url: null }
             }),
             // Legacy gallery (not used for primary render anymore)

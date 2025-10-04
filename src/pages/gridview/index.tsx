@@ -84,12 +84,33 @@ export default function ProfilesPage() {
       })
 
       if (response.success) {
+        // Process profile images the same way as detailed profile views
+        const processedProfiles = response.profiles.map(profile => {
+          // Debug: Log the profile data to understand what's being returned
+          console.log('Gridview profile data from API:', {
+            id: profile.id,
+            name: profile.name,
+            profileImage: profile.profileImage,
+            slots: (profile as any).slots,
+            images: (profile as any).images
+          });
+          
+          // Use slot 0 as profile image when provided; fallback to profileImage if no slots
+          const processedProfileImage = (profile as any).slots?.find((s: any) => s.slot === 0)?.image?.cloudfrontUrl
+            || profile.profileImage; // Fallback to profileImage if slots not available
+          
+          return {
+            ...profile,
+            profileImage: processedProfileImage // Override with processed image
+          }
+        })
+
         if (isLoadMore) {
-          setProfiles(prev => [...prev, ...response.profiles])
-          setOffset(prev => prev + response.profiles.length)
+          setProfiles(prev => [...prev, ...processedProfiles])
+          setOffset(prev => prev + processedProfiles.length)
         } else {
-          setProfiles(response.profiles)
-          setOffset(response.profiles.length)
+          setProfiles(processedProfiles)
+          setOffset(processedProfiles.length)
         }
         setHasMore(response.hasMore)
       } else {
