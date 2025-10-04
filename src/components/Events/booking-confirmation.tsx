@@ -82,11 +82,11 @@ export function BookingConfirmation({
       {/* Content */}
       <div className="flex-1 px-6" style={{ paddingTop: '35px' }}>
         {/* Title */}
-        <div className="text-center" style={{ marginBottom: '28px' }}>
+        <div className="text-center px-4" style={{ marginBottom: '28px' }}>
           <p 
+            className="w-full max-w-[315px] mx-auto"
             style={{
               display: '-webkit-box',
-              width: '315px',
               WebkitBoxOrient: 'vertical',
               WebkitLineClamp: 2,
               overflow: 'hidden',
@@ -94,11 +94,10 @@ export function BookingConfirmation({
               textAlign: 'center',
               textOverflow: 'ellipsis',
               fontFamily: '"Roboto Serif"',
-              fontSize: '28px',
+              fontSize: 'clamp(20px, 5vw, 28px)',
               fontStyle: 'normal',
               fontWeight: 600,
-              lineHeight: 'normal',
-              margin: '0 auto'
+              lineHeight: 'normal'
             }}
           >
             Let's book your
@@ -111,7 +110,7 @@ export function BookingConfirmation({
                 color: '#1BEA7B',
                 textOverflow: 'ellipsis',
                 fontFamily: '"Roboto Serif"',
-                fontSize: '28px',
+                fontSize: 'clamp(20px, 5vw, 28px)',
                 fontStyle: 'italic',
                 fontWeight: 700,
                 lineHeight: 'normal'
@@ -124,8 +123,8 @@ export function BookingConfirmation({
 
         {/* Booking Details Card */}
         <div 
+          className="w-full max-w-[345px] mx-auto"
           style={{
-            width: '345px',
             height: '273px',
             flexShrink: 0,
             borderRadius: '15px',
@@ -134,8 +133,7 @@ export function BookingConfirmation({
             paddingLeft: '24px',
             paddingRight: '24px',
             // paddingBottom: '24px',
-            marginBottom: '32px',
-            margin: '0 auto'
+            marginBottom: '32px'
           }}
         >
           {/* Restaurant Info */}
@@ -317,13 +315,12 @@ export function BookingConfirmation({
       </div>
 
       {/* Bottom Buttons */}
-      <div className="bg-black px-6 flex gap-4" style={{ paddingTop: '24px', paddingBottom: '16px' }}>
+      <div className="bg-black px-4 sm:px-6 flex gap-3 sm:gap-4" style={{ paddingTop: '24px', paddingBottom: '16px' }}>
         <button
           onClick={onBack}
-          className="hover:bg-gray-800/50 transition-colors"
+          className="hover:bg-gray-800/50 transition-colors flex-1"
           style={{
             display: 'flex',
-            width: '173px',
             height: '50px',
             padding: '14.5px 16px',
             justifyContent: 'center',
@@ -347,10 +344,9 @@ export function BookingConfirmation({
         <button
           onClick={handlePayment}
           disabled={isProcessing}
-          className="hover:bg-green-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="hover:bg-green-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-1"
           style={{
             display: 'flex',
-            width: '173px',
             height: '50px',
             padding: '14.5px 16px',
             justifyContent: 'center',

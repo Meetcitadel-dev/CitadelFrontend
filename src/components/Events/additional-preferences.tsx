@@ -68,45 +68,28 @@ export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferen
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="pb-8" style={{ paddingLeft: '24px', paddingRight: '24px', paddingTop: '28px' }}>
+        <div className="pb-8 px-6 pt-7">
           {/* Relationship Status Question */}
           <div style={{ marginBottom: '30px' }}>
             <h2 
+              className="text-white text-lg font-bold leading-[135%] mb-[23px]"
               style={{
-                width: '346px',
-                color: '#FFFFFF',
-                fontFamily: 'Inter',
-                fontSize: '18px',
-                fontStyle: 'normal',
-                fontWeight: 700,
-                lineHeight: '135%', // 24.3px
-                marginBottom: '23px'
+                fontFamily: 'Inter'
               }}
             >
               Select your relationship status*
             </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="flex flex-col gap-3">
               {relationshipOptions.map((option) => (
                 <button
                   key={option.id}
                   onClick={() => setRelationshipStatus(option.id)}
-                  className="flex items-center justify-between hover:bg-gray-700/50 transition-colors"
-                  style={{
-                    width: '345px',
-                    height: '60px',
-                    flexShrink: 0,
-                    borderRadius: '15px',
-                    background: '#111',
-                    border: 'none',
-                    padding: '16px'
-                  }}
+                  className="flex items-center justify-between hover:bg-gray-700/50 transition-colors w-full h-[60px] rounded-[15px] bg-[#111] border-none p-4"
                 >
                   <span 
+                    className="text-white text-lg font-medium"
                     style={{
-                      color: '#FFFFFF',
-                      fontFamily: 'Inter',
-                      fontSize: '18px',
-                      fontWeight: 500
+                      fontFamily: 'Inter'
                     }}
                   >
                     {option.name}
@@ -126,46 +109,24 @@ export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferen
           {/* Meal Preference Question */}
           <div style={{ marginBottom: '30px' }}>
             <p 
+              className="text-white text-lg font-bold leading-[135%] mb-[23px]"
               style={{
-                display: 'flex',
-                width: '346px',
-                height: '47px',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                flexShrink: 0,
-                color: '#FFFFFF',
-                fontFamily: 'Inter',
-                fontSize: '18px',
-                fontStyle: 'normal',
-                fontWeight: 700,
-                lineHeight: '135%', // 24.3px
-                marginBottom: '23px'
+                fontFamily: 'Inter'
               }}
             >
               Select your meal preference*
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="flex flex-col gap-3">
               {mealOptions.map((option) => (
                 <button
                   key={option.id}
                   onClick={() => setMealPreference(option.id)}
-                  className="flex items-center justify-between hover:bg-gray-700/50 transition-colors"
-                  style={{
-                    width: '345px',
-                    height: '60px',
-                    flexShrink: 0,
-                    borderRadius: '15px',
-                    background: '#111',
-                    border: 'none',
-                    padding: '16px'
-                  }}
+                  className="flex items-center justify-between hover:bg-gray-700/50 transition-colors w-full h-[60px] rounded-[15px] bg-[#111] border-none p-4"
                 >
                   <span 
+                    className="text-white text-lg font-medium"
                     style={{
-                      color: '#FFFFFF',
-                      fontFamily: 'Inter',
-                      fontSize: '18px',
-                      fontWeight: 500
+                      fontFamily: 'Inter'
                     }}
                   >
                     {option.name}
@@ -184,16 +145,11 @@ export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferen
 
           {/* Vegetarian Question (moved from previous step) */}
           <div className="mb-8">
-            <div className="flex items-center" style={{ width: '345px', justifyContent: 'space-between', paddingRight: '16px' }}>
+            <div className="flex items-center justify-between w-full pr-4">
               <span 
+                className="text-white text-lg font-bold leading-[135%] flex-1"
                 style={{
-                  width: '267px',
-                  color: '#FFFFFF',
-                  fontFamily: 'Inter',
-                  fontSize: '18px',
-                  fontStyle: 'normal',
-                  fontWeight: 700,
-                  lineHeight: '135%'
+                  fontFamily: 'Inter'
                 }}
               >
                 I want only pure vegetarians at the table.
