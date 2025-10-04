@@ -13,6 +13,7 @@ import { useNavigate, useLocation, useParams } from "react-router-dom"
 import { useState, useEffect } from "react"
 // Removed unused ProfileImage import
 import Navbar from "@/components/Common/navbar"
+import ProfileAvatar from "@/components/Common/ProfileAvatar"
 import ForestProfile from "@/assets/man, forest background behind.png"
 import Realisticprofile from "@/assets/man, realsitic background behind.png"
 import Oceanprofile from "@/assets/man, ocean background behind.png"
@@ -217,8 +218,7 @@ export default function UserProfileScreen() {
     )
   }
 
-  // Get profile image (user's uploaded image or placeholder)
-  const profileImageUrl = userProfile.profileImage || "/placeholder.svg"
+  // Profile image is now handled by ProfileAvatar component
 
   // Get gallery images (user's uploaded images or defaults)
   const galleryImages = userProfile.uploadedImages || [ForestProfile, Realisticprofile, Oceanprofile, Buildingprofile]
@@ -243,14 +243,15 @@ export default function UserProfileScreen() {
 
         {/* Profile Image with Gradient Overlay and Info Block */}
         <div className="relative w-full" style={{ height: '586px' }}>
-          <img
-            src={profileImageUrl || "/placeholder.svg"}
+          <ProfileAvatar
+            profileImage={userProfile.profileImage}
+            userId={userProfile.id}
             alt="Profile"
             className="object-cover absolute inset-0 w-full h-full"
             fetchPriority="high"
             decoding="async"
-            onLoad={() => console.log('Profile image loaded successfully:', profileImageUrl)}
-            onError={(e) => console.error('Profile image failed to load:', profileImageUrl, e)}
+            onLoad={() => console.log('Profile image loaded successfully')}
+            onError={(e) => console.error('Profile image failed to load:', e)}
           />
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90" />

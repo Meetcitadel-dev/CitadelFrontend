@@ -1,11 +1,14 @@
 
+import ProfileAvatar from "@/components/Common/ProfileAvatar"
+
 interface ProfileSectionProps {
   name: string
   subtitle: string
   profileImage: string
+  userId: string
 }
 
-export default function ProfileSection({ name, subtitle, profileImage }: ProfileSectionProps) {
+export default function ProfileSection({ name, subtitle, profileImage, userId }: ProfileSectionProps) {
   return (
     <div className="flex flex-col items-center bg-black px-4" style={{ marginTop: '30px' }}>
       <div 
@@ -18,8 +21,9 @@ export default function ProfileSection({ name, subtitle, profileImage }: Profile
           overflow: 'hidden'
         }}
       >
-        <img
-          src={profileImage || "/placeholder.svg"}
+        <ProfileAvatar
+          profileImage={profileImage}
+          userId={userId}
           alt={name}
           style={{
             width: '100%',

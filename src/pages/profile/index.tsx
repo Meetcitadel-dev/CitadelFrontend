@@ -14,6 +14,7 @@ import { useNavigate, useLocation } from "react-router-dom"
 import { useState, useEffect } from "react"
 // Removed unused ProfileImage import
 import Navbar from "@/components/Common/navbar"
+import ProfileAvatar from "@/components/Common/ProfileAvatar"
 import { getCurrentUserProfile, getUserConnectionsCount } from "@/lib/api"
 import { getAuthToken } from "@/lib/utils"
 
@@ -182,14 +183,17 @@ export default function MobileProfileScreen() {
     ],
   }
 
-  // Get profile image (user's uploaded image or placeholder)
-  const profileImageUrl = profile.profileImage || "/placeholder.svg"
+  // Profile image is now handled by ProfileAvatar component
 
 
   // Removed CORS proxy indirection; images load directly from CDN
 
-  console.log('Render - Profile image URL:', profileImageUrl)
   console.log('Render - Profile data:', profile)
+  console.log('Render - Profile slots:', profile.slots)
+  console.log('Render - Slot 1 URL:', profile.slots?.[1]?.url)
+  console.log('Render - Slot 2 URL:', profile.slots?.[2]?.url)
+  console.log('Render - Slot 3 URL:', profile.slots?.[3]?.url)
+  console.log('Render - Slot 4 URL:', profile.slots?.[4]?.url)
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
@@ -208,14 +212,15 @@ export default function MobileProfileScreen() {
               <Settings className="w-6 h-6 text-white" />
             </button>
           </div>
-          <img
-            src={profileImageUrl || "/placeholder.svg"}
+          <ProfileAvatar
+            profileImage={profile.profileImage}
+            userId={profile.id}
             alt="Profile"
             className="object-cover absolute inset-0 w-full h-full"
             fetchPriority="high"
             decoding="async"
-            onLoad={() => console.log('Profile image loaded successfully:', profileImageUrl)}
-            onError={(e) => console.error('Profile image failed to load:', profileImageUrl, e)}
+            onLoad={() => console.log('Profile image loaded successfully')}
+            onError={(e) => console.error('Profile image failed to load:', e)}
           />
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90" />

@@ -1,6 +1,7 @@
 import { Info, Briefcase, GraduationCap, Search, Calendar, MessageCircle, Bell, User, LayoutGrid } from "lucide-react"
 import { useState, useEffect } from "react"
 import Navbar from "../Common/navbar";
+import ProfileAvatar from "../Common/ProfileAvatar";
 import { useNavigate, useLocation } from "react-router-dom";
 // Removed unused ProfileImage import
 import { 
@@ -589,15 +590,16 @@ export default function MobileProfileScreen() {
 
       {/* Profile Image with Gradient Overlay and Info Block */}
       <div className="relative w-full flex-grow min-h-0">
-        <img 
-          src={currentProfile.profileImage || "/placeholder.svg"} 
-          alt="Profile" 
-          className="object-cover absolute inset-0 w-full h-full" 
+        <ProfileAvatar
+          profileImage={currentProfile.profileImage}
+          userId={currentProfile.id.toString()}
+          alt="Profile"
+          className="object-cover absolute inset-0 w-full h-full"
           fetchPriority="high"
           decoding="async"
           loading="eager"
-          onLoad={() => console.log('Explore profile image loaded successfully:', currentProfile.profileImage)}
-          onError={(e) => console.error('Explore profile image failed to load:', currentProfile.profileImage, e)}
+          onLoad={() => console.log('Explore profile image loaded successfully')}
+          onError={(e) => console.error('Explore profile image failed to load:', e)}
         />
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90" />

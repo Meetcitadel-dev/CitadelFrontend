@@ -1,19 +1,26 @@
 
+import ProfileAvatar from "@/components/Common/ProfileAvatar"
 
 interface UserCardProps {
   name: string
   location: string
   profileImage: string
+  userId: string
   isBlocked: boolean
   onToggleBlock: () => void
 }
 
-export default function UserCard({ name, location, profileImage, isBlocked, onToggleBlock }: UserCardProps) {
+export default function UserCard({ name, location, profileImage, userId, isBlocked, onToggleBlock }: UserCardProps) {
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-700 last:border-b-0">
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 rounded-full overflow-hidden">
-          <img src={profileImage || "/placeholder.svg"} alt={name} className="w-full h-full object-cover" />
+          <ProfileAvatar
+            profileImage={profileImage}
+            userId={userId}
+            alt={name}
+            className="w-full h-full object-cover"
+          />
         </div>
         <div>
           <h3 className="text-green-400 text-base font-medium">{name}</h3>

@@ -1,20 +1,28 @@
 "use client"
 
+import ProfileAvatar from "@/components/Common/ProfileAvatar"
+
 interface ChatItemProps {
   name: string
   message: string
   time: string
   avatar: string
+  userId: string
   isOnline?: boolean
   unreadCount?: number
   onClick?: () => void
 }
 
-export default function ChatItem({ name, message, time, avatar, isOnline = false, unreadCount = 0, onClick }: ChatItemProps) {
+export default function ChatItem({ name, message, time, avatar, userId, isOnline = false, unreadCount = 0, onClick }: ChatItemProps) {
   return (
     <div className="flex items-center px-4 py-3 hover:bg-gray-900 cursor-pointer" onClick={onClick}>
       <div className="relative">
-        <img src={avatar || "/placeholder.svg"} alt={name} className="w-12 h-12 rounded-lg object-cover" />
+        <ProfileAvatar
+          profileImage={avatar}
+          userId={userId}
+          alt={name}
+          className="w-12 h-12 rounded-lg object-cover"
+        />
         {isOnline && (
           <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-black"></div>
         )}

@@ -1,5 +1,6 @@
 import { MessageSquare, Minus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import ProfileAvatar from "@/components/Common/ProfileAvatar"
 
 interface Member {
   id: string
@@ -26,8 +27,9 @@ export default function MemberItem({
   return (
     <div className="flex items-center justify-between p-4 hover:bg-gray-900">
       <div className="flex items-center gap-3">
-        <img
-          src={member.avatar || "/placeholder.svg"}
+        <ProfileAvatar
+          profileImage={member.avatar}
+          userId={member.id}
           alt={member.name}
           className="w-12 h-12 rounded-full object-cover"
           loading="lazy"

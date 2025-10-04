@@ -1,6 +1,7 @@
 import { ProfileActionButton } from "./profile-action-button"
 import { GraduationCap } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import ProfileAvatar from "@/components/Common/ProfileAvatar"
 
 export interface Profile {
   id: number
@@ -48,11 +49,10 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
           onClick={() => handleProfileClick(profile)}
         >
           <div className="relative flex justify-center items-center" style={{ height: '182px' }}>
-            <img
-              src={profile.image || "/placeholder.svg"}
+            <ProfileAvatar
+              profileImage={profile.image}
+              userId={profile.id.toString()}
               alt={profile.name}
-              width={143}
-              height={152}
               className="object-cover"
               style={{ width: '143px', height: '152px', borderRadius: '12px' }}
               loading="lazy"
