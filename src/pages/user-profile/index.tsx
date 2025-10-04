@@ -220,8 +220,8 @@ export default function UserProfileScreen() {
 
   // Profile image is now handled by ProfileAvatar component
 
-  // Get gallery images (user's uploaded images or defaults)
-  const galleryImages = userProfile.uploadedImages || [ForestProfile, Realisticprofile, Oceanprofile, Buildingprofile]
+  // Get gallery images (user's uploaded images only, no defaults)
+  const galleryImages = userProfile.uploadedImages || []
 
   // Removed CORS proxy indirection; images load directly from CDN
 
@@ -386,16 +386,22 @@ export default function UserProfileScreen() {
 
           {/* Photo Gallery Section */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <img
-              src={galleryImages[0] || ForestProfile}
-              alt="Profile Gallery"
-              className="w-full h-auto object-contain rounded-xl"
-              loading="lazy"
-              decoding="async"
-              fetchPriority="low"
-              onLoad={() => console.log('Gallery image 1 loaded:', galleryImages[0])}
-              onError={(e) => console.error('Gallery image 1 failed to load:', galleryImages[0], e)}
-            />
+            {galleryImages[0] ? (
+              <img
+                src={galleryImages[0]}
+                alt="Profile Gallery"
+                className="w-full h-auto object-contain rounded-xl"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+                onLoad={() => console.log('Gallery image 1 loaded:', galleryImages[0])}
+                onError={(e) => console.error('Gallery image 1 failed to load:', galleryImages[0], e)}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-32 rounded-xl bg-gray-800/50 border border-gray-600/30">
+                <span className="text-gray-400 text-sm font-medium">No image uploaded</span>
+              </div>
+            )}
           </div>
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <h3 className="text-white text-xl font-bold mb-3">Movies I like</h3>
@@ -404,16 +410,22 @@ export default function UserProfileScreen() {
 
           {/* Photo Gallery Section */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <img
-              src={galleryImages[1] || Realisticprofile}
-              alt="Profile Gallery"
-              className="w-full h-auto object-contain rounded-xl"
-              loading="lazy"
-              decoding="async"
-              fetchPriority="low"
-              onLoad={() => console.log('Gallery image 2 loaded:', galleryImages[1])}
-              onError={(e) => console.error('Gallery image 2 failed to load:', galleryImages[1], e)}
-            />
+            {galleryImages[1] ? (
+              <img
+                src={galleryImages[1]}
+                alt="Profile Gallery"
+                className="w-full h-auto object-contain rounded-xl"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+                onLoad={() => console.log('Gallery image 2 loaded:', galleryImages[1])}
+                onError={(e) => console.error('Gallery image 2 failed to load:', galleryImages[1], e)}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-32 rounded-xl bg-gray-800/50 border border-gray-600/30">
+                <span className="text-gray-400 text-sm font-medium">No image uploaded</span>
+              </div>
+            )}
           </div>
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <h3 className="text-white text-xl font-bold mb-3">TV Shows I watch</h3>
@@ -421,16 +433,22 @@ export default function UserProfileScreen() {
           </div>
 
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <img
-              src={galleryImages[2] || Oceanprofile}
-              alt="Profile Gallery"
-              className="w-full h-auto object-contain rounded-xl"
-              loading="lazy"
-              decoding="async"
-              fetchPriority="low"
-              onLoad={() => console.log('Gallery image 3 loaded:', galleryImages[2])}
-              onError={(e) => console.error('Gallery image 3 failed to load:', galleryImages[2], e)}
-            />
+            {galleryImages[2] ? (
+              <img
+                src={galleryImages[2]}
+                alt="Profile Gallery"
+                className="w-full h-auto object-contain rounded-xl"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+                onLoad={() => console.log('Gallery image 3 loaded:', galleryImages[2])}
+                onError={(e) => console.error('Gallery image 3 failed to load:', galleryImages[2], e)}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-32 rounded-xl bg-gray-800/50 border border-gray-600/30">
+                <span className="text-gray-400 text-sm font-medium">No image uploaded</span>
+              </div>
+            )}
           </div>
 
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
@@ -439,16 +457,22 @@ export default function UserProfileScreen() {
           </div>
 
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <img
-              src={galleryImages[3] || Buildingprofile}
-              alt="Profile Gallery"
-              className="w-full h-auto object-contain rounded-xl"
-              loading="lazy"
-              decoding="async"
-              fetchPriority="low"
-              onLoad={() => console.log('Gallery image 4 loaded:', galleryImages[3])}
-              onError={(e) => console.error('Gallery image 4 failed to load:', galleryImages[3], e)}
-            />
+            {galleryImages[3] ? (
+              <img
+                src={galleryImages[3]}
+                alt="Profile Gallery"
+                className="w-full h-auto object-contain rounded-xl"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+                onLoad={() => console.log('Gallery image 4 loaded:', galleryImages[3])}
+                onError={(e) => console.error('Gallery image 4 failed to load:', galleryImages[3], e)}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-32 rounded-xl bg-gray-800/50 border border-gray-600/30">
+                <span className="text-gray-400 text-sm font-medium">No image uploaded</span>
+              </div>
+            )}
           </div>
           
 
