@@ -11,13 +11,15 @@ import ChatItem from "./ChatItem"
 import SearchBar from "./SearchBar"
 import TabNavigation from "./TabNavigation"
 import { fetchActiveConversations, fetchGroupChats } from "@/lib/api"
+import { getRandomDefaultAvatar } from "@/lib/profileAvatar"
 import { getAuthToken } from "@/lib/utils"
 import type { GroupChat } from "@/types"
 
 interface ActiveChatsProps {
   activeTab: "active" | "matches"
   setActiveTab: (tab: "active" | "matches") => void
-  onChatSelect: (chatId: string, isGroup?: boolean) => void
+  // Pass conversationId, isGroup flag, and for individual chats also the other user's userId
+  onChatSelect: (chatId: string, isGroup?: boolean, userId?: string) => void
   onPlusClick?: () => void
   // Provide a way for parent to receive a function to update unread counts locally
   onUnreadCountUpdate?: (fn: (chatId: string, unreadCount: number, isGroup: boolean) => void) => void
@@ -173,7 +175,7 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onP
     ...uniqueGroupChats.map(group => ({
       id: group.id,
       name: group.name,
-      profileImage: group.avatar,
+      profileImage: group.avatar || getRandomDefaultAvatar(),
       lastMessage: group.lastMessage?.content,
       lastMessageTime: group.lastMessage?.timestamp ? new Date(group.lastMessage.timestamp).toISOString() : undefined,
       unreadCount: group.unreadCount,
@@ -248,11 +250,11 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onP
               name={chat.name}
               message={chat.lastMessage || "No messages yet"}
               time={chat.lastMessageTime ? formatTime(chat.lastMessageTime) : ""}
-              avatar={chat.profileImage || "/placeholder.svg?height=48&width=48"}
+              profileImage={chat.profileImage}
               userId={chat.userId}
               isOnline={chat.isOnline || false}
               unreadCount={chat.unreadCount}
-              onClick={() => onChatSelect(chat.id, chat.isGroup)}
+              onClick={() => onChatSelect(chat.id, chat.isGroup, chat.userId)}
             />
           ))
         )}

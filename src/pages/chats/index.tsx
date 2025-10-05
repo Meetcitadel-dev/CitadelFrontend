@@ -133,7 +133,7 @@ export default function ChatApp() {
     
   };
 
-  const handleChatSelect = async (chatId: string, isGroup?: boolean) => {
+  const handleChatSelect = async (chatId: string, isGroup?: boolean, otherUserId?: string) => {
     setSelectedChat(chatId);
     setSelectedChatType(isGroup ? "group" : "individual");
     
@@ -151,7 +151,8 @@ export default function ChatApp() {
         console.error('Error fetching group details:', error);
       }
     } else {
-      setSelectedUserId(chatId); // For individual chats, chatId is the userId
+      // For individual chats, ensure we store the other user's userId
+      setSelectedUserId(otherUserId || null);
     }
   };
 

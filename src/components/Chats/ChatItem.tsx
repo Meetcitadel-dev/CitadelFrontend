@@ -6,19 +6,19 @@ interface ChatItemProps {
   name: string
   message: string
   time: string
-  avatar: string
+  profileImage?: string | null
   userId: string
   isOnline?: boolean
   unreadCount?: number
   onClick?: () => void
 }
 
-export default function ChatItem({ name, message, time, avatar, userId, isOnline = false, unreadCount = 0, onClick }: ChatItemProps) {
+export default function ChatItem({ name, message, time, profileImage, userId, isOnline = false, unreadCount = 0, onClick }: ChatItemProps) {
   return (
     <div className="flex items-center px-4 py-3 hover:bg-gray-900 cursor-pointer" onClick={onClick}>
       <div className="relative">
         <ProfileAvatar
-          profileImage={avatar}
+          profileImage={profileImage}
           userId={userId}
           alt={name}
           className="w-12 h-12 rounded-lg object-cover"

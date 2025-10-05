@@ -154,7 +154,7 @@ export default function MatchesChats({ activeTab, setActiveTab, onChatSelect, on
               name={conversation.name}
               message={conversation.lastMessage || "No messages yet"}
               time={conversation.lastMessageTime ? formatTime(conversation.lastMessageTime) : ""}
-              avatar={conversation.profileImage || "/placeholder.svg?height=48&width=48"}
+              profileImage={conversation.profileImage}
               isOnline={false}
               unreadCount={conversation.unreadCount}
               userId={conversation.userId}

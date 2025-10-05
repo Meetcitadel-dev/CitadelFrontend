@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import ChatMessage from "./chat-message"
 import GroupOptionsMenu from "./group-options-menu"
 import { fetchGroupMessages, sendGroupMessage, markGroupMessagesAsRead, getCurrentUserProfile } from "@/lib/api"
+import { getRandomDefaultAvatar } from "@/lib/profileAvatar"
 import { getAuthToken } from "@/lib/utils"
 import { chatSocketService } from "@/lib/socket"
 
@@ -395,7 +396,7 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
           onClick={onHeaderClick}
         >
           <img
-            src={groupAvatar || "/images/profile.png"}
+            src={groupAvatar || getRandomDefaultAvatar()}
             alt={groupName}
             className="w-10 h-10 rounded-full object-cover"
             loading="lazy"
