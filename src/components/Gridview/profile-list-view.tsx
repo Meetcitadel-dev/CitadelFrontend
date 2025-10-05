@@ -7,7 +7,7 @@ interface Profile {
   university: string
   year: string
   image: string
-  status: "connect" | "remove" | "request" | "connected"
+  status: "connect" | "remove" | "request" | "requested" | "connected"
 }
 
 interface ProfileListViewProps {

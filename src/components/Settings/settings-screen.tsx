@@ -29,6 +29,7 @@ interface SettingsScreenProps {
 }
 
 interface UserProfile {
+  id: string
   name: string
   university: string
   profileImage: string
@@ -44,6 +45,7 @@ export default function SettingsScreen({
 }: SettingsScreenProps) {
   const navigate = useNavigate()
   const [userProfile, setUserProfile] = useState<UserProfile>({
+    id: "",
     name: "Loading...",
     university: "Loading...",
     profileImage: "/placeholder.svg" // Use a generic placeholder instead of someone else's photo
@@ -66,6 +68,7 @@ export default function SettingsScreen({
         if (response.success) {
           const profileData = response.data
           setUserProfile({
+            id: String(profileData.id),
             name: profileData.name,
             university: profileData.university?.name || "University not set",
             profileImage: profileData.images?.[0]?.cloudfrontUrl || "/placeholder.svg"
@@ -158,6 +161,7 @@ export default function SettingsScreen({
           name={userProfile.name} 
           subtitle={userProfile.university} 
           profileImage={userProfile.profileImage} 
+          userId={userProfile.id}
         />
       </div>
       <div className="w-full" style={{ marginTop: '30px' }}>

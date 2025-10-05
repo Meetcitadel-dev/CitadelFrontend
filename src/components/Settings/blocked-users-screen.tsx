@@ -46,6 +46,7 @@ export default function BlockedUsersScreen({ onBack }: BlockedUsersScreenProps) 
           users.map((user) => (
             <UserCard
               key={user.id}
+              userId={String(user.id)}
               name={user.name}
               location={user.location}
               profileImage={user.profileImage}

@@ -135,7 +135,7 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
             <ProfileActionButton 
               status={profile.status} 
               onClick={(e) => {
-                e.stopPropagation() // Prevent triggering profile navigation
+                e?.stopPropagation() // Prevent triggering profile navigation
                 const action = profile.status === 'connect' ? 'connect' : 
                              profile.status === 'connected' ? 'remove' : 
                              profile.status === 'request' ? 'accept' : 'connect'

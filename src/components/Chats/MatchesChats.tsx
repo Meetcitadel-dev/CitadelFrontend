@@ -157,6 +157,7 @@ export default function MatchesChats({ activeTab, setActiveTab, onChatSelect, on
               avatar={conversation.profileImage || "/placeholder.svg?height=48&width=48"}
               isOnline={false}
               unreadCount={conversation.unreadCount}
+              userId={conversation.userId}
               onClick={() => onChatSelect(conversation.id, conversation.userId)}
             />
           ))

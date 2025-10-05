@@ -2,7 +2,7 @@
 
 import { Check, X } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import EllipseImg from '@/assets/Ellipse 2812.png';
+import ProfileAvatar from "@/components/Common/ProfileAvatar"
 import type { ConnectionRequestNotification } from '@/types';
 
 interface RequestItemProps {
@@ -37,10 +37,11 @@ export default function RequestItem({ request, onAccept, onReject, isProcessing 
   return (
     <div className="flex items-center gap-3 px-4 py-3">
       <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-        <img 
-          src={request.requesterProfileImage || EllipseImg} 
-          alt={request.requesterName} 
-          className="w-full h-full object-cover" 
+        <ProfileAvatar
+          profileImage={request.requesterProfileImage}
+          userId={request.requesterId}
+          alt={request.requesterName}
+          className="w-full h-full object-cover"
           loading="lazy"
           decoding="async"
           fetchPriority="low"

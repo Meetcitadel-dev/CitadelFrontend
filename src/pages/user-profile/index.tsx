@@ -14,10 +14,7 @@ import { useState, useEffect } from "react"
 // Removed unused ProfileImage import
 import Navbar from "@/components/Common/navbar"
 import ProfileAvatar from "@/components/Common/ProfileAvatar"
-import ForestProfile from "@/assets/man, forest background behind.png"
-import Realisticprofile from "@/assets/man, realsitic background behind.png"
-import Oceanprofile from "@/assets/man, ocean background behind.png"
-import Buildingprofile from "@/assets/man, building background behind.png"
+// Removed unused static profile image imports
 import { getAuthToken } from "@/lib/utils"
 import { fetchUserProfileByName, manageConnection } from "@/lib/api"
 
@@ -71,7 +68,7 @@ export default function UserProfileScreen() {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = () => {
       if (showDropdown) {
         setShowDropdown(false)
       }
@@ -116,7 +113,7 @@ export default function UserProfileScreen() {
         const response = await fetchUserProfileByName(name, token)
         
         if (response.success && response.data) {
-          const profileData = response.data
+          const profileData = response.data as any
           console.log('User profile data received:', profileData)
           
           const mappedProfile: UserProfile = {
@@ -138,10 +135,10 @@ export default function UserProfileScreen() {
             portfolioLink: profileData.portfolioLink,
             phoneNumber: profileData.phoneNumber,
             // Use slot 0 as profile image when provided; no fallback to legacy images
-            profileImage: profileData.slots?.find((s: any) => s.slot === 0)?.image?.cloudfrontUrl || null,
+            profileImage: (profileData as any).slots?.find((s: any) => s.slot === 0)?.image?.cloudfrontUrl || null,
             // Build slots array 0..4; use only slots data, no fallback to legacy images
             slots: [0,1,2,3,4].map((i) => {
-              const slotUrl = profileData.slots?.find((s: any) => s.slot === i)?.image?.cloudfrontUrl
+              const slotUrl = (profileData as any).slots?.find((s: any) => s.slot === i)?.image?.cloudfrontUrl
               if (slotUrl) return { slot: i, image: { cloudfrontUrl: slotUrl } }
               return { slot: i, image: null }
             }),
@@ -150,9 +147,9 @@ export default function UserProfileScreen() {
             // Updated to reflect actual connection counts
             connectionsCount: profileData.connections?.length || 0,
             mutualConnectionsCount: profileData.mutualConnections?.length || 0,
-            connectionStatus: profileData.connectionState?.status === 'accepted' ? 'connected' : 
-                             profileData.connectionState?.status === 'pending' ? 'requested' :
-                             profileData.connectionState?.status || 'not_connected'
+            connectionStatus: (profileData.connectionState?.status as any) === 'accepted' ? 'connected' : 
+                             (profileData.connectionState?.status as any) === 'pending' ? 'requested' :
+                             (profileData.connectionState?.status as any) || 'not_connected'
           }
           
           console.log('Mapped user profile:', mappedProfile)
@@ -204,9 +201,9 @@ export default function UserProfileScreen() {
         // Update the connection status
         setUserProfile(prev => prev ? {
           ...prev,
-          connectionStatus: response.connectionState?.status === 'accepted' ? 'connected' : 
-                           response.connectionState?.status === 'pending' ? 'requested' :
-                           response.connectionState?.status || 'not_connected'
+          connectionStatus: (response.connectionState?.status as any) === 'accepted' ? 'connected' : 
+                           (response.connectionState?.status as any) === 'pending' ? 'requested' :
+                           (response.connectionState?.status as any) || 'not_connected'
         } : null)
         
         // Show success message

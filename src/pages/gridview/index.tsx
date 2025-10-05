@@ -205,7 +205,7 @@ export default function ProfilesPage() {
       name: exploreProfile.name,
       university: exploreProfile.university?.name || 'Unknown University',
       year: exploreProfile.year || 'Unknown Year',
-      image: exploreProfile.profileImage, // Let ProfileAvatar handle the default avatar logic
+      image: exploreProfile.profileImage || "/placeholder.svg", // Ensure string type for image
       status: status,
     }
   }

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { ArrowLeft, MoreVertical, Mic, Send, Heart, X } from "lucide-react"
 import BlockUserModal from "./BlockUserModal"
 import ChatDropdown from "./ChatDropdown"
+import ProfileAvatar from "@/components/Common/ProfileAvatar"
 import { 
   fetchConversationMessages, 
   sendMessage, 
@@ -648,8 +649,9 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
             className="flex items-center flex-1 cursor-pointer hover:bg-gray-800 rounded-lg px-2 py-1 transition-colors"
             onClick={() => onHeaderClick?.(conversationInfo)}
           >
-            <img
-              src={conversationInfo?.profileImage || "/placeholder.svg?height=40&width=40"}
+            <ProfileAvatar
+              profileImage={conversationInfo?.profileImage}
+              userId={conversationInfo?.userId || "unknown"}
               alt={conversationInfo?.name || "User"}
               className="w-10 h-10 rounded-full object-cover mr-3"
               loading="lazy"

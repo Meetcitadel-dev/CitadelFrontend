@@ -2,6 +2,7 @@
 
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import ProfileAvatar from "@/components/Common/ProfileAvatar"
 
 interface Connection {
   id: string
@@ -20,8 +21,9 @@ export default function ConnectionItem({ connection, isSelected, onAdd }: Connec
   return (
     <div className="flex items-center justify-between p-4 hover:bg-gray-900">
       <div className="flex items-center gap-3">
-        <img
-          src={connection.avatar || "/placeholder.svg"}
+        <ProfileAvatar
+          profileImage={connection.avatar}
+          userId={connection.id}
           alt={connection.name}
           className="w-12 h-12 rounded-full object-cover"
         />

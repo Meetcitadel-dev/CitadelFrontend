@@ -43,6 +43,7 @@ interface ChatItem {
   unreadCount: number;
   isGroup: boolean;
   isOnline?: boolean;
+  userId: string; // used by ChatItem avatar
 }
 
 export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onPlusClick, onUnreadCountUpdate }: ActiveChatsProps) {
@@ -166,7 +167,8 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onP
       lastMessageTime: conv.lastMessageTime,
       unreadCount: conv.unreadCount,
       isGroup: false,
-      isOnline: conv.isOnline
+      isOnline: conv.isOnline,
+      userId: conv.userId
     })),
     ...uniqueGroupChats.map(group => ({
       id: group.id,
@@ -176,7 +178,9 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onP
       lastMessageTime: group.lastMessage?.timestamp ? new Date(group.lastMessage.timestamp).toISOString() : undefined,
       unreadCount: group.unreadCount,
       isGroup: true,
-      isOnline: false
+      isOnline: false,
+      // For groups, pass group id to satisfy required prop; ProfileAvatar won't use navigation here
+      userId: group.id
     }))
   ].sort((a, b) => {
     if (!a.lastMessageTime && !b.lastMessageTime) return 0;
@@ -245,6 +249,7 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onP
               message={chat.lastMessage || "No messages yet"}
               time={chat.lastMessageTime ? formatTime(chat.lastMessageTime) : ""}
               avatar={chat.profileImage || "/placeholder.svg?height=48&width=48"}
+              userId={chat.userId}
               isOnline={chat.isOnline || false}
               unreadCount={chat.unreadCount}
               onClick={() => onChatSelect(chat.id, chat.isGroup)}

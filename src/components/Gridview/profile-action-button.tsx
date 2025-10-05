@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 
 interface ProfileActionButtonProps {
   status: "connect" | "remove" | "request" | "requested" | "connected"
-  onClick?: () => void
+  onClick?: (e?: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 export function ProfileActionButton({ status, onClick }: ProfileActionButtonProps) {

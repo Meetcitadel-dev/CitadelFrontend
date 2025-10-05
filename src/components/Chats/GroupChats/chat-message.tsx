@@ -1,3 +1,5 @@
+import ProfileAvatar from "@/components/Common/ProfileAvatar"
+
 interface Message {
     id: string
     text: string
@@ -27,8 +29,9 @@ interface Message {
     // Other users' messages (left side, gray with profile picture)
     return (
       <div className="flex items-start gap-2">
-        <img
-          src={message.senderAvatar || "/placeholder.svg"}
+        <ProfileAvatar
+          profileImage={message.senderAvatar}
+          userId={message.senderId}
           alt={message.senderName}
           className="w-8 h-8 rounded-full object-cover flex-shrink-0"
           loading="lazy"
