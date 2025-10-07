@@ -1,5 +1,5 @@
-import React from 'react'
-import { getProfileImageUrl } from '@/lib/profileAvatar'
+import React, { useState, useEffect } from 'react'
+import { getProfileImageUrl, getDefaultAvatar } from '@/lib/profileAvatar'
 
 interface ProfileAvatarProps {
   /** The user's uploaded profile image URL */
@@ -22,6 +22,10 @@ interface ProfileAvatarProps {
   onLoad?: () => void
   /** Callback when image fails to load */
   onError?: (event: React.SyntheticEvent<HTMLImageElement, Event>) => void
+  /** Show loading placeholder */
+  showPlaceholder?: boolean
+  /** Enable progressive loading */
+  progressive?: boolean
 }
 
 /**

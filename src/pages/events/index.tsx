@@ -135,6 +135,10 @@ export default function DinnerBooking() {
     setCurrentScreen("booking")
   }
 
+  const handleCloseToMain = () => {
+    setCurrentScreen("booking")
+  }
+
   const handleBackToCity = () => {
     setCurrentScreen("city-selection")
   }
@@ -211,18 +215,19 @@ export default function DinnerBooking() {
         onBack={handleBackToArea}
         onEditPreferences={handleEditPreferences}
         onContinue={handlePreferencesContinue}
+        onClose={handleCloseToMain}
       />
     )
   }
 
   // Edit Preferences Screen
   if (currentScreen === "edit-preferences") {
-    return <EditPreferences onBack={handleBackToPreferences} onSave={handleSavePreferences} />
+    return <EditPreferences onBack={handleBackToPreferences} onSave={handleSavePreferences} onClose={handleCloseToMain} />
   }
 
   // Additional Preferences Screen
   if (currentScreen === "additional-preferences") {
-    return <AdditionalPreferences onBack={handleBackToEditPreferences} onContinue={handleAdditionalPreferences} />
+    return <AdditionalPreferences onBack={handleBackToEditPreferences} onContinue={handleAdditionalPreferences} onClose={handleCloseToMain} />
   }
 
   // Booking Confirmation Screen
@@ -231,6 +236,7 @@ export default function DinnerBooking() {
       <BookingConfirmation
         onBack={handleBackToPreferences}
         onPayment={handlePayment}
+        onClose={handleCloseToMain}
         bookingDetails={bookingDetails}
         onPaymentSuccess={handlePaymentSuccess}
         onPaymentFailure={handlePaymentFailure}

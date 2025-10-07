@@ -1,11 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, X } from "lucide-react"
 
 interface AdditionalPreferencesProps {
   onBack: () => void
   onContinue: (preferences: AdditionalPrefs) => void
+  onClose?: () => void
 }
 
 interface AdditionalPrefs {
@@ -14,7 +15,7 @@ interface AdditionalPrefs {
   vegetarianOnly: boolean
 }
 
-export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferencesProps) {
+export function AdditionalPreferences({ onBack, onContinue, onClose }: AdditionalPreferencesProps) {
   const [relationshipStatus, setRelationshipStatus] = useState<string>("")
   const [mealPreference, setMealPreference] = useState<string>("")
   const [vegetarianOnly, setVegetarianOnly] = useState<boolean>(false)
@@ -50,7 +51,7 @@ export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferen
         <button onClick={onBack} className="text-white">
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <h1 
+        <h1
           style={{
             color: '#FFFFFF',
             textAlign: 'center',
@@ -63,7 +64,13 @@ export function AdditionalPreferences({ onBack, onContinue }: AdditionalPreferen
         >
           Your Dinner
         </h1>
-        <div className="w-6"></div>
+        {onClose ? (
+          <button onClick={onClose} className="text-white hover:text-gray-300 transition-colors">
+            <X className="w-6 h-6" />
+          </button>
+        ) : (
+          <div className="w-6"></div>
+        )}
       </div>
 
       {/* Scrollable Content */}

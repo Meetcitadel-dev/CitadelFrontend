@@ -1,25 +1,60 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import OnboardingPage from "./pages/onboarding";
-import ProfilePage from "./pages/editprofile";
-import ExplorePage from "./pages/explore";
-import NotificationPage from "./pages/notification";
-import ProfilesPage from "./pages/gridview";
-import ChatApp from "./pages/chats";
-import SettingsPage from "./pages/settings";
-import EventsPage from "./pages/events";
-import UserProfilePage from "./pages/profile";
 import { useEffect } from "react";
 import { getAuthToken, prefetchImagesBatched, preloadCriticalImages } from "@/lib/utils";
 import { fetchExploreProfiles, getCurrentUserProfile } from "@/lib/api";
 import UserProfileScreen from "./pages/user-profile";
 import { useClientOnly } from "@/lib/hooks/useClientOnly";
+import { useConnectionRequests } from "@/hooks/useConnectionRequests";
+import { useRoutePerformance, usePerformanceSummary } from "@/hooks/usePerformance";
+import { measureWebVitals, logMemoryUsage, logBundleInfo } from "@/lib/performance";
+import { Toaster } from 'react-hot-toast';
+import {
+  LazyOnboardingPage,
+  LazyExplorePage,
+  LazyEventsPage,
+  LazyChatsPage,
+  LazyProfilePage,
+  LazySettingsPage,
+  LazyGridviewPage,
+  LazyNotificationPage,
+  preloadComponents
+} from "@/lib/lazyLoading";
+
+// Import non-lazy components that are critical
+import UserProfilePage from "./pages/profile";
+
+// Import test interface for development
+import TestInterface from "@/components/Testing/TestInterface";
 
 export default function App() {
   const isClient = useClientOnly()
+
+  // Initialize performance monitoring
+  useRoutePerformance()
+  const { logSummary } = usePerformanceSummary()
+
+  // Initialize connection request handling
+  useConnectionRequests()
   
   useEffect(() => {
     if (!isClient) return
-    
+
+    // Initialize performance monitoring
+    if (import.meta.env.DEV) {
+      measureWebVitals()
+      logBundleInfo()
+      logMemoryUsage()
+    }
+
+    // Preload critical components
+    const preloadCriticalComponents = async () => {
+      await preloadComponents([
+        { importFn: () => import("./pages/explore"), name: "ExplorePage" },
+        { importFn: () => import("./pages/chats"), name: "ChatsPage" },
+        { importFn: () => import("./pages/notification"), name: "NotificationPage" }
+      ])
+    }
+
     const warmImages = async () => {
       try {
         const token = getAuthToken()
@@ -64,28 +99,57 @@ export default function App() {
       }
     }
 
-    // warm shortly after boot
+    // Start preloading and warming
+    preloadCriticalComponents()
     const t = setTimeout(warmImages, 50)
     return () => clearTimeout(t)
   }, [])
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/onboarding/*" element={<OnboardingPage />} />
-        <Route path="/edit-profile/*" element={<ProfilePage onSave={() => {}} />} />
-        <Route path="/explore" element={<ExplorePage />} />
-        <Route path="/notification" element={<NotificationPage />} />
-        <Route path="/chats" element={<ChatApp />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/search" element={<ProfilesPage />} />
-        <Route path="/gridview" element={<ProfilesPage />} />
+        <Route path="/onboarding/*" element={<LazyOnboardingPage />} />
+        <Route path="/edit-profile/*" element={<LazyProfilePage onSave={() => {}} />} />
+        <Route path="/explore" element={<LazyExplorePage />} />
+        <Route path="/notification" element={<LazyNotificationPage />} />
+        <Route path="/chats" element={<LazyChatsPage />} />
+        <Route path="/settings" element={<LazySettingsPage />} />
+        <Route path="/events" element={<LazyEventsPage />} />
+        <Route path="/search" element={<LazyGridviewPage />} />
+        <Route path="/gridview" element={<LazyGridviewPage />} />
         <Route path="/profile" element={<UserProfilePage />} />
         {/* Catch-all route for user profiles - must be last */}
         <Route path="/:name" element={<UserProfileScreen />} />
         {/* Default route: redirect to onboarding */}
         <Route path="*" element={<Navigate to="/onboarding" replace />} />
       </Routes>
+
+      {/* Toast notifications for connection requests */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#10B981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            duration: 4000,
+            iconTheme: {
+              primary: '#EF4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
+      {/* Test Interface - Development Only */}
+      <TestInterface />
     </BrowserRouter>
   );
 }
