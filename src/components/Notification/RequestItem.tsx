@@ -63,9 +63,10 @@ export default function RequestItem({ request, onAccept, onReject, isProcessing 
             <button
               onClick={handleAccept}
               disabled={isProcessing}
-              className={`w-10 h-10 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center transition-colors ${
-                isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'
+              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'
               }`}
+              style={{ backgroundColor: '#111111', border: '1px solid #292929' }}
             >
               {isProcessing ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
@@ -76,9 +77,10 @@ export default function RequestItem({ request, onAccept, onReject, isProcessing 
             <button
               onClick={handleReject}
               disabled={isProcessing}
-              className={`w-10 h-10 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center transition-colors ${
-                isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'
+              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'
               }`}
+              style={{ backgroundColor: '#111111', border: '1px solid #292929' }}
             >
               {isProcessing ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
