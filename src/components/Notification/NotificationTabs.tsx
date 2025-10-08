@@ -11,10 +11,10 @@ export default function NotificationTabs({ activeTab, onTabChange, requestCount 
     <div className="flex mx-4 mb-6" style={{ width: '361px', height: '38px' }}>
       <button
         onClick={() => onTabChange("requests")}
-        className={`flex-1 py-3 px-4 rounded-l-full text-sm font-medium relative ${
+        className={`flex-1 px-4 rounded-l-full font-medium relative flex items-center justify-center ${
           activeTab === "requests" ? "bg-gray-700 text-white" : "bg-gray-800 text-gray-400"
         }`}
-        style={{ fontFamily: 'Inter' }}
+        style={{ fontFamily: 'Inter', fontSize: '16px' }}
       >
         Requests
         {requestCount && requestCount > 0 && (
@@ -28,10 +28,10 @@ export default function NotificationTabs({ activeTab, onTabChange, requestCount 
       </button>
       <button
         onClick={() => onTabChange("likes")}
-        className={`flex-1 py-3 px-4 rounded-r-full text-sm font-medium ${
+        className={`flex-1 px-4 rounded-r-full font-medium flex items-center justify-center ${
           activeTab === "likes" ? "bg-gray-700 text-white" : "bg-gray-800 text-gray-400"
         }`}
-        style={{ fontFamily: 'Inter' }}
+        style={{ fontFamily: 'Inter', fontSize: '16px' }}
       >
         Likes
       </button>
