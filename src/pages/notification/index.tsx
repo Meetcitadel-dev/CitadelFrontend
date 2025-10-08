@@ -136,7 +136,7 @@ export default function NotificationsScreen() {
   if (loading) {
     return (
       <div className="relative bg-black h-screen overflow-hidden text-white pt-4">
-        <div className="px-4 py-4">
+        <div className="px-4 py-3">
           <h1 className="text-2xl font-bold mb-6">Notifications</h1>
         </div>
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -150,7 +150,7 @@ export default function NotificationsScreen() {
   if (error) {
     return (
       <div className="relative bg-black h-screen overflow-hidden text-white pt-4">
-        <div className="px-4 py-4">
+        <div className="px-4 py-3">
           <h1 className="text-2xl font-bold mb-6">Notifications</h1>
         </div>
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -175,7 +175,7 @@ export default function NotificationsScreen() {
 
   return (
     <div className="relative bg-black h-screen overflow-hidden text-white pt-4">
-      <div className="px-4 py-4">
+      <div className="px-4 py-3">
         <h1 className="text-2xl font-bold mb-6">Notifications</h1>
       </div>
 

@@ -8,7 +8,7 @@ interface NotificationTabsProps {
 
 export default function NotificationTabs({ activeTab, onTabChange, requestCount }: NotificationTabsProps) {
   return (
-    <div className="flex mx-4 mb-6">
+    <div className="flex mx-4 mb-6" style={{ width: '361px', height: '38px' }}>
       <button
         onClick={() => onTabChange("requests")}
         className={`flex-1 py-3 px-4 rounded-l-full text-sm font-medium relative ${
