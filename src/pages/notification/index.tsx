@@ -176,7 +176,7 @@ export default function NotificationsScreen() {
   return (
     <div className="relative bg-black h-screen overflow-hidden text-white pt-4">
       <div className="px-4 py-3">
-        <h1 className="text-2xl font-bold mb-6">Notifications</h1>
+        <h1 className="text-2xl font-bold mb-6 ml-1">Notifications</h1>
       </div>
 
       <NotificationTabs 
