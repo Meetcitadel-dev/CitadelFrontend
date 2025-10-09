@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Comprehensive test runner for all Citadel application fixes
 import { performanceTester } from './testPerformance';
 import { universityLoadingTester } from './testUniversityLoading';

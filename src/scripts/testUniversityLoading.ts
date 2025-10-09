@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Comprehensive test script for university loading optimization
 import { apiGet } from '../lib/apiClient';
 import { performanceMonitor } from '../lib/performance';

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import chatSocketService from '../lib/socket';
+import { chatSocketService } from '../lib/socket';
 import { toast } from 'react-hot-toast';
 
 interface ConnectionRequestData {
@@ -153,7 +153,7 @@ export const useConnectionRequests = () => {
 
   // Setup WebSocket event listeners
   useEffect(() => {
-    if (!chatSocketService.isConnected()) {
+    if (!chatSocketService.getConnectionStatus()) {
       chatSocketService.connect();
     }
 
@@ -164,7 +164,7 @@ export const useConnectionRequests = () => {
     chatSocketService.onConnectionRemoved(handleConnectionRemoved);
     chatSocketService.onNotification(handleNotification);
 
-    setIsConnected(chatSocketService.isConnected());
+    setIsConnected(chatSocketService.getConnectionStatus());
 
     // Cleanup function
     return () => {

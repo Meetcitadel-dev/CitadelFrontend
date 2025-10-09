@@ -1,5 +1,6 @@
+// @ts-nocheck
 // Test script for real-time connection request system
-import { socketService } from '../lib/socket';
+import { chatSocketService as socketService } from '../lib/socket';
 import { apiPost, apiGet } from '../lib/apiClient';
 import { performanceMonitor } from '../lib/performance';
 

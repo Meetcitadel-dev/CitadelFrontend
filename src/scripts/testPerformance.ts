@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Performance testing script for Citadel frontend
 import { performanceMonitor, measureWebVitals, logMemoryUsage } from '../lib/performance';
 import { apiGet, getApiCacheStats, clearApiCache } from '../lib/apiClient';

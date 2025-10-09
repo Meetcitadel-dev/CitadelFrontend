@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
-import { apiClient } from '../../lib/apiClient';
+import { apiPost } from '../../lib/apiClient';
 
 interface ConnectionRequestData {
   id: number;
@@ -36,13 +36,12 @@ const ConnectionRequestNotification: React.FC<ConnectionRequestNotificationProps
   // Handle connection request response
   const handleConnectionRequestMutation = useMutation({
     mutationFn: async ({ requestId, action }: { requestId: number; action: 'accept' | 'reject' }) => {
-      const response = await apiClient.post('/api/v1/notifications/handle-connection-request', {
+      return await apiPost('/api/v1/notifications/handle-connection-request', {
         requestId,
         action
       });
-      return response.data;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_ignored, variables) => {
       const action = variables.action;
       toast.success(
         action === 'accept' 

@@ -92,7 +92,7 @@ export async function apiClient<T = any>(
     retries: options.retries || 0
   });
 
-  const makeRequest = async (): Promise<T> => {
+  const makeRequest = async (): Promise<Response> => {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...options.headers,

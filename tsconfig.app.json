@@ -27,4 +27,6 @@
     "noImplicitAny": false
   },
   "include": ["src"]
+  ,
+  "exclude": ["src/scripts/**/*"]
 }

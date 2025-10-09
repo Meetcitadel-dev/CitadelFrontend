@@ -7,9 +7,6 @@ import path from 'path';
 export default defineConfig({
   plugins: [
     react({
-      // Enable React Fast Refresh
-      fastRefresh: true,
-      // Optimize JSX runtime
       jsxRuntime: 'automatic'
     }),
     tailwindcss()
@@ -62,15 +59,7 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     },
-    // Enable minification
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true, // Remove console.log in production
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug']
-      }
-    }
+    minify: true
   },
   define: {
     // Ensure proper environment detection

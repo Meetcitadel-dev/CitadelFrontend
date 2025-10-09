@@ -1,4 +1,4 @@
-import React, { Suspense, ComponentType, LazyExoticComponent } from 'react';
+import React, { Suspense, type ComponentType, type LazyExoticComponent } from 'react';
 import { performanceMonitor } from './performance';
 
 // Loading component for lazy-loaded components

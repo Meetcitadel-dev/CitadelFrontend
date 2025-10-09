@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { getProfileImageUrl, getDefaultAvatar } from '@/lib/profileAvatar'
+import React from 'react'
+import { getProfileImageUrl } from '@/lib/profileAvatar'
 
 interface ProfileAvatarProps {
   /** The user's uploaded profile image URL */

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { getAuthToken, prefetchImagesBatched, preloadCriticalImages } from "@/lib/utils";
 import { fetchExploreProfiles, getCurrentUserProfile } from "@/lib/api";
@@ -31,7 +31,7 @@ export default function App() {
 
   // Initialize performance monitoring
   useRoutePerformance()
-  const { logSummary } = usePerformanceSummary()
+  usePerformanceSummary()
 
   // Initialize connection request handling
   useConnectionRequests()
@@ -105,7 +105,7 @@ export default function App() {
     return () => clearTimeout(t)
   }, [])
   return (
-    <BrowserRouter>
+    <>
       <Routes>
         <Route path="/onboarding/*" element={<LazyOnboardingPage />} />
         <Route path="/edit-profile/*" element={<LazyProfilePage onSave={() => {}} />} />
@@ -148,8 +148,8 @@ export default function App() {
           },
         }}
       />
-      {/* Test Interface - Development Only */}
-      <TestInterface />
-    </BrowserRouter>
+      {/* Test Interface - Development Only (enable via VITE_ENABLE_TEST_UI=true) */}
+      {import.meta.env.DEV && import.meta.env.VITE_ENABLE_TEST_UI === 'true' && <TestInterface />}
+    </>
   );
 }
