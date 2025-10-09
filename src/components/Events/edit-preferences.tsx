@@ -1,11 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, X } from "lucide-react"
 
 interface EditPreferencesProps {
   onBack: () => void
   onSave: (preferences: UserPreferences) => void
+  onClose?: () => void
 }
 
 interface UserPreferences {
@@ -13,7 +14,7 @@ interface UserPreferences {
   vegetarianOnly: boolean
 }
 
-export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
+export function EditPreferences({ onBack, onSave, onClose }: EditPreferencesProps) {
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["English"])
   
 
@@ -52,7 +53,7 @@ export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
         <button onClick={onBack} className="text-white">
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <h1 
+        <h1
           style={{
             color: '#FFFFFF',
             textAlign: 'center',
@@ -65,7 +66,13 @@ export function EditPreferences({ onBack, onSave }: EditPreferencesProps) {
         >
           Your Dinner
         </h1>
-        <div className="w-6"></div>
+        {onClose ? (
+          <button onClick={onClose} className="text-white hover:text-gray-300 transition-colors">
+            <X className="w-6 h-6" />
+          </button>
+        ) : (
+          <div className="w-6"></div>
+        )}
       </div>
 
       {/* Scrollable Content */}

@@ -1,14 +1,15 @@
 "use client"
 
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, X } from "lucide-react"
 
 interface PreferencesDisplayProps {
   onBack: () => void
   onEditPreferences: () => void
   onContinue: () => void
+  onClose?: () => void
 }
 
-export function PreferencesDisplay({ onBack, onEditPreferences, onContinue }: PreferencesDisplayProps) {
+export function PreferencesDisplay({ onBack, onEditPreferences, onContinue, onClose }: PreferencesDisplayProps) {
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
       {/* Header */}
@@ -16,7 +17,7 @@ export function PreferencesDisplay({ onBack, onEditPreferences, onContinue }: Pr
         <button onClick={onBack} className="text-white">
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <h1 
+        <h1
           style={{
             color: '#FFFFFF',
             textAlign: 'center',
@@ -29,7 +30,13 @@ export function PreferencesDisplay({ onBack, onEditPreferences, onContinue }: Pr
         >
           Your Dinner
         </h1>
-        <div className="w-6"></div>
+        {onClose ? (
+          <button onClick={onClose} className="text-white hover:text-gray-300 transition-colors">
+            <X className="w-6 h-6" />
+          </button>
+        ) : (
+          <div className="w-6"></div>
+        )}
       </div>
 
       {/* Content */}

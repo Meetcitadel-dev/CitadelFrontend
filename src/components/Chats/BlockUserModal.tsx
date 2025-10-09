@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Send } from "lucide-react"
+import { Send, X } from "lucide-react"
 
 interface BlockUserModalProps {
   onClose: () => void
@@ -26,8 +26,11 @@ export default function BlockUserModal({ onClose }: BlockUserModalProps) {
       <div className="absolute top-32 left-4 right-4 bg-gray-900 rounded-xl border border-gray-700 mx-4">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+            <X className="w-5 h-5" />
+          </button>
           <h2 className="text-white text-lg font-medium">Block user</h2>
-          <button onClick={handleSubmit} className="text-green-500">
+          <button onClick={handleSubmit} className="text-green-500 hover:text-green-400 transition-colors">
             <Send className="w-5 h-5" />
           </button>
         </div>

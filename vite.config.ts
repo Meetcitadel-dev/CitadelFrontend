@@ -5,7 +5,15 @@ import path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react({
+      // Enable React Fast Refresh
+      fastRefresh: true,
+      // Optimize JSX runtime
+      jsxRuntime: 'automatic'
+    }),
+    tailwindcss()
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, './src')
@@ -20,9 +28,47 @@ export default defineConfig({
     }
   },
   build: {
+    // Enable source maps for production debugging (optional)
+    sourcemap: false,
+    // Optimize chunk size
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: undefined
+        // Manual chunk splitting for better caching
+        manualChunks: {
+          // Vendor chunks
+          'react-vendor': ['react', 'react-dom'],
+          'router-vendor': ['react-router-dom'],
+          'query-vendor': ['@tanstack/react-query'],
+          'ui-vendor': ['lucide-react', '@radix-ui/react-label', '@radix-ui/react-slot', '@radix-ui/react-tabs'],
+          'socket-vendor': ['socket.io-client'],
+          'utils-vendor': ['axios', 'clsx', 'tailwind-merge', 'class-variance-authority'],
+          // App chunks
+          'onboarding': [
+            './src/pages/onboarding/index.tsx',
+            './src/components/Onboarding/splash-screen-1.tsx',
+            './src/components/Onboarding/splash-screen-2.tsx',
+            './src/components/Onboarding/splash-screen-3.tsx'
+          ],
+          'events': [
+            './src/pages/events/index.tsx',
+            './src/components/Events/booking-confirmation.tsx',
+            './src/components/Events/city-selection.tsx'
+          ]
+        },
+        // Optimize file names for caching
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
+      }
+    },
+    // Enable minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.log in production
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug']
       }
     }
   },

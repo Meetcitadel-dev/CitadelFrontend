@@ -1,6 +1,6 @@
 "use client"
 
-import { MapPin } from "lucide-react"
+import { MapPin, X, ArrowLeft } from "lucide-react"
 import { useState } from "react"
 import wavy1Svg from "@/assets/wavy1.svg";
 import CafeImage from "@/assets/cafe.png";
@@ -9,6 +9,7 @@ import { paymentService } from "@/lib/payment";
 interface BookingConfirmationProps {
   onBack: () => void
   onPayment: () => void
+  onClose?: () => void
   bookingDetails: {
     guests: number
     date: string
@@ -21,13 +22,14 @@ interface BookingConfirmationProps {
   onPaymentCancel?: () => void
 }
 
-export function BookingConfirmation({ 
-  onBack, 
-  onPayment, 
-  bookingDetails, 
-  onPaymentSuccess, 
-  onPaymentFailure, 
-  onPaymentCancel 
+export function BookingConfirmation({
+  onBack,
+  onPayment,
+  onClose,
+  bookingDetails,
+  onPaymentSuccess,
+  onPaymentFailure,
+  onPaymentCancel
 }: BookingConfirmationProps) {
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -79,8 +81,23 @@ export function BookingConfirmation({
   };
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 flex-shrink-0" style={{ paddingTop: '35px', paddingBottom: '20px' }}>
+        <button onClick={onBack} className="text-white hover:text-gray-300 transition-colors">
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+        <h1 className="text-white text-lg font-semibold">Booking Confirmation</h1>
+        {onClose ? (
+          <button onClick={onClose} className="text-white hover:text-gray-300 transition-colors">
+            <X className="w-6 h-6" />
+          </button>
+        ) : (
+          <div className="w-6"></div>
+        )}
+      </div>
+
       {/* Content */}
-      <div className="flex-1 px-6" style={{ paddingTop: '35px' }}>
+      <div className="flex-1 px-6">
         {/* Title */}
         <div className="text-center px-4" style={{ marginBottom: '28px' }}>
           <p 

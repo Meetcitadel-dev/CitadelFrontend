@@ -6,8 +6,13 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:analyze": "tsc -b && vite build --mode analyze",
+    "build:profile": "tsc -b && vite build --mode production --profile",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "perf:analyze": "npm run build && npx vite-bundle-analyzer dist",
+    "perf:lighthouse": "npx lighthouse http://localhost:5173 --output=html --output-path=./lighthouse-report.html",
+    "perf:size": "npm run build && npx bundlesize"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.7",
@@ -22,6 +27,7 @@
     "razorpay": "^2.9.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.7.0",
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.3.1",

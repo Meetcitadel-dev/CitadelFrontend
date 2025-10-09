@@ -355,8 +355,60 @@ class ChatSocketService {
   // Join user-specific room for global notifications
   joinUserRoom(userId: string) {
     if (!this.socket) return;
-    
+
     this.socket.emit('join-user-room', { userId });
+  }
+
+  // Connection request event handlers
+  onConnectionRequestReceived(callback: (data: any) => void) {
+    if (!this.socket) return;
+    this.socket.on('connection_request_received', callback);
+  }
+
+  onConnectionRequestAccepted(callback: (data: any) => void) {
+    if (!this.socket) return;
+    this.socket.on('connection_request_accepted', callback);
+  }
+
+  onConnectionRequestRejected(callback: (data: any) => void) {
+    if (!this.socket) return;
+    this.socket.on('connection_request_rejected', callback);
+  }
+
+  onConnectionRemoved(callback: (data: any) => void) {
+    if (!this.socket) return;
+    this.socket.on('connection_removed', callback);
+  }
+
+  onNotification(callback: (data: any) => void) {
+    if (!this.socket) return;
+    this.socket.on('notification', callback);
+  }
+
+  // Remove connection request event handlers
+  offConnectionRequestReceived() {
+    if (!this.socket) return;
+    this.socket.off('connection_request_received');
+  }
+
+  offConnectionRequestAccepted() {
+    if (!this.socket) return;
+    this.socket.off('connection_request_accepted');
+  }
+
+  offConnectionRequestRejected() {
+    if (!this.socket) return;
+    this.socket.off('connection_request_rejected');
+  }
+
+  offConnectionRemoved() {
+    if (!this.socket) return;
+    this.socket.off('connection_removed');
+  }
+
+  offNotification() {
+    if (!this.socket) return;
+    this.socket.off('notification');
   }
 
   // Remove event listeners
