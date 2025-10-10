@@ -11,7 +11,7 @@ import { getAuthToken } from "@/lib/utils"
 interface MatchesChatsProps {
   activeTab: "active" | "matches"
   setActiveTab: (tab: "active" | "matches") => void
-  onChatSelect: (chatId: string, userId: string) => void
+  onChatSelect: (chatId: string, userId: string, matchData?: EnhancedConversation) => void
   onPlusClick?: () => void
 }
 
@@ -158,7 +158,7 @@ export default function MatchesChats({ activeTab, setActiveTab, onChatSelect, on
               isOnline={false}
               unreadCount={conversation.unreadCount}
               userId={conversation.userId}
-              onClick={() => onChatSelect(conversation.id, conversation.userId)}
+              onClick={() => onChatSelect(conversation.id, conversation.userId, conversation)}
             />
           ))
         )}

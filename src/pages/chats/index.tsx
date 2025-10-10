@@ -25,6 +25,7 @@ export default function ChatApp() {
   const [showEditGroup, setShowEditGroup] = useState(false)
   const [updateUnreadCount, setUpdateUnreadCount] = useState<((chatId: string, unreadCount: number, isGroup: boolean) => void) | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [selectedMatchData, setSelectedMatchData] = useState<any>(null)
 
   // Stable callback to prevent infinite re-renders
   const handleUnreadCountUpdate = useCallback((fn: (chatId: string, unreadCount: number, isGroup: boolean) => void) => {
@@ -156,12 +157,22 @@ export default function ChatApp() {
     }
   };
 
+  // Handle match selection from matches tab
+  const handleMatchSelect = (chatId: string, userId: string, matchData?: any) => {
+    setSelectedChat(chatId);
+    setSelectedUserId(userId);
+    setSelectedChatType("individual");
+    // Store match data for ChatConversation component
+    setSelectedMatchData(matchData);
+  };
+
   const handleBackToChats = () => {
     setSelectedChat(null);
     setSelectedUserId(null);
     setSelectedChatType("individual");
     setSelectedGroup(null);
     setShowEditGroup(false);
+    setSelectedMatchData(null);
   };
 
   const handleHeaderClick = (conversationInfo: any) => {
@@ -186,7 +197,7 @@ export default function ChatApp() {
     );
   }
 
-  if (selectedChat) {
+  if (selectedChat || selectedUserId) {
     // Show edit group if header was clicked for group chat (check this first)
     if (showEditGroup && selectedGroup) {
       return (
@@ -205,7 +216,7 @@ export default function ChatApp() {
       return (
         <GroupChatScreen
           onBack={handleBackToChats}
-          groupId={selectedChat}
+          groupId={selectedChat || ''}
           groupName={selectedGroup.name}
           groupAvatar={selectedGroup.avatar || ""}
           memberCount={selectedGroup.memberCount}
@@ -245,6 +256,7 @@ export default function ChatApp() {
         isFromMatches={activeTab === "matches"}
         isGroupChat={selectedChatType === "group"}
         onHeaderClick={handleHeaderClick}
+        {...(selectedMatchData && { matchData: selectedMatchData })}
       />
     );
   }
@@ -263,11 +275,7 @@ export default function ChatApp() {
         <MatchesChats
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          onChatSelect={(chatId, userId) => {
-            setSelectedChat(chatId);
-            setSelectedUserId(userId);
-            setSelectedChatType("individual");
-          }}
+          onChatSelect={handleMatchSelect}
           onPlusClick={handlePlusClick}
         />
       )}

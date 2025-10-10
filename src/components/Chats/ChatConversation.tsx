@@ -23,6 +23,25 @@ import {
 import { getAuthToken } from "@/lib/utils"
 import { chatSocketService } from "@/lib/socket"
 
+interface MatchData {
+  id: string | null;
+  userId: string;
+  name: string;
+  profileImage?: string | null;
+  lastMessage?: string | null;
+  lastMessageTime?: string | null;
+  isOnline: boolean;
+  unreadCount: number;
+  caseType: 'CASE_1' | 'CASE_2' | 'CASE_3';
+  isConnected: boolean;
+  hasChatHistory: boolean | null;
+  matchData?: {
+    mutualAdjective: string;
+    iceBreakingPrompt: string;
+    matchTimestamp?: string;
+  };
+}
+
 interface ChatConversationProps {
   onBack: () => void
   conversationId?: string
@@ -30,6 +49,7 @@ interface ChatConversationProps {
   isFromMatches?: boolean // New prop to identify if chat is from matches section
   isGroupChat?: boolean // New prop to identify if this is a group chat
   onHeaderClick?: (conversationInfo: ConversationInfo | null) => void // Updated to pass conversation info
+  matchData?: MatchData | null // Match data from matches list
 }
 
 interface Message {
@@ -65,7 +85,7 @@ enum MatchCase {
   CASE_3 = 'CASE_3'  // Never Connected + Match
 }
 
-export default function ChatConversation({ onBack, conversationId, userId, isFromMatches = false, onHeaderClick }: ChatConversationProps) {
+export default function ChatConversation({ onBack, conversationId, userId, isFromMatches = false, onHeaderClick, matchData }: ChatConversationProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [conversationInfo, setConversationInfo] = useState<ConversationInfo | null>(null)
   const [inputValue, setInputValue] = useState("")
@@ -103,8 +123,10 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
           return
         }
 
+        // Only fetch messages if we have a conversation ID
         if (!conversationId) {
-          console.error('No conversation ID provided')
+          console.log('No conversation ID provided - this might be a new match')
+          setLoading(false)
           return
         }
 
@@ -206,7 +228,93 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
       }
     }
 
-    // Check match state and connection status
+    // Handle match data from matches list
+    const handleMatchData = () => {
+      if (!matchData) {
+        console.log('❌ No match data provided')
+        return
+      }
+      
+      console.log('🎯 Using match data from matches list:', matchData)
+      
+      // Set loading to false immediately for matches
+      setLoading(false)
+      
+      // Set conversation info from match data
+      setConversationInfo({
+        id: matchData.id || '',
+        userId: String(matchData.userId), // Convert to string
+        name: matchData.name,
+        profileImage: matchData.profileImage || undefined
+      })
+      
+      // Set match state (simplified - only use fields that exist)
+      const matchState = {
+        id: matchData.id || '',
+        userId1: '', // Not provided by backend
+        userId2: '', // Not provided by backend
+        mutualAdjective: matchData.matchData?.mutualAdjective || '',
+        isConnected: matchData.isConnected || false,
+        matchTimestamp: matchData.matchData?.matchTimestamp || '',
+        iceBreakingPrompt: matchData.matchData?.iceBreakingPrompt || ''
+      }
+      
+      setMatchState(matchState)
+      setIsMatched(true)
+      
+      // Use the caseType directly from backend instead of calculating
+      const caseType = matchData.caseType
+      const isConnected = matchData.isConnected
+      const hasHistory = matchData.hasChatHistory === true // Convert null to false
+      
+      console.log('🔗 Match data - caseType:', caseType, 'isConnected:', isConnected, 'hasChatHistory:', hasHistory)
+      
+      if (caseType === 'CASE_1') {
+        console.log('✅ Case 1: Already Connected + Already Chatting + Match')
+        setMatchCase(MatchCase.CASE_1)
+        setIsUserConnected(true)
+        setHasChatHistory(true)
+        setShowPrompt(isFromMatches) // Only show prompt in matches section
+        setShowCrossButton(isFromMatches)
+        setShowConnectButton(false)
+      } else if (caseType === 'CASE_2') {
+        console.log('✅ Case 2: Already Connected + Never Chatted + Match')
+        setMatchCase(MatchCase.CASE_2)
+        setIsUserConnected(true)
+        setHasChatHistory(false)
+        setShowPrompt(true)
+        setShowCrossButton(true)
+        setShowConnectButton(false)
+      } else if (caseType === 'CASE_3') {
+        console.log('✅ Case 3: Never Connected + Match')
+        setMatchCase(MatchCase.CASE_3)
+        setIsUserConnected(false)
+        setHasChatHistory(false)
+        setShowPrompt(true)
+        setShowConnectButton(true)
+        setShowCrossButton(false)
+      }
+      
+      // Set ice-breaking prompt from match data
+      if (matchData.matchData?.iceBreakingPrompt) {
+        setIceBreakingPrompt(matchData.matchData.iceBreakingPrompt)
+      } else {
+        setIceBreakingPrompt(`You both find each other ${matchData.matchData?.mutualAdjective?.toLowerCase() || 'compatible'}!`)
+      }
+      
+      console.log('🎯 Final state from match data:', {
+        matchCase: caseType,
+        showPrompt: true,
+        showConnectButton: caseType === 'CASE_3',
+        showCrossButton: caseType === 'CASE_1' || caseType === 'CASE_2',
+        isFromMatches: isFromMatches
+      })
+      
+      // Ensure loading is set to false after setting up match data
+      setLoading(false)
+    }
+
+    // Check match state and connection status (fallback for when no match data)
     const checkMatchAndConnection = async () => {
       if (!userId) return
       
@@ -382,7 +490,8 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
       return () => clearInterval(pollInterval)
     }
 
-    if (conversationId) {
+    if (conversationId && !matchData) {
+      // Only fetch messages if we don't have match data (Case 3 matches)
       fetchMessages()
       
       // Try WebSocket first, fallback to polling
@@ -393,13 +502,20 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
         setConnectionMethod('polling')
         cleanupPolling = startPolling()
       }
+    } else if (conversationId && matchData) {
+      // For matches with conversation ID, just set loading to false
+      setLoading(false)
     }
     
     // Always try to fetch conversation info, even without userId
     fetchConversationInfo()
     
-    // Check match and connection state
-    checkMatchAndConnection()
+    // Use match data if available, otherwise check match and connection state
+    if (matchData) {
+      handleMatchData()
+    } else {
+      checkMatchAndConnection()
+    }
 
     // Cleanup function
     return () => {
@@ -414,7 +530,7 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
       }
       isInitialized = false;
     }
-  }, [conversationId, userId])
+  }, [conversationId, userId, matchData])
 
   useEffect(() => {
     scrollToBottom()

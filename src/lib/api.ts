@@ -800,10 +800,14 @@ export function getEnhancedMatches(token?: string) {
     }>;
     message?: string;
   }>(
-    '/api/v1/enhanced-chats/matches',
+    `/api/v1/enhanced-chats/matches?t=${Date.now()}`, // Add cache busting
     {
       method: 'GET',
       token,
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
     }
   );
 }
