@@ -775,7 +775,7 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
               fetchPriority="low"
             />
             <div className="flex-1">
-              <h1 className="text-lg font-semibold">
+              <h1 className="font-semibold" style={{ fontFamily: 'Inter', fontSize: '17px', color: '#1BEA7B' }}>
                 {conversationInfo?.name || userId || "User"}
               </h1>
               {isMatched && matchState && (
@@ -845,12 +845,12 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
             <div className="text-gray-400 text-center">
               {matchCase === MatchCase.CASE_3 && !isUserConnected ? (
                 <div>
-                  <div className="mb-2">You matched with {conversationInfo?.name}!</div>
+                  <div className="mb-2">You matched with <span style={{ fontFamily: 'Inter', fontSize: '17px', fontWeight: '600', color: '#1BEA7B' }}>{conversationInfo?.name}</span>!</div>
                   <div className="text-sm">Connect to start the conversation</div>
                 </div>
               ) : matchCase === MatchCase.CASE_2 && !hasChatHistory ? (
                 <div>
-                  <div className="mb-2">You matched with {conversationInfo?.name}!</div>
+                  <div className="mb-2">You matched with <span style={{ fontFamily: 'Inter', fontSize: '17px', fontWeight: '600', color: '#1BEA7B' }}>{conversationInfo?.name}</span>!</div>
                   <div className="text-sm">Start your first conversation</div>
                 </div>
               ) : (

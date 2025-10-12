@@ -29,7 +29,7 @@ export default function ChatItem({ name, message, time, profileImage, userId, is
       </div>
       <div className="flex-1 ml-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-green-500 font-medium">{name}</h3>
+          <h3 className="font-semibold" style={{ fontFamily: 'Inter', fontSize: '17px', color: '#1BEA7B' }}>{name}</h3>
           <span className="text-gray-400 text-sm">{time}</span>
         </div>
         <p className="text-gray-400 text-sm mt-1">{message}</p>
