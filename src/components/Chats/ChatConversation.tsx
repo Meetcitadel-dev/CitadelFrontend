@@ -865,7 +865,7 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
           messages.map((message, index) => (
             <div key={message.id}>
               {shouldShowTime(message, index) && (
-                <div className="text-center text-gray-400 text-sm mb-4">
+                <div className="text-center mb-4" style={{ fontFamily: 'Inter', fontSize: '15px', fontWeight: '400', color: '#B8B8B8' }}>
                   {formatTime(message.timestamp)}
                 </div>
               )}

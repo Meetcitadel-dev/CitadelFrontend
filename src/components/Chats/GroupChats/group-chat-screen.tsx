@@ -427,7 +427,7 @@ export default function GroupChatScreen({ onBack, groupId, groupName, groupAvata
             return (
               <div key={`${message.id}-${index}`}>
                 {showTime && message.timestamp && (
-                  <div className="text-center text-gray-400 text-sm mb-4">{message.timestamp}</div>
+                  <div className="text-center mb-4" style={{ fontFamily: 'Inter', fontSize: '15px', fontWeight: '400', color: '#B8B8B8' }}>{message.timestamp}</div>
                 )}
                 <ChatMessage message={message} />
               </div>
