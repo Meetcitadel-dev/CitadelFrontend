@@ -202,8 +202,10 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onP
         <ChatHeader onPlusClick={onPlusClick} />
         <SearchBar />
         <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} activeCount={uniqueChats.length} matchesCount={0} />
-        <div className="flex items-center justify-center py-8">
-          <div className="text-white">Loading conversations...</div>
+        <div className="pt-4" style={{ backgroundColor: '#111111', minHeight: 'calc(100vh - 200px)' }}>
+          <div className="flex items-center justify-center py-8">
+            <div className="text-white">Loading conversations...</div>
+          </div>
         </div>
       </div>
     )
@@ -215,15 +217,17 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onP
         <ChatHeader onPlusClick={onPlusClick} />
         <SearchBar />
         <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} activeCount={0} matchesCount={0} />
-        <div className="flex items-center justify-center py-8">
-          <div className="text-red-400 text-center">
-            <div className="mb-2">{error}</div>
-            <button 
-              onClick={() => window.location.reload()}
-              className="bg-green-500 text-black px-4 py-2 rounded-lg"
-            >
-              Try Again
-            </button>
+        <div className="pt-4" style={{ backgroundColor: '#111111', minHeight: 'calc(100vh - 200px)' }}>
+          <div className="flex items-center justify-center py-8">
+            <div className="text-red-400 text-center">
+              <div className="mb-2">{error}</div>
+              <button 
+                onClick={() => window.location.reload()}
+                className="bg-green-500 text-black px-4 py-2 rounded-lg"
+              >
+                Try Again
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -235,7 +239,8 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onP
       <ChatHeader onPlusClick={onPlusClick} />
       <SearchBar />
       <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} activeCount={uniqueChats.length} matchesCount={0} />
-      <div className="space-y-0">
+      <div className="pt-4" style={{ backgroundColor: '#111111', minHeight: 'calc(100vh - 200px)' }}>
+        <div className="space-y-0">
         {uniqueChats.length === 0 ? (
           <div className="flex items-center justify-center py-8">
             <div className="text-gray-400 text-center">
@@ -258,6 +263,7 @@ export default function ActiveChats({ activeTab, setActiveTab, onChatSelect, onP
             />
           ))
         )}
+        </div>
       </div>
     </div>
   )
