@@ -32,7 +32,7 @@ export default function ChatItem({ name, message, time, profileImage, userId, is
           <h3 className="font-semibold" style={{ fontFamily: 'Inter', fontSize: '17px', color: '#1BEA7B' }}>{name}</h3>
           <span className="text-gray-400 text-sm">{time}</span>
         </div>
-        <p className="text-gray-400 text-sm mt-1">{message}</p>
+        <p className="mt-1" style={{ fontFamily: 'Inter', fontSize: '15px', fontWeight: '400', color: '#B8B8B8' }}>{message}</p>
       </div>
       <div className="flex items-center gap-2">
         {isOnline && <div className="w-2 h-2 bg-green-500 rounded-full"></div>}
