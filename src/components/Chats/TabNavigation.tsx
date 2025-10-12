@@ -14,8 +14,8 @@ export default function TabNavigation({
   matchesCount = 1,
 }: TabNavigationProps) {
   return (
-    <div className="mx-4 mb-6" style={{ width: '361px', height: '38px' }}>
-      <div className="relative rounded-full p-1 h-full" style={{ backgroundColor: '#1C1C1C' }}>
+    <div className="flex justify-center mb-6 px-4">
+      <div className="relative rounded-full p-1 w-full max-w-sm" style={{ height: '38px', backgroundColor: '#1C1C1C' }}>
         <div
           className="absolute left-1 rounded-full transition-transform duration-300 ease-out"
           style={{

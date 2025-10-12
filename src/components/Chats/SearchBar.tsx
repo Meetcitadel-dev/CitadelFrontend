@@ -2,8 +2,8 @@ import { Search } from "lucide-react"
 
 export default function SearchBar() {
   return (
-    <div className="mx-4 mb-4" style={{ width: '361px', height: '44px' }}>
-      <div className="relative h-full">
+    <div className="flex justify-center mb-4 px-4">
+      <div className="relative w-full max-w-sm" style={{ height: '44px' }}>
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"
