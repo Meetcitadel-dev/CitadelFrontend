@@ -21,7 +21,7 @@ export default function ChatItem({ name, message, time, profileImage, userId, is
           profileImage={profileImage}
           userId={userId}
           alt={name}
-          className="w-12 h-12 rounded-lg object-cover"
+          className="w-16 h-16 rounded-lg object-cover"
         />
         {isOnline && (
           <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-black"></div>

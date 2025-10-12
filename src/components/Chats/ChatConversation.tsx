@@ -769,7 +769,7 @@ export default function ChatConversation({ onBack, conversationId, userId, isFro
               profileImage={conversationInfo?.profileImage}
               userId={conversationInfo?.userId || "unknown"}
               alt={conversationInfo?.name || "User"}
-              className="w-10 h-10 rounded-full object-cover mr-3"
+              className="w-16 h-16 rounded-full object-cover mr-3"
               loading="lazy"
               decoding="async"
               fetchPriority="low"
