@@ -106,17 +106,20 @@ export default function App() {
         const res = await refreshAccessToken()
         if (res?.success && res.tokens?.accessToken) {
           setAuthToken(res.tokens.accessToken)
+          // Only initialize socket if we have a valid token
+          try {
+            chatSocketService.initializeConnection()
+          } catch {}
+          return true
         }
       } catch (e) {
         // No-op: user will go through onboarding if needed
       }
+      return false
     }
 
-    // Start preloading and warming after trying refresh, and then init socket once
+    // Start preloading and warming after trying refresh
     tryRefresh().finally(() => {
-      try {
-        chatSocketService.initializeConnection()
-      } catch {}
       preloadCriticalComponents()
       const t = setTimeout(warmImages, 50)
       cleanup = () => clearTimeout(t)

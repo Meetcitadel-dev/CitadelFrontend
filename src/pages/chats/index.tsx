@@ -64,8 +64,9 @@ export default function ChatApp() {
 
   // Initialize WebSocket connection and join user room
   useEffect(() => {
-    // Only connect if not already connected
-    if (!chatSocketService.getConnectionStatus()) {
+    // Only connect if not already connected AND we have a valid token
+    const token = getAuthToken()
+    if (!chatSocketService.getConnectionStatus() && token) {
       chatSocketService.connect()
     }
     
