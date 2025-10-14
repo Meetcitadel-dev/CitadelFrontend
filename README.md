@@ -21,32 +21,43 @@ A modern React-based social networking application built for students to connect
 - **Real-time Updates**: WebSocket connections for live chat and notifications
 - **Responsive Design**: Mobile-first design with modern UI/UX
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack (Frontend)
 
-### Frontend Framework
-- **React 19.1.0** - Modern React with latest features
-- **TypeScript 5.8.3** - Type-safe development
-- **Vite 7.0.4** - Fast build tool and development server
+### Core
+- **React 19.1.0** – UI library (StrictMode enabled)
+- **TypeScript ~5.8.3** – Type-safe development
+- **Vite 7.0.4** – Dev server and bundler (`@vitejs/plugin-react`)
+- **React Router DOM 7.7.0** – Client-side routing
+
+### Data, State & Networking
+- **@tanstack/react-query 5.83.0** – Server state caching and fetching
+- **Axios 1.10.0** – HTTP client abstraction (via `lib/apiClient.ts` with timeout/retry/cache)
+
+### Real-time & Events
+- **socket.io-client 4.8.1** – Realtime messaging with reconnection/backoff
 
 ### UI & Styling
-- **Tailwind CSS 4.1.11** - Utility-first CSS framework
-- **Radix UI** - Accessible component primitives
-- **Lucide React** - Beautiful icons
-- **Class Variance Authority** - Component variant management
+- **Tailwind CSS 4.1.11** – Utility-first CSS (via `@tailwindcss/vite`)
+- **tw-animate-css 1.3.5** – Animation utilities
+- **Radix UI (react-label, react-slot, react-tabs)** – Accessible primitives
+- **lucide-react** – Icons
+- **clsx**, **tailwind-merge**, **class-variance-authority** – Styling helpers & variants
+- **Google Fonts** – `Inter`, `Roboto Serif`
 
-### State Management & Data Fetching
-- **TanStack React Query 5.83.0** - Server state management
-- **Axios 1.10.0** - HTTP client for API calls
+### Notifications & UX
+- **react-hot-toast 2.6.0** – Toast notifications
 
-### Real-time Communication
-- **Socket.io Client 4.8.1** - WebSocket connections for real-time features
+### Payments
+- **Razorpay 2.9.6** – Checkout SDK (loaded dynamically at runtime)
 
-### Payment Processing
-- **Razorpay 2.9.6** - Payment gateway integration
+### Tooling & Quality
+- **ESLint 9.30.1**, **typescript-eslint**, **eslint-plugin-react-hooks**, **eslint-plugin-react-refresh**
+- **Vite Bundle Analyzer** (via `npx vite-bundle-analyzer`)
+- **Lighthouse** CLI (performance audits)
 
-### Development Tools
-- **ESLint 9.30.1** - Code linting and formatting
-- **TypeScript ESLint** - TypeScript-specific linting rules
+### Build & Performance
+- Manual chunking in `vite.config.ts` for vendors and feature routes
+- Route/component lazy loading with preloading and image prefetching
 
 ## 📁 Project Structure
 
@@ -85,6 +96,19 @@ src/
 └── assets/             # Static assets (images, icons)
 ```
 
+## 🧩 Third‑Party Libraries & Services (Frontend)
+
+- React, React Router
+- @tanstack/react-query
+- Axios (wrapped via `lib/apiClient.ts` with timeouts, retries, cache)
+- socket.io-client (chat, groups, notifications)
+- Razorpay Checkout (runtime-loaded)
+- Tailwind CSS (+ `@tailwindcss/vite`), tw-animate-css
+- Radix UI (label, slot, tabs)
+- lucide-react
+- clsx, tailwind-merge, class-variance-authority
+- Google Fonts: Inter, Roboto Serif
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -105,10 +129,16 @@ src/
    ```
 
 3. **Environment Setup**
-   Create a `.env` file in the root directory:
+   Create a `.env` file in the `app_v1` directory:
    ```env
+   # Backend base URL used for REST and WebSocket
    VITE_API_URL=http://localhost:3000
+
+   # Razorpay public key (frontend)
    VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
+
+   # Optional: enable internal test UI in development
+   VITE_ENABLE_TEST_UI=false
    ```
 
 4. **Start development server**
@@ -136,6 +166,8 @@ src/
 | `/gridview` | ProfilesPage | Grid view of profiles |
 | `/profile` | UserProfilePage | Current user's profile |
 | `/:name` | UserProfileScreen | Other user's profile |
+
+Routing is powered by **react-router-dom 7**, with extensive route-level code splitting and preloading.
 
 ## 🔧 Key Components
 
@@ -242,6 +274,10 @@ npm run dev          # Start development server
 npm run build        # Build for production
 npm run preview      # Preview production build
 npm run lint         # Run ESLint
+# Performance & analysis
+npm run perf:analyze   # Build + open Vite bundle analyzer
+npm run perf:lighthouse # Run Lighthouse against localhost:5173
+npm run perf:size       # Build + bundlesize check
 ```
 
 ### Code Quality
