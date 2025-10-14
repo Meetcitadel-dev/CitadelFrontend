@@ -109,6 +109,35 @@ src/
 - clsx, tailwind-merge, class-variance-authority
 - Google Fonts: Inter, Roboto Serif
 
+### External Services & APIs (Comprehensive)
+
+- **Backend API**: Custom REST API hosted on Render (`VITE_API_URL`)
+- **WebSockets**: `socket.io` namespace on the same Render backend (`/socket.io/`)
+- **Email/OTP**: Backend routes `/api/v1/auth/send-otp` and `/api/v1/auth/verify-otp` (provider configured server-side)
+- **Universities & Colleges Data**: `/api/v1/universities`, `/api/v1/colleges` via backend
+- **Media Uploads**: Backend `POST /api/profile/upload` → stores to S3; client uses returned `cloudfrontUrl`
+- **Profile & Explore**: Multiple endpoints under `/api/v1/profile/*`, `/api/v1/users/*`, `/api/v1/enhanced-explore/*`
+- **Connections & Notifications**: `/api/v1/connections/*`, `/api/v1/notifications/*`
+- **Chats (1:1 & Groups)**: `/api/v1/chats/*`, `/api/v1/groups/*`
+- **Payments**: Razorpay Checkout + backend `/api/payments/create-order`, `/api/payments/verify`
+
+## ☁️ Platforms & Hosting
+
+- **Frontend Hosting: Vercel**
+  - Config: `vercel.json` with SPA rewrites to `index.html`
+  - Long-term asset caching via `Cache-Control: public, max-age=31536000, immutable` on `/assets/*`
+- **Alternative/Compatible Hosting: Netlify**
+  - SPA fallback configured via `_redirects` (both `public/_redirects` and `dist/_redirects`) → `/* /index.html 200`
+- **Backend & Database Hosting: Render**
+  - Backend API and database deployed on **Render**
+  - Frontend uses `VITE_API_URL` to talk to the Render backend and WebSocket endpoint
+- **Media Storage & CDN: AWS S3 + CloudFront**
+  - User images referenced via `cloudfrontUrl` across the app (see API and pages)
+- **Payments: Razorpay**
+  - Frontend loads `checkout.js` at runtime; backend endpoints handle order creation and verification
+- **Realtime Backend Endpoint**
+  - WebSocket client connects to `VITE_API_URL` using `socket.io-client`
+
 ## 🚀 Getting Started
 
 ### Prerequisites
