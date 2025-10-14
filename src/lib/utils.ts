@@ -8,7 +8,8 @@ export function cn(...inputs: ClassValue[]) {
 export function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null
   try {
-    return localStorage.getItem('token') || sessionStorage.getItem('token')
+    // Use session storage for access tokens (faster, cleared on tab close)
+    return sessionStorage.getItem('token') || localStorage.getItem('token')
   } catch (error) {
     console.error('Error accessing storage:', error)
     return null
@@ -18,6 +19,9 @@ export function getAuthToken(): string | null {
 export function setAuthToken(token: string): void {
   if (typeof window === 'undefined') return
   try {
+    // Store in session storage for better performance and security
+    sessionStorage.setItem('token', token)
+    // Also keep in localStorage as backup
     localStorage.setItem('token', token)
   } catch (error) {
     console.error('Error setting auth token:', error)
@@ -27,8 +31,9 @@ export function setAuthToken(token: string): void {
 export function removeAuthToken(): void {
   if (typeof window === 'undefined') return
   try {
-    localStorage.removeItem('token')
+    // Clear from both session and local storage
     sessionStorage.removeItem('token')
+    localStorage.removeItem('token')
   } catch (error) {
     console.error('Error removing auth token:', error)
   }
