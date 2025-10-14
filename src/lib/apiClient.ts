@@ -1,5 +1,6 @@
 // Enhanced API client with performance tracking and caching
 import { performanceMonitor } from './performance';
+import { setAuthToken } from './utils';
 export type ApiClientOptions = {
   method?: string;
   headers?: Record<string, string>;
@@ -8,6 +9,8 @@ export type ApiClientOptions = {
   cache?: boolean;
   timeout?: number;
   retries?: number;
+  // When true, include cookies (for refresh/logout and CSRF-protected routes)
+  withCredentials?: boolean;
 };
 
 function getApiUrl(url: string) {
@@ -107,27 +110,67 @@ export async function apiClient<T = any>(
       headers,
     };
 
+    // Include credentials (cookies) if requested
+    if (options.withCredentials) {
+      fetchOptions.credentials = 'include';
+    }
+
     if (options.body) {
       fetchOptions.body = JSON.stringify(options.body);
     }
 
     const apiUrl = getApiUrl(url);
     const res = await fetch(apiUrl, fetchOptions);
-
     if (!res.ok) {
-      const error = await res.text();
-      console.error('API Error:', error);
-      throw new Error(error || res.statusText);
+      const errorText = await res.text();
+      const err: any = new Error(errorText || res.statusText);
+      err.status = res.status;
+      throw err;
     }
-
     return res;
   };
 
   try {
-    const res = await (retries > 0
-      ? withRetries(() => withTimeout(makeRequest(), timeout), retries)
-      : withTimeout(makeRequest(), timeout)
-    );
+    let hasRefreshed = false;
+    const exec = async (): Promise<Response> => {
+      try {
+        return await (retries > 0
+          ? withRetries(() => withTimeout(makeRequest(), timeout), retries)
+          : withTimeout(makeRequest(), timeout)
+        );
+      } catch (e: any) {
+        // If unauthorized, attempt a single refresh then retry once
+        if (!hasRefreshed && (e?.status === 401 || e?.message?.includes('401'))) {
+          try {
+            // Attempt refresh using a direct fetch to avoid circular imports
+            const refreshUrl = getApiUrl('/api/v1/auth/refresh');
+            const refreshRes = await fetch(refreshUrl, {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            const refreshJson = await refreshRes.json().catch(() => ({} as any));
+            if (refreshRes.ok && refreshJson?.success && refreshJson?.tokens?.accessToken) {
+              setAuthToken(refreshJson.tokens.accessToken);
+              // Update header token for the retry if caller provided one
+              if (options && refreshJson.tokens.accessToken) {
+                options.token = refreshJson.tokens.accessToken;
+              }
+              hasRefreshed = true;
+              return await (retries > 0
+                ? withRetries(() => withTimeout(makeRequest(), timeout), retries)
+                : withTimeout(makeRequest(), timeout)
+              );
+            }
+          } catch (_) {
+            // fallthrough
+          }
+        }
+        throw e;
+      }
+    };
+
+    const res = await exec();
 
     // Try to parse JSON, fallback to text
     const contentType = res.headers.get('content-type');

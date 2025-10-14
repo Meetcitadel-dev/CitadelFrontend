@@ -1,12 +1,13 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
-import { getAuthToken, prefetchImagesBatched, preloadCriticalImages } from "@/lib/utils";
-import { fetchExploreProfiles, getCurrentUserProfile } from "@/lib/api";
+import { getAuthToken, setAuthToken, prefetchImagesBatched, preloadCriticalImages } from "@/lib/utils";
+import { fetchExploreProfiles, getCurrentUserProfile, refreshAccessToken } from "@/lib/api";
 import UserProfileScreen from "./pages/user-profile";
 import { useClientOnly } from "@/lib/hooks/useClientOnly";
 import { useConnectionRequests } from "@/hooks/useConnectionRequests";
 import { useRoutePerformance, usePerformanceSummary } from "@/hooks/usePerformance";
 import { measureWebVitals, logMemoryUsage, logBundleInfo } from "@/lib/performance";
+import { chatSocketService } from "@/lib/socket";
 import { Toaster } from 'react-hot-toast';
 import {
   LazyOnboardingPage,
@@ -99,10 +100,30 @@ export default function App() {
       }
     }
 
-    // Start preloading and warming
-    preloadCriticalComponents()
-    const t = setTimeout(warmImages, 50)
-    return () => clearTimeout(t)
+    // Attempt silent session restore before preloading (7-day window via refresh cookie)
+    const tryRefresh = async () => {
+      try {
+        const res = await refreshAccessToken()
+        if (res?.success && res.tokens?.accessToken) {
+          setAuthToken(res.tokens.accessToken)
+        }
+      } catch (e) {
+        // No-op: user will go through onboarding if needed
+      }
+    }
+
+    // Start preloading and warming after trying refresh, and then init socket once
+    tryRefresh().finally(() => {
+      try {
+        chatSocketService.initializeConnection()
+      } catch {}
+      preloadCriticalComponents()
+      const t = setTimeout(warmImages, 50)
+      cleanup = () => clearTimeout(t)
+    })
+
+    let cleanup: () => void = () => {}
+    return () => cleanup()
   }, [])
   return (
     <>

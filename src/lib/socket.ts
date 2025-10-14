@@ -31,7 +31,7 @@ class ChatSocketService {
       },
       transports: ['websocket', 'polling'],
       timeout: 10000, // 10 second timeout
-      forceNew: true, // Force new connection
+      forceNew: false, // Reuse existing connection when possible
       reconnection: true,
       reconnectionAttempts: this.maxReconnectAttempts,
       reconnectionDelay: 1000,

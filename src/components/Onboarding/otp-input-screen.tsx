@@ -18,6 +18,7 @@ export default function OTPInputScreen({ email, onContinue, onBack }: OTPInputSc
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
+  const [trustDevice, setTrustDevice] = useState(true)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   const handleInputChange = (index: number, value: string) => {
@@ -54,7 +55,7 @@ export default function OTPInputScreen({ email, onContinue, onBack }: OTPInputSc
     setLoading(true)
     try {
       const code = otp.join("")
-      const res = await verifyOTP(email, code)
+      const res = await verifyOTP(email, code, trustDevice)
       if (res.success) {
         // Store the access token from the tokens object
         if (res.tokens && res.tokens.accessToken) {
@@ -130,6 +131,43 @@ export default function OTPInputScreen({ email, onContinue, onBack }: OTPInputSc
             />
           ))}
         </div>
+        {/* Trust device toggle (custom checkbox to avoid global reset hiding native control) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 18, padding: '10px 12px', background: '#141414', borderRadius: 12, border: '1px solid #333' }}>
+          <div
+            role="checkbox"
+            aria-checked={trustDevice}
+            tabIndex={0}
+            onClick={() => setTrustDevice(!trustDevice)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTrustDevice(!trustDevice) } }}
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: 6,
+              border: trustDevice ? '1px solid #22FF88' : '1px solid #555',
+              background: trustDevice ? '#22FF88' : 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: trustDevice ? '0 0 0 2px rgba(34,255,136,0.15)' : 'none'
+            }}
+            aria-label="Don’t ask for OTP on this device for 7 days"
+          >
+            {trustDevice && (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 6L9 17L4 12" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => setTrustDevice(!trustDevice)}
+            style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, fontSize: 15, color: '#fff', cursor: 'pointer', letterSpacing: '-0.1px', textAlign: 'left' }}
+          >
+            Don’t ask for OTP on this device for 7 days
+          </button>
+        </div>
+
         {/* Notification */}
         {error && <div style={{ color: '#ff5555', marginTop: 8 }}>{error}</div>}
         {success && <div style={{ color: '#22c55e', marginTop: 8 }}>{success}</div>}

@@ -50,7 +50,7 @@ export function sendEmailOTP(email: string) {
 }
 
 // Verify OTP (4 digits)
-export function verifyOTP(email: string, otp: string) {
+export function verifyOTP(email: string, otp: string, rememberDevice?: boolean) {
   return apiClient<{ 
     success: boolean; 
     message?: string; 
@@ -68,7 +68,31 @@ export function verifyOTP(email: string, otp: string) {
     '/api/v1/auth/verify-otp',
     {
       method: 'POST',
-      body: { email, otp },
+      // Pass rememberDevice to set trusted-device cookie for 7 days (backend-controlled)
+      body: { email, otp, rememberDevice: !!rememberDevice },
+      withCredentials: true,
+    }
+  );
+}
+
+// Refresh access token using HttpOnly refresh cookie
+export function refreshAccessToken() {
+  return apiClient<{ success: boolean; tokens?: { accessToken: string } }>(
+    '/api/v1/auth/refresh',
+    {
+      method: 'POST',
+      withCredentials: true,
+    }
+  );
+}
+
+// Logout: revoke refresh token and clear cookies
+export function logoutSession() {
+  return apiClient<{ success: boolean; message?: string }>(
+    '/api/v1/auth/logout',
+    {
+      method: 'POST',
+      withCredentials: true,
     }
   );
 }

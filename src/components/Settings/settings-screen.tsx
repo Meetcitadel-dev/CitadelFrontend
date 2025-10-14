@@ -7,7 +7,7 @@ import ProfileSection from "./profile-section"
 import SettingsMenuItem from "./settings-menu-item"
 import ConfirmationModal from "./confirmation-modal"
 import LogoutModal from "./logout-modal"
-import { getCurrentUserProfile, deleteUserAccount } from "@/lib/api"
+import { getCurrentUserProfile, deleteUserAccount, logoutSession } from "@/lib/api"
 import { getAuthToken, removeAuthToken } from "@/lib/utils"
 
 // Use Lucide icons for all menu items
@@ -125,7 +125,9 @@ export default function SettingsScreen({
   const handleConfirmLogout = async () => {
     try {
       setIsProcessing(true)
-      // Clear auth token
+      // Tell backend to revoke refresh token and clear cookies
+      try { await logoutSession() } catch {}
+      // Clear auth token locally
       removeAuthToken()
       console.log('User logged out successfully')
       // Redirect to onboarding/login
