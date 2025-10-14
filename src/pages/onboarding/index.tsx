@@ -17,7 +17,8 @@ import BestFriendsScreen from "../../components/Onboarding/best-friends-screen"
 import SuccessScreen from "../../components/Onboarding/success-screen"
 import DegreeSelection from "../../components/Onboarding/degree-selection"
 import LoginEmailScreen from "../../components/Onboarding/login-email-screen"
-import { submitOnboardingData } from "@/lib/api";
+import { submitOnboardingData, refreshAccessToken } from "@/lib/api";
+import { getAuthToken } from "@/lib/utils";
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState(0)
@@ -41,6 +42,29 @@ export default function App() {
 
   const navigate = useNavigate();
 
+  // Check authentication after splash screens complete
+  const checkAuthAfterSplash = async () => {
+    // First check if we already have a token in localStorage
+    const existingToken = getAuthToken()
+    if (existingToken) {
+      // User is already authenticated, redirect to main app
+      navigate("/explore")
+      return
+    }
+    
+    // If no token, try to refresh from cookie
+    try {
+      const res = await refreshAccessToken()
+      if (res?.success && res.tokens?.accessToken) {
+        // User is authenticated, redirect to main app
+        navigate("/explore")
+        return
+      }
+    } catch (e) {
+      // No valid session, continue with onboarding
+    }
+  }
+
   useEffect(() => {
     if (currentScreen < 3) {
       const timer = setTimeout(() => {
@@ -51,6 +75,18 @@ export default function App() {
         }
       }, 3000)
 
+      return () => clearTimeout(timer)
+    }
+  }, [currentScreen])
+
+  // Check authentication after all splash screens complete
+  useEffect(() => {
+    if (currentScreen === 2) {
+      // After splash screens, check if user is authenticated
+      const timer = setTimeout(() => {
+        checkAuthAfterSplash()
+      }, 100) // Small delay to let splash screen finish
+      
       return () => clearTimeout(timer)
     }
   }, [currentScreen])
