@@ -3,16 +3,19 @@ import { X } from 'lucide-react';
 import CitySelection from './CitySelection';
 import AreaSelection from './AreaSelection';
 import PreferencesSelection from './PreferencesSelection';
-import PersonalityQuiz from './PersonalityQuiz';
+import MatchingScreen from './MatchingScreen';
+import { apiClient } from '@/lib/apiClient';
+import { getAuthToken } from '@/lib/utils';
 
 interface SetupModalProps {
+  mode: 'full' | 'location-only';
   onComplete: () => void;
   onClose: () => void;
 }
 
-type SetupStep = 'city' | 'area' | 'preferences' | 'quiz';
+type SetupStep = 'city' | 'area' | 'preferences' | 'matching';
 
-export default function SetupModal({ onComplete, onClose }: SetupModalProps) {
+export default function SetupModal({ mode, onComplete, onClose }: SetupModalProps) {
   const [currentStep, setCurrentStep] = useState<SetupStep>('city');
   const [setupData, setSetupData] = useState({
     city: '',
@@ -29,25 +32,63 @@ export default function SetupModal({ onComplete, onClose }: SetupModalProps) {
     setCurrentStep('area');
   };
 
-  const handleAreaSelect = (areas: string[]) => {
+  const handleAreaSelect = async (areas: string[]) => {
     setSetupData(prev => ({ ...prev, preferredAreas: areas }));
-    setCurrentStep('preferences');
+
+    // If mode is 'location-only', update location and complete
+    if (mode === 'location-only') {
+      try {
+        const token = getAuthToken();
+        if (!token) {
+          console.error('No auth token found');
+          alert('Please login again');
+          return;
+        }
+
+        // Update user preferences with new city and areas
+        const response = await apiClient('/api/v1/dinner-preferences', {
+          method: 'PATCH',
+          token,
+          body: {
+            city: setupData.city,
+            preferredAreas: areas
+          }
+        });
+
+        if (response.success) {
+          onComplete();
+        } else {
+          throw new Error(response.message || 'Failed to update location');
+        }
+      } catch (error: any) {
+        console.error('Error updating location:', error);
+        alert(error.message || 'Failed to update location. Please try again.');
+      }
+    } else {
+      // Otherwise continue to preferences
+      setCurrentStep('preferences');
+    }
   };
 
   const handlePreferencesSelect = (preferences: any) => {
     setSetupData(prev => ({ ...prev, ...preferences }));
-    setCurrentStep('quiz');
+    setCurrentStep('matching');
   };
 
-  const handleQuizComplete = () => {
+  const handleMatchingComplete = () => {
+    // After matching completes, proceed to payment (handled by parent)
     onComplete();
   };
 
   const handleBack = () => {
     if (currentStep === 'area') setCurrentStep('city');
     else if (currentStep === 'preferences') setCurrentStep('area');
-    else if (currentStep === 'quiz') setCurrentStep('preferences');
   };
+
+  // Show matching screen without modal wrapper
+  if (currentStep === 'matching') {
+    return <MatchingScreen onComplete={handleMatchingComplete} />;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
@@ -75,13 +116,6 @@ export default function SetupModal({ onComplete, onClose }: SetupModalProps) {
           {currentStep === 'preferences' && (
             <PreferencesSelection
               onSelect={handlePreferencesSelect}
-              onBack={handleBack}
-            />
-          )}
-          {currentStep === 'quiz' && (
-            <PersonalityQuiz
-              setupData={setupData}
-              onComplete={handleQuizComplete}
               onBack={handleBack}
             />
           )}

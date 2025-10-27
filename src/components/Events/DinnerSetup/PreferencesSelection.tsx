@@ -7,11 +7,8 @@ interface PreferencesSelectionProps {
 }
 
 export default function PreferencesSelection({ onSelect, onBack }: PreferencesSelectionProps) {
-  const [budget, setBudget] = useState('');
   const [language, setLanguage] = useState<string[]>([]);
   const [dietaryRestriction, setDietaryRestriction] = useState('');
-  const [drinksPreference, setDrinksPreference] = useState('');
-  const [relationshipStatus, setRelationshipStatus] = useState('');
 
   const toggleLanguage = (lang: string) => {
     setLanguage(prev =>
@@ -22,21 +19,18 @@ export default function PreferencesSelection({ onSelect, onBack }: PreferencesSe
   };
 
   const handleContinue = () => {
-    if (budget && language.length > 0 && dietaryRestriction) {
+    if (language.length > 0 && dietaryRestriction) {
       onSelect({
-        budget,
         language,
-        dietaryRestriction,
-        drinksPreference,
-        relationshipStatus
+        dietaryRestriction
       });
     }
   };
 
-  const isValid = budget && language.length > 0 && dietaryRestriction;
+  const isValid = language.length > 0 && dietaryRestriction;
 
   return (
-    <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
+    <div className="space-y-8 max-h-[70vh] overflow-y-auto pr-2">
       {/* Header */}
       <div>
         <button
@@ -48,105 +42,93 @@ export default function PreferencesSelection({ onSelect, onBack }: PreferencesSe
         </button>
 
         <h2 className="text-2xl font-bold text-white mb-2">
-          Tell us your <span className="text-green-400">PREFERENCES</span>
+          Your <span className="text-green-400">Dinner</span>
         </h2>
       </div>
 
-      {/* Budget */}
+      {/* Dietary Preferences */}
       <div>
-        <label className="block text-white font-medium mb-3">Budget *</label>
-        <div className="flex gap-3">
-          {['low', 'medium', 'high'].map((b) => (
-            <button
-              key={b}
-              onClick={() => setBudget(b)}
-              className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all ${
-                budget === b
-                  ? 'bg-green-400 text-black'
-                  : 'bg-white/10 text-white hover:bg-white/20'
-              }`}
-            >
-              {b === 'low' ? '$' : b === 'medium' ? '$$' : '$$$'}
-            </button>
-          ))}
+        <label className="block text-white font-medium mb-4">
+          Dietary preferences
+        </label>
+        <div className="space-y-3">
+          <button
+            onClick={() => setDietaryRestriction('everything')}
+            className={`w-full py-4 px-6 rounded-xl text-left font-medium transition-all flex items-center justify-between ${
+              dietaryRestriction === 'everything'
+                ? 'bg-green-400 text-black'
+                : 'bg-white/10 text-white hover:bg-white/20'
+            }`}
+          >
+            <span>Everything</span>
+            {dietaryRestriction === 'everything' && (
+              <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+            )}
+          </button>
         </div>
       </div>
 
       {/* Language */}
       <div>
-        <label className="block text-white font-medium mb-3">Language *</label>
-        <div className="flex flex-wrap gap-3">
-          {['English', 'Hindi', 'Everything'].map((lang) => (
+        <label className="block text-white font-medium mb-4">
+          What languages are you willing to speak at dinner?*
+        </label>
+        <div className="space-y-3">
+          {['English', 'Hindi'].map((lang) => (
             <button
               key={lang}
               onClick={() => toggleLanguage(lang)}
-              className={`px-6 py-3 rounded-full text-sm font-medium transition-all ${
+              className={`w-full py-4 px-6 rounded-xl text-left font-medium transition-all flex items-center justify-between ${
                 language.includes(lang)
                   ? 'bg-green-400 text-black'
                   : 'bg-white/10 text-white hover:bg-white/20'
               }`}
             >
-              {lang}
+              <span>{lang}</span>
+              {language.includes(lang) && (
+                <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Dietary Restriction */}
+      {/* Meal Preference */}
       <div>
-        <label className="block text-white font-medium mb-3">Dietary Restriction *</label>
-        <div className="flex flex-wrap gap-3">
-          {['veg', 'non-veg', 'vegan', 'any'].map((diet) => (
+        <label className="block text-white font-medium mb-4">
+          Select your meal preference*
+        </label>
+        <div className="space-y-3">
+          {[
+            { value: 'everything', label: 'Everything' },
+            { value: 'vegetarian', label: 'Vegetarian' },
+            { value: 'vegan', label: 'Vegan' }
+          ].map((meal) => (
             <button
-              key={diet}
-              onClick={() => setDietaryRestriction(diet)}
-              className={`px-6 py-3 rounded-full text-sm font-medium transition-all capitalize ${
-                dietaryRestriction === diet
+              key={meal.value}
+              onClick={() => setDietaryRestriction(meal.value)}
+              className={`w-full py-4 px-6 rounded-xl text-left font-medium transition-all flex items-center justify-between ${
+                dietaryRestriction === meal.value
                   ? 'bg-green-400 text-black'
                   : 'bg-white/10 text-white hover:bg-white/20'
               }`}
             >
-              {diet === 'non-veg' ? 'Non-Veg' : diet.charAt(0).toUpperCase() + diet.slice(1)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Drinks Preference */}
-      <div>
-        <label className="block text-white font-medium mb-3">Drinks Preference</label>
-        <div className="flex gap-3">
-          {['yes', 'no', 'occasionally'].map((drink) => (
-            <button
-              key={drink}
-              onClick={() => setDrinksPreference(drink)}
-              className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all capitalize ${
-                drinksPreference === drink
-                  ? 'bg-green-400 text-black'
-                  : 'bg-white/10 text-white hover:bg-white/20'
-              }`}
-            >
-              {drink}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Relationship Status */}
-      <div>
-        <label className="block text-white font-medium mb-3">Relationship Status</label>
-        <div className="grid grid-cols-2 gap-3">
-          {['single', 'in-relationship', 'married', 'prefer-not-to-say'].map((status) => (
-            <button
-              key={status}
-              onClick={() => setRelationshipStatus(status)}
-              className={`py-3 rounded-xl text-sm font-medium transition-all ${
-                relationshipStatus === status
-                  ? 'bg-green-400 text-black'
-                  : 'bg-white/10 text-white hover:bg-white/20'
-              }`}
-            >
-              {status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+              <span>{meal.label}</span>
+              {dietaryRestriction === meal.value && (
+                <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
             </button>
           ))}
         </div>

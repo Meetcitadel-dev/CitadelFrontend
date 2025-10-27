@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  HomeIcon, 
-  UserGroupIcon, 
-  BellIcon, 
-  ChatBubbleLeftRightIcon, 
+import {
+  HomeIcon,
+  UserGroupIcon,
+  BellIcon,
+  ChatBubbleLeftRightIcon,
   CalendarIcon,
   MagnifyingGlassIcon,
   Cog6ToothIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  UserIcon
 } from '@heroicons/react/24/outline';
-import { 
-  HomeIcon as HomeIconSolid, 
-  UserGroupIcon as UserGroupIconSolid, 
-  BellIcon as BellIconSolid, 
-  ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid, 
+import {
+  HomeIcon as HomeIconSolid,
+  UserGroupIcon as UserGroupIconSolid,
+  BellIcon as BellIconSolid,
+  ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
   CalendarIcon as CalendarIconSolid,
   MagnifyingGlassIcon as MagnifyingGlassIconSolid,
-  Cog6ToothIcon as Cog6ToothIconSolid
+  Cog6ToothIcon as Cog6ToothIconSolid,
+  UserIcon as UserIconSolid
 } from '@heroicons/react/24/solid';
 
 interface NavigationItem {
@@ -30,41 +32,23 @@ interface NavigationItem {
 }
 
 const navigationItems: NavigationItem[] = [
-  { 
-    name: 'Home', 
-    href: '/explore', 
-    icon: HomeIcon, 
-    iconSolid: HomeIconSolid 
+  {
+    name: 'Events',
+    href: '/events',
+    icon: CalendarIcon,
+    iconSolid: CalendarIconSolid
   },
-  { 
-    name: 'Search', 
-    href: '/search', 
-    icon: MagnifyingGlassIcon, 
-    iconSolid: MagnifyingGlassIconSolid 
+  {
+    name: 'Explore',
+    href: '/explore',
+    icon: MagnifyingGlassIcon,
+    iconSolid: MagnifyingGlassIconSolid
   },
-  { 
-    name: 'Chats', 
-    href: '/chats', 
-    icon: ChatBubbleLeftRightIcon, 
-    iconSolid: ChatBubbleLeftRightIconSolid 
-  },
-  { 
-    name: 'Events', 
-    href: '/events', 
-    icon: CalendarIcon, 
-    iconSolid: CalendarIconSolid 
-  },
-  { 
-    name: 'Notifications', 
-    href: '/notification', 
-    icon: BellIcon, 
-    iconSolid: BellIconSolid 
-  },
-  { 
-    name: 'Settings', 
-    href: '/settings', 
-    icon: Cog6ToothIcon, 
-    iconSolid: Cog6ToothIconSolid 
+  {
+    name: 'Profile',
+    href: '/profile',
+    icon: UserIcon,
+    iconSolid: UserIconSolid
   }
 ];
 
@@ -212,8 +196,8 @@ export default function ResponsiveNavigation() {
 
       {/* Mobile bottom navigation */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black via-black/98 to-black/95 backdrop-blur-xl border-t border-white/10 shadow-2xl">
-        <div className="grid grid-cols-5 gap-0.5 px-2 py-2 safe-area-bottom">
-          {navigationItems.slice(0, 5).map((item) => {
+        <div className="grid grid-cols-3 gap-0.5 px-2 py-2 safe-area-bottom">
+          {navigationItems.map((item) => {
             const active = isActive(item.href);
             const Icon = active ? item.iconSolid : item.icon;
 

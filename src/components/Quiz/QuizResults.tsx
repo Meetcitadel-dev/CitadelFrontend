@@ -1,4 +1,3 @@
-import React from 'react';
 import ResponsiveCard from '../UI/ResponsiveCard';
 import ResponsiveButton from '../UI/ResponsiveButton';
 import { 
@@ -6,7 +5,6 @@ import {
   StarIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ClockIcon
 } from '@heroicons/react/24/outline';
 
 interface QuizResultsProps {

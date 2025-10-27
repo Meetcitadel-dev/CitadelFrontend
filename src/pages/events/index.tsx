@@ -2,9 +2,8 @@ import { useState, useEffect } from "react"
 import IndiaGate from "@/assets/unsplash_va77t8vGbJ8.png"
 import MumbaiGateway from "@/assets/gateway of mumbai stylized image.png"
 import BangaloreMonument from "@/assets/bangalore monument.png"
-import Navbar from "@/components/Common/navbar";
-import { Search, Calendar, MessageCircle, Bell, User, Settings, History } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Settings, History } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { LocationHeader } from "@/components/Events/location-header"
 import { BookingHeader } from "@/components/Events/booking-header"
 import { TimeSlot } from "@/components/Events/time-slot"
@@ -47,16 +46,25 @@ export default function DinnerBooking() {
   const [preferences, setPreferences] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [backgroundImage, setBackgroundImage] = useState(IndiaGate);
-  
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [setupMode, setSetupMode] = useState<'full' | 'location-only'>('full');
+
   const navigate = useNavigate();
-  const location = useLocation();
-  const navItems = [
-    { icon: Search, label: "Explore", onClick: () => navigate("/explore"), active: location.pathname === "/explore" },
-    { icon: Calendar, label: "Events", onClick: () => navigate("/events"), active: location.pathname === "/events" },
-    { icon: MessageCircle, label: "Chats", onClick: () => navigate("/chats"), active: location.pathname === "/chats" },
-    { icon: Bell, label: "Notifications", onClick: () => navigate("/notification"), active: location.pathname === "/notification" },
-    { icon: User, label: "Profile", onClick: () => navigate("/profile"), active: location.pathname === "/profile" },
-  ];
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Format time as HH:MM
+  const formatTime = (date: Date) => {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
 
   useEffect(() => {
     checkPreferencesAndLoadEvents();
@@ -125,6 +133,11 @@ export default function DinnerBooking() {
   const handleSetupComplete = async () => {
     setShowSetupModal(false);
     await checkPreferencesAndLoadEvents();
+
+    // If mode is 'full' and there's a selected event, proceed to payment
+    if (setupMode === 'full' && selectedEvent) {
+      setShowPaymentModal(true);
+    }
   };
 
   const handleEventSelect = (event: DinnerEvent) => {
@@ -141,8 +154,16 @@ export default function DinnerBooking() {
 
   const handleBookSeat = () => {
     if (selectedEvent) {
-      setShowPaymentModal(true);
+      // Always show full setup flow when booking
+      setSetupMode('full');
+      setShowSetupModal(true);
     }
+  };
+
+  const handleChangeLocation = () => {
+    // Show only location setup (city + area)
+    setSetupMode('location-only');
+    setShowSetupModal(true);
   };
 
   const handlePaymentSuccess = () => {
@@ -167,98 +188,166 @@ export default function DinnerBooking() {
   // Main Booking Screen
   return (
     <>
-      <div className="relative bg-black min-h-screen overflow-y-auto pb-24">
-        <div className="w-full mx-auto flex flex-col">
-          {/* Top Section - Image Background */}
+      <div className="relative bg-black min-h-screen flex flex-col">
+        {/* City Image Card with View Bookings Button */}
+        <div className="relative w-full h-80">
           <div
-            key={backgroundImage}
-            className="relative w-full h-[400px] sm:h-[450px] md:h-[500px] animate-fadeIn"
+            className="absolute inset-0 w-full h-full"
             style={{
               backgroundImage: `url(${backgroundImage})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              animation: 'fadeIn 0.8s ease-in-out'
             }}
           >
-            {/* Dark Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/90"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/70"></div>
 
-            {/* Top Right Buttons */}
-            <div className="absolute top-4 right-4 z-10 flex gap-2">
+            {/* Centered Content Container */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 px-6">
+              {/* View Bookings Button */}
               <button
                 onClick={() => navigate('/event-history')}
-                className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                title="My Bookings"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/40 text-white text-sm bg-black/20 backdrop-blur-sm hover:bg-black/30 transition-all"
               >
-                <History className="w-5 h-5 text-white" />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                View Bookings
               </button>
+
+              {/* City Name */}
+              <h2 className="text-white text-4xl font-bold text-center" style={{ fontFamily: 'serif' }}>
+                {preferences?.city || "Bangalore"}
+              </h2>
+
+              {/* Change Location */}
               <button
-                onClick={() => navigate('/settings')}
-                className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                title="Settings"
+                onClick={handleChangeLocation}
+                className="flex items-center gap-1 text-white/90 text-sm hover:text-white transition-colors"
               >
-                <Settings className="w-5 h-5 text-white" />
+                <span className="underline">Change location</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
               </button>
-            </div>
-
-            {/* Location Header Content */}
-            <div className="relative z-10 h-full flex flex-col justify-center items-center px-4">
-              <LocationHeader
-                city={preferences?.city || "New Delhi"}
-                venue="Select Location"
-                onChangeLocation={() => setShowSetupModal(true)}
-              />
-            </div>
-          </div>
-
-          {/* Bottom Section Wrapper */}
-          <div className="relative -mt-32 z-20 px-4 sm:px-6 md:px-8 pb-8">
-            {/* Black Background Section */}
-            <div className="w-full max-w-md mx-auto bg-black rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/5">
-              <BookingHeader waitingCount={events.reduce((acc, e) => acc + e.currentAttendees, 0)} />
-
-              {/* Event Slots */}
-              <div className="flex flex-col gap-4 mb-8 mt-6">
-                {events.length === 0 ? (
-                  <div className="text-center py-10">
-                    <p className="text-white/70">No upcoming events available</p>
-                  </div>
-                ) : (
-                  events.map((event) => (
-                    <TimeSlot
-                      key={event.id}
-                      date={new Date(event.eventDate).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                      time={event.eventTime}
-                      isSelected={selectedEvent?.id === event.id}
-                      onSelect={() => handleEventSelect(event)}
-                    />
-                  ))
-                )}
-              </div>
-
-              {/* Book Button */}
-              <div className="flex items-center justify-center mt-6">
-                <BookButton 
-                  isEnabled={selectedEvent !== null} 
-                  onClick={handleBookSeat} 
-                />
-              </div>
             </div>
           </div>
         </div>
 
-        {/* Navbar */}
-        <Navbar navItems={navItems} />
+        {/* Black Card Section */}
+        <div className="flex-1 px-4 pt-6 pb-24">
+          <div className="bg-black rounded-3xl p-6 border border-white/10">
+            {/* Header */}
+            <div className="text-center mb-6">
+              <h3 className="text-white text-xl mb-1">
+                Book your next <span className="text-[#1BEA7B] font-bold italic" style={{ fontFamily: 'serif' }}>DINNER</span>
+              </h3>
+              <p className="text-white/70 text-sm">
+                {events.reduce((acc, e) => acc + e.currentAttendees, 0)} people are waiting for you
+              </p>
+            </div>
+
+            {/* Event Slots */}
+            <div className="flex flex-col gap-3 mb-6">
+              {events.length === 0 ? (
+                <div className="text-center py-10">
+                  <p className="text-white/70">No upcoming events available</p>
+                </div>
+              ) : (
+                events.slice(0, 3).map((event) => (
+                  <button
+                    key={event.id}
+                    onClick={() => handleEventSelect(event)}
+                    className={`w-full p-4 rounded-xl text-left transition-all ${
+                      selectedEvent?.id === event.id
+                        ? 'bg-white/10 border-2 border-white'
+                        : 'bg-white/5 border border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-white font-semibold text-base mb-1">
+                          {new Date(event.eventDate).toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </div>
+                        <div className="text-white/70 text-sm">{event.eventTime}</div>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        selectedEvent?.id === event.id ? 'border-white bg-white' : 'border-white/50'
+                      }`}>
+                        {selectedEvent?.id === event.id && (
+                          <div className="w-2 h-2 bg-black rounded-full"></div>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+
+            {/* Book Button */}
+            <button
+              onClick={handleBookSeat}
+              disabled={!selectedEvent}
+              className={`w-full py-4 rounded-full text-white font-semibold transition-all ${
+                selectedEvent
+                  ? 'bg-[#1BEA7B] hover:bg-[#17d16f]'
+                  : 'bg-white/20 cursor-not-allowed'
+              }`}
+            >
+              Book my seat
+            </button>
+          </div>
+        </div>
+
+        {/* Bottom Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 px-6 py-3">
+          <div className="flex items-center justify-around max-w-md mx-auto">
+            <button
+              onClick={() => navigate('/events')}
+              className="flex flex-col items-center gap-1"
+            >
+              <svg className="w-6 h-6 text-[#1BEA7B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2"/>
+                <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"/>
+                <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"/>
+                <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"/>
+              </svg>
+              <span className="text-[#1BEA7B] text-xs font-medium">Events</span>
+            </button>
+            <button
+              onClick={() => navigate('/explore')}
+              className="flex flex-col items-center gap-1"
+            >
+              <svg className="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" strokeWidth="2"/>
+                <path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <span className="text-white/60 text-xs">Explore</span>
+            </button>
+            <button
+              onClick={() => navigate('/profile')}
+              className="flex flex-col items-center gap-1"
+            >
+              <svg className="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="7" r="4" strokeWidth="2"/>
+              </svg>
+              <span className="text-white/60 text-xs">Profile</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Modals */}
       {showSetupModal && (
         <SetupModal
+          mode={setupMode}
           onComplete={handleSetupComplete}
           onClose={() => setShowSetupModal(false)}
         />

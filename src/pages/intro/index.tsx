@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '@/components/UI/LoadingSpinner';
 import ResponsiveButton from '@/components/UI/ResponsiveButton';
@@ -27,6 +27,15 @@ export default function IntroSequencePage() {
   const [currentStep, setCurrentStep] = useState<IntroStep>('initial_loading');
   const [displayedMessages, setDisplayedMessages] = useState<ChatMessage[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (currentStep === 'initial_loading') {
@@ -126,11 +135,19 @@ export default function IntroSequencePage() {
     return null;
   };
 
+  // Format time as HH:MM:SS
+  const formatTime = (date: Date) => {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+  };
+
   return (
     <div className="h-screen w-screen flex flex-col">
       {/* Top bar (time, wifi, battery) */}
       <div className="flex justify-between items-center p-4 bg-black text-white z-20">
-        <span className="text-sm">12:45</span>
+        <span className="text-sm">{formatTime(currentTime)}</span>
         <div className="flex items-center space-x-1">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>

@@ -8,7 +8,7 @@ interface AreaSelectionProps {
 }
 
 const areasByCity: Record<string, string[]> = {
-  'New Delhi': ['South Delhi', 'Connaught Place', 'Hauz Khas', 'Saket', 'Gurgaon'],
+  'New Delhi': ['CP', 'Gurgaon', 'South Delhi', 'Hauz Khas', 'Saket'],
   'Mumbai': ['Bandra', 'Andheri', 'Powai', 'Lower Parel', 'Colaba'],
   'Bangalore': ['Indiranagar', 'Koramangala', 'Whitefield', 'HSR Layout', 'MG Road']
 };
@@ -51,19 +51,55 @@ export default function AreaSelection({ city, onSelect, onBack }: AreaSelectionP
         </p>
       </div>
 
-      {/* Area Chips */}
-      <div className="flex flex-wrap gap-3">
+      {/* Area Grid */}
+      <div className="grid grid-cols-2 gap-4">
         {areas.map((area) => (
           <button
             key={area}
             onClick={() => toggleArea(area)}
-            className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 ${
+            className={`relative overflow-hidden transition-all duration-300 ${
               selectedAreas.includes(area)
-                ? 'bg-green-400 text-black'
-                : 'bg-white/10 text-white hover:bg-white/20'
+                ? 'ring-4 ring-green-400'
+                : 'hover:scale-105'
             }`}
+            style={{
+              height: '102px',
+              borderRadius: '15px',
+              background: '#111',
+              border: 'none'
+            }}
           >
-            {area}
+            <div className="flex h-full w-full items-center justify-center transition-transform duration-300">
+              <span
+                style={{
+                  color: '#FFFFFF',
+                  textAlign: 'center',
+                  fontFamily: 'Inter',
+                  fontSize: '18px',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  lineHeight: '135%'
+                }}
+              >
+                {area}
+              </span>
+            </div>
+
+            {selectedAreas.includes(area) && (
+              <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-green-400 flex items-center justify-center">
+                <svg
+                  className="w-4 h-4 text-black"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="3"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            )}
           </button>
         ))}
       </div>

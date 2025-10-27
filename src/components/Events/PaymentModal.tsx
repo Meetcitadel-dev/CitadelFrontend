@@ -1,7 +1,25 @@
 import { useState } from 'react';
-import { X, CreditCard, Smartphone, Wallet } from 'lucide-react';
-import { getAuthToken, ensureValidToken } from '@/lib/utils';
+import { X, MapPin, ChevronRight } from 'lucide-react';
+import { ensureValidToken } from '@/lib/utils';
 import { apiClient } from '@/lib/apiClient';
+
+// Helper function to parse JWT token
+function parseJwt(token: string): any | null {
+  try {
+    const base64Url = token.split('.')[1];
+    if (!base64Url) return null;
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
 
 interface PaymentModalProps {
   event: {
@@ -16,19 +34,82 @@ interface PaymentModalProps {
   onClose: () => void;
 }
 
+interface GuidelinesModalProps {
+  onClose: () => void;
+}
+
+// Guidelines Modal Component
+function GuidelinesModal({ onClose }: GuidelinesModalProps) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
+      <div className="relative w-full max-w-sm bg-black border border-white/20 rounded-2xl p-6">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        >
+          <X className="w-5 h-5 text-white" />
+        </button>
+
+        {/* Header */}
+        <h2 className="text-xl font-bold text-white mb-6">Guidelines</h2>
+
+        {/* Guidelines List */}
+        <ol className="space-y-4 text-white/90 text-sm">
+          <li className="flex gap-3">
+            <span className="font-semibold">1.</span>
+            <span>
+              Find your ticket in <span className="text-blue-400">settings → event bookings</span>.
+            </span>
+          </li>
+          <li className="flex gap-3">
+            <span className="font-semibold">2.</span>
+            <span>
+              Restaurant name will be available <span className="text-blue-400">12 hours before</span> the dinner.
+            </span>
+          </li>
+          <li className="flex gap-3">
+            <span className="font-semibold">3.</span>
+            <span>
+              This price <span className="text-blue-400">includes</span> one time Citadel dinner experience with like-minded people.
+            </span>
+          </li>
+          <li className="flex gap-3">
+            <span className="font-semibold">4.</span>
+            <span>
+              The <span className="text-blue-400">meal cost is to be paid</span> at the restaurant.
+            </span>
+          </li>
+          <li className="flex gap-3">
+            <span className="font-semibold">5.</span>
+            <span>
+              Free <span className="text-blue-400">reschedule up to 48 hours</span> before the dinner.
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  );
+}
+
 export default function PaymentModal({ event, onSuccess, onClose }: PaymentModalProps) {
-  const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'phonepe' | 'cash' | null>(null);
+  const [showGuidelines, setShowGuidelines] = useState(false);
   const [processing, setProcessing] = useState(false);
 
-  const handlePayment = async () => {
-    if (!paymentMethod) return;
 
+
+  const handlePayment = async () => {
     setProcessing(true);
     try {
-      console.log('=== Starting payment process ===');
-      console.log('Payment method:', paymentMethod);
-      console.log('Event ID:', event.id);
-      console.log('Booking fee:', event.bookingFee);
+      console.log('=== Starting Direct Booking ===');
+
+      // Validate event data
+      if (!event.id || !event.eventDate || !event.eventTime || !event.city || !event.area || !event.bookingFee) {
+        console.error('❌ Missing event data');
+        alert('❌ Event information is incomplete. Please try again.');
+        setProcessing(false);
+        return;
+      }
 
       // Ensure we have a valid token
       const token = await ensureValidToken();
@@ -40,283 +121,219 @@ export default function PaymentModal({ event, onSuccess, onClose }: PaymentModal
         return;
       }
 
-      // Handle Cash payment (for testing)
-      if (paymentMethod === 'cash') {
-        console.log('Processing cash payment for event:', event.id);
-        console.log('Token:', token ? 'Present' : 'Missing');
+      // Get user ID from token
+      const tokenData = parseJwt(token);
+      console.log('Token Data:', tokenData);
 
-        try {
-          // Create booking directly without payment gateway
-          const bookingData = {
-            eventId: event.id,
-            paymentId: `CASH_${Date.now()}`,
-            paymentAmount: event.bookingFee,
-            paymentMethod: 'cash',
-            paymentGateway: 'cash',
-            paymentStatus: 'pending' // Mark as pending for cash payments
-          };
-
-          console.log('Booking data:', bookingData);
-
-          const response = await apiClient<{ success: boolean; message?: string; data?: any }>(
-            '/api/v1/dinner-events/bookings',
-            {
-              method: 'POST',
-              token,
-              body: bookingData
-            }
-          );
-
-          console.log('Cash booking response:', response);
-
-          if (response && response.success) {
-            alert('✅ Booking confirmed! Payment will be collected at the venue.');
-            onSuccess();
-            return;
-          } else {
-            const errorMsg = response?.message || 'Failed to create booking';
-            console.error('Booking failed:', errorMsg);
-            throw new Error(errorMsg);
-          }
-        } catch (bookingError: any) {
-          console.error('Cash booking error details:', {
-            message: bookingError?.message,
-            status: bookingError?.status,
-            error: bookingError
-          });
-
-          // Show more specific error message
-          let errorMessage = 'Failed to create cash booking';
-          if (bookingError?.message) {
-            errorMessage = bookingError.message;
-          } else if (bookingError?.status === 401 || bookingError?.status === 403) {
-            errorMessage = 'Authentication failed. Please login again.';
-          } else if (bookingError?.status === 404) {
-            errorMessage = 'Event not found.';
-          } else if (bookingError?.status === 400) {
-            errorMessage = 'Invalid booking data or event is full.';
-          }
-
-          throw new Error(errorMessage);
-        }
+      if (!tokenData) {
+        alert('❌ Invalid token. Please login again.');
+        setProcessing(false);
+        return;
       }
 
-      // Create Razorpay order for online payments
-      const orderResponse = await apiClient<{
+      const userId = tokenData.id || tokenData.userId || tokenData.sub;
+
+      if (!userId) {
+        console.error('User ID not found in token:', tokenData);
+        alert('❌ User information not found. Please login again.');
+        setProcessing(false);
+        return;
+      }
+
+      console.log('User ID:', userId);
+
+      // Prepare booking date
+      const bookingDate = new Date(event.eventDate).toISOString().split('T')[0];
+      const location = `${event.area}, ${event.city}`;
+
+      console.log('Creating direct booking...');
+
+      // Create direct booking (no payment gateway)
+      const bookingResponse = await apiClient<{
         success: boolean;
-        data: { orderId: string; amount: number; currency: string };
-      }>('/api/v1/payments/create-order', {
+        data: { bookingId: string };
+      }>('/api/v1/payments/create-cash-payment', {
         method: 'POST',
         token,
         body: {
+          userId: userId,
+          eventId: event.id,
+          eventType: 'Dinner',
           amount: event.bookingFee,
           currency: 'INR',
-          notes: {
-            eventId: event.id,
-            type: 'dinner_booking'
-          }
+          bookingDate: bookingDate,
+          bookingTime: event.eventTime,
+          location: location,
+          guests: 1
         }
       });
 
-      if (!orderResponse.success) {
-        throw new Error('Failed to create payment order');
+      console.log('Booking Response:', bookingResponse);
+
+      if (!bookingResponse.success) {
+        throw new Error('Failed to create booking');
       }
 
-      // Initialize Razorpay
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: orderResponse.data.amount,
-        currency: orderResponse.data.currency,
-        name: 'Citadel Dinners',
-        description: `Dinner Booking - ${event.city}`,
-        order_id: orderResponse.data.orderId,
-        handler: async function (response: any) {
-          try {
-            // Verify payment
-            const verifyResponse = await apiClient<{ success: boolean }>('/api/v1/payments/verify', {
-              method: 'POST',
-              token,
-              body: {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature
-              }
-            });
+      console.log('✅ Booking successful!');
 
-            if (verifyResponse.success) {
-              // Create booking
-              await apiClient('/api/v1/dinner-events/bookings', {
-                method: 'POST',
-                token,
-                body: {
-                  eventId: event.id,
-                  paymentId: response.razorpay_payment_id,
-                  paymentAmount: event.bookingFee,
-                  paymentMethod: paymentMethod,
-                  paymentGateway: 'razorpay'
-                }
-              });
-
-              onSuccess();
-            } else {
-              throw new Error('Payment verification failed');
-            }
-          } catch (error) {
-            console.error('Error processing payment:', error);
-            alert('Payment verification failed. Please contact support.');
-          }
-        },
-        prefill: {
-          name: '',
-          email: '',
-          contact: ''
-        },
-        theme: {
-          color: '#1BEA7B'
-        }
-      };
-
-      const razorpay = new (window as any).Razorpay(options);
-      razorpay.open();
+      // Close payment modal and show confirmation
+      setProcessing(false);
+      onSuccess();
     } catch (error: any) {
-      console.error('Error initiating payment:', error);
-      const errorMessage = error?.message || 'Failed to initiate payment. Please try again.';
-      alert(errorMessage);
+      console.error('Error creating booking:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        status: error?.status,
+        response: error?.response,
+        stack: error?.stack
+      });
+
+      let errorMessage = 'Failed to create booking. Please try again.';
+
+      // Try to extract more detailed error message
+      if (error?.message) {
+        try {
+          const errorObj = JSON.parse(error.message);
+          errorMessage = errorObj.message || errorObj.error || errorMessage;
+        } catch {
+          errorMessage = error.message;
+        }
+      }
+
+      alert(`❌ ${errorMessage}`);
     } finally {
       setProcessing(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="relative w-full max-w-md mx-auto bg-black border border-white/10 rounded-3xl shadow-2xl p-6 my-8 max-h-[90vh] overflow-y-auto">
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="sticky top-0 right-0 float-right p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10"
-        >
-          <X className="w-5 h-5 text-white" />
-        </button>
+    <>
+      {/* Guidelines Modal */}
+      {showGuidelines && <GuidelinesModal onClose={() => setShowGuidelines(false)} />}
 
-        {/* Header */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Let's book your <span className="text-green-400">DINNER!</span>
-          </h2>
-          <p className="text-white/70 text-sm">
-            To be reminded
-          </p>
-        </div>
+      {/* Main Payment Modal - Full Screen */}
+      <div className="fixed inset-0 z-50 bg-black flex flex-col">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto px-6 pt-12 pb-8">
+          {/* Header */}
+          <h1 className="text-4xl font-bold text-white leading-tight mb-1">
+            Let's book your
+          </h1>
+          <h1 className="text-4xl font-bold text-green-400 mb-12 leading-tight">
+            DINNER!
+          </h1>
 
-        {/* Event Details */}
-        <div className="bg-white/5 rounded-2xl p-4 mb-6">
-          <div className="flex justify-between items-start mb-3">
+          {/* Card Container */}
+          <div className="bg-black border border-white/10 rounded-3xl p-8 space-y-8">
+            {/* To be revealed section */}
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-white/60 text-sm mb-2">To be revealed</p>
+                <p className="text-white text-lg font-semibold">6 guests</p>
+              </div>
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-600 to-orange-700 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                <span className="text-3xl">🍽️</span>
+              </div>
+            </div>
+
+            {/* Date & Time */}
             <div>
-              <p className="text-white font-medium">
+              <p className="text-white/60 text-sm mb-2">Date & Time</p>
+              <p className="text-white text-lg font-semibold">
                 {new Date(event.eventDate).toLocaleDateString('en-US', {
-                  weekday: 'long',
+                  day: '2-digit',
                   month: 'long',
-                  day: 'numeric'
-                })}
+                  year: 'numeric'
+                })} | {event.eventTime}
               </p>
-              <p className="text-white/70 text-sm">{event.eventTime}</p>
             </div>
-            <div className="text-right">
-              <p className="text-white font-medium">{event.city}</p>
-              <p className="text-white/70 text-sm">{event.area}</p>
+
+            {/* Location */}
+            <div>
+              <p className="text-white/60 text-sm mb-2">Location</p>
+              <div className="flex items-center justify-between">
+                <p className="text-white text-lg font-semibold">{event.area}, {event.city}</p>
+                <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
+                  <MapPin className="w-5 h-5 text-white" />
+                </button>
+              </div>
+            </div>
+
+            {/* Price and Guidelines */}
+            <div className="flex items-center justify-between pt-4 border-t border-white/10">
+              <div className="px-4 py-2 bg-green-400/10 border border-green-400/40 rounded-lg">
+                <p className="text-green-400 font-bold text-lg">Rs 299</p>
+              </div>
+              <button
+                onClick={() => setShowGuidelines(true)}
+                className="flex items-center gap-2 text-white hover:text-green-400 transition-colors"
+              >
+                <span className="font-semibold">Guidelines</span>
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           </div>
-          <div className="border-t border-white/10 pt-3 flex justify-between items-center">
-            <span className="text-white/70">Booking Fee</span>
-            <span className="text-2xl font-bold text-green-400">₹{event.bookingFee}</span>
-          </div>
         </div>
 
-        {/* Important Notes */}
-        <div className="bg-green-400/10 border border-green-400/20 rounded-xl p-4 mb-6">
-          <ul className="space-y-2 text-sm text-white/90">
-            <li className="flex items-start gap-2">
-              <span className="text-green-400 mt-1">•</span>
-              <span>Your seat is <strong>4 people</strong> bookings.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-400 mt-1">•</span>
-              <span>You'll be notified <strong>24 hours</strong> before the dinner.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-400 mt-1">•</span>
-              <span>Dinner experience with <strong>6 new people</strong>.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-400 mt-1">•</span>
-              <span>Restaurant details will be shared <strong>24 hours</strong> before event.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-400 mt-1">•</span>
-              <span><strong>Note:</strong> Booking fee covers only seat reservation, not dinner cost.</span>
-            </li>
-          </ul>
-        </div>
+        {/* Wavy Green Bottom Section - Fixed */}
+        <div className="relative mt-auto">
+          {/* Wavy SVG Background */}
+          <svg
+            className="w-full"
+            viewBox="0 0 1440 320"
+            preserveAspectRatio="none"
+            style={{ height: '200px' }}
+          >
+            {/* Wave 1 */}
+            <path
+              fill="#22c55e"
+              fillOpacity="0.2"
+              d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,138.7C960,139,1056,117,1152,112C1248,107,1344,117,1392,122.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            ></path>
+            {/* Wave 2 */}
+            <path
+              fill="#22c55e"
+              fillOpacity="0.4"
+              d="M0,160L48,176C96,192,192,224,288,213.3C384,203,480,149,576,144C672,139,768,181,864,192C960,203,1056,181,1152,165.3C1248,149,1344,149,1392,149.3L1440,149L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            ></path>
+            {/* Wave 3 */}
+            <path
+              fill="#22c55e"
+              fillOpacity="0.6"
+              d="M0,192L48,197.3C96,203,192,213,288,208C384,203,480,181,576,181.3C672,181,768,203,864,213.3C960,224,1056,224,1152,213.3C1248,203,1344,181,1392,170.7L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            ></path>
+            {/* Wave 4 - Solid */}
+            <path
+              fill="#22c55e"
+              d="M0,224L48,229.3C96,235,192,245,288,240C384,235,480,213,576,213.3C672,213,768,235,864,240C960,245,1056,235,1152,224C1248,213,1344,192,1392,181.3L1440,171L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            ></path>
+          </svg>
 
-        {/* Payment Methods */}
-        <div className="mb-6">
-          <label className="block text-white font-medium mb-3">Select Payment Method</label>
-          <div className="space-y-3">
+          {/* Buttons - Positioned over waves */}
+          <div className="absolute bottom-0 left-0 right-0 px-6 pb-8 flex items-center gap-4">
             <button
-              onClick={() => setPaymentMethod('razorpay')}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${
-                paymentMethod === 'razorpay'
-                  ? 'bg-green-400 text-black'
-                  : 'bg-white/10 text-white hover:bg-white/20'
-              }`}
+              onClick={onClose}
+              className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full transition-colors text-lg"
             >
-              <CreditCard className="w-5 h-5" />
-              <span className="font-medium">Card / UPI / Net Banking</span>
+              Back
             </button>
+
+            {/* Pay Amount Button */}
             <button
-              onClick={() => setPaymentMethod('phonepe')}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${
-                paymentMethod === 'phonepe'
-                  ? 'bg-green-400 text-black'
-                  : 'bg-white/10 text-white hover:bg-white/20'
+              onClick={handlePayment}
+              disabled={processing}
+              className={`flex-1 py-4 rounded-full font-semibold text-lg transition-all ${
+                processing
+                  ? 'bg-green-400/50 text-black/50 cursor-not-allowed'
+                  : 'bg-green-400 text-black hover:bg-green-500 shadow-lg shadow-green-400/30'
               }`}
             >
-              <Smartphone className="w-5 h-5" />
-              <span className="font-medium">PhonePe</span>
-            </button>
-            <button
-              onClick={() => setPaymentMethod('cash')}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${
-                paymentMethod === 'cash'
-                  ? 'bg-green-400 text-black'
-                  : 'bg-white/10 text-white hover:bg-white/20'
-              }`}
-            >
-              <Wallet className="w-5 h-5" />
-              <span className="font-medium">Cash (Pay at Venue)</span>
+              {processing ? 'Processing...' : 'Pay amount'}
             </button>
           </div>
         </div>
-
-        {/* Pay Button */}
-        <button
-          onClick={handlePayment}
-          disabled={!paymentMethod || processing}
-          className={`w-full py-4 rounded-full font-semibold transition-all duration-200 ${
-            paymentMethod && !processing
-              ? 'bg-green-400 text-black hover:bg-green-500'
-              : 'bg-white/10 text-white/50 cursor-not-allowed'
-          }`}
-        >
-          {processing
-            ? 'Processing...'
-            : paymentMethod === 'cash'
-              ? `Confirm Booking (₹${event.bookingFee} at venue)`
-              : `Pay ₹${event.bookingFee}`
-          }
-        </button>
       </div>
-    </div>
+    </>
   );
 }
 
