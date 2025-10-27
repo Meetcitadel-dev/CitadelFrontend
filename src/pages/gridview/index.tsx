@@ -7,7 +7,7 @@ import { ProfileListView } from "@/components/Gridview/profile-list-view"
 import { FilterModal } from "@/components/Gridview/filter-modal"
 import { FilterTags } from "@/components/Gridview/filter-tags"
 import { fetchExploreProfiles, manageConnection } from "@/lib/api"
-import { getAuthToken } from "@/lib/utils"
+import { getAuthToken, ensureValidToken } from "@/lib/utils"
 import type { ExploreProfile } from "@/types"
 import type { Profile } from "@/components/Gridview/profile-card-view"
 
@@ -38,10 +38,12 @@ export default function ProfilesPage() {
         setLoading(true)
       }
       setError(null)
-      
-      const token = getAuthToken()
+
+      // Try to ensure we have a valid token (will refresh if expired)
+      const token = await ensureValidToken()
       if (!token) {
-        console.error('No authentication token found')
+        console.error('No valid token available, redirecting to onboarding')
+        navigate('/onboarding')
         return
       }
 
@@ -300,19 +302,28 @@ export default function ProfilesPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-lg">Loading profiles...</div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+          <div className="text-lg font-medium">Loading profiles...</div>
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-lg mb-4">Failed to load profiles</div>
-          <button 
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="mb-4">
+            <svg className="w-16 h-16 mx-auto text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div className="text-xl font-semibold mb-2">Failed to load profiles</div>
+          <div className="text-gray-400 mb-6">Please check your connection and try again</div>
+          <button
             onClick={() => loadProfiles()}
-            className="bg-green-500 text-black px-4 py-2 rounded-lg"
+            className="bg-green-500 hover:bg-green-600 text-black font-semibold px-6 py-3 rounded-lg transition-colors"
           >
             Try Again
           </button>
@@ -323,17 +334,22 @@ export default function ProfilesPage() {
 
   if (profiles.length === 0) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-lg mb-4">No profiles available</div>
-          <div className="text-sm text-gray-400">You've seen all available profiles!</div>
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="mb-4">
+            <svg className="w-16 h-16 mx-auto text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <div className="text-xl font-semibold mb-2">No profiles available</div>
+          <div className="text-gray-400">You've seen all available profiles!</div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white pb-20 lg:pb-8">
       <ProfileHeader
         isSearchView={isSearchView}
         searchQuery={searchQuery}
@@ -345,20 +361,23 @@ export default function ProfilesPage() {
 
       {selectedFilters.length > 0 && <FilterTags filters={selectedFilters} onRemoveFilter={handleRemoveFilter} />}
 
-      <div className="px-4 pb-4">
+      <div className="container-responsive px-4 sm:px-6 md:px-8 lg:px-10 py-4 sm:py-6">
         {isSearchView ? (
           <ProfileListView profiles={sortedProfiles} />
         ) : (
-          <ProfileCardView 
-            profiles={sortedProfiles} 
+          <ProfileCardView
+            profiles={sortedProfiles}
             onConnectionAction={handleConnectionAction}
           />
         )}
       </div>
 
       {loadingMore && (
-        <div className="flex justify-center py-4">
-          <div className="text-gray-400">Loading more profiles...</div>
+        <div className="flex justify-center py-6">
+          <div className="flex items-center gap-2">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-500"></div>
+            <span className="text-gray-400">Loading more profiles...</span>
+          </div>
         </div>
       )}
 

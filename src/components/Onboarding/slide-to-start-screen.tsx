@@ -16,22 +16,6 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
   const sliderRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Keep the screen design proportions constant across devices
-  const DESIGN_WIDTH = 390
-  const DESIGN_HEIGHT = 844
-  const [scale, setScale] = useState(1)
-
-  useEffect(() => {
-    const computeScale = () => {
-      const vw = window.innerWidth
-      const scaleX = vw / DESIGN_WIDTH
-      setScale(scaleX)
-    }
-    computeScale()
-    window.addEventListener('resize', computeScale)
-    return () => window.removeEventListener('resize', computeScale)
-  }, [])
-
   const handleStart = () => {
     setIsDragging(true)
   }
@@ -104,96 +88,70 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
   }, [isDragging])
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Scaled design canvas */}
-      <div
-        style={{
-          width: `${DESIGN_WIDTH}px`,
-          height: `${DESIGN_HEIGHT}px`,
-          position: 'absolute',
-          left: '50%',
-          bottom: 0,
-          transform: `translateX(-50%) scale(${scale})`,
-          transformOrigin: 'bottom center'
-        }}
-      >
+    <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
+      {/* Responsive Container */}
+      <div className="w-full max-w-md mx-auto h-screen flex flex-col relative">
       {/* Images Container - Above Curved Background */}
-      <div 
-        className="absolute left-1/2 transform -translate-x-1/2"
+      <div
+        className="absolute left-1/2 transform -translate-x-1/2 w-[85%] max-w-[336px]"
         style={{
           top: '44px',
-          width: '336px',
           height: '348px'
         }}
       >
         {/* First Image - Rectangle 4 */}
-        <div 
-          className="absolute"
+        <div
+          className="absolute w-[24%] aspect-[0.76] rounded-[60px] bg-cover bg-center"
           style={{
-            left: '28px',
+            left: '8%',
             top: '4px',
-            width: '79.636px',
-            height: '104.727px',
-            borderRadius: '60px',
-            background: `url(${Rectangle4}) lightgray 0px -1.479px / 100% 114.253% no-repeat`,
-            flexShrink: 0
+            backgroundImage: `url(${Rectangle4})`,
+            backgroundSize: 'cover'
           }}
         />
 
         {/* Second Image - Rectangle 2 */}
-        <div 
-          className="absolute"
+        <div
+          className="absolute w-[45%] aspect-[0.76] rounded-[60px] bg-cover bg-center"
           style={{
             left: '0px',
             bottom: '0px',
-            width: '150.545px',
-            height: '198.545px',
-            borderRadius: '60px',
-            background: `url(${Rectangle2}) lightgray 50% / cover no-repeat`,
-            flexShrink: 0
+            backgroundImage: `url(${Rectangle2})`,
+            backgroundSize: 'cover'
           }}
         />
 
         {/* Third Image - Rectangle 4 (Top Right) */}
-        <div 
-          className="absolute"
+        <div
+          className="absolute w-[45%] aspect-[0.76] rounded-[60px] bg-cover bg-center"
           style={{
-            right: '14px',
+            right: '4%',
             top: '0px',
-            width: '150.545px',
-            height: '198.545px',
-            borderRadius: '60px',
-            background: `url(${Rectangle1}) lightgray 50% / cover no-repeat`,
-            flexShrink: 0
+            backgroundImage: `url(${Rectangle1})`,
+            backgroundSize: 'cover'
           }}
         />
 
         {/* Fourth Image - Rectangle 3 */}
-        <div 
-          className="absolute"
+        <div
+          className="absolute w-[24%] aspect-[0.76] rounded-[60px] bg-cover bg-center"
           style={{
-            right: '35px',
+            right: '10%',
             bottom: '21.8px',
-            width: '79.636px',
-            height: '104.727px',
-            borderRadius: '60px',
-            background: `url(${Rectangle3}) 50% / cover no-repeat`,
-            flexShrink: 0
+            backgroundImage: `url(${Rectangle3})`,
+            backgroundSize: 'cover'
           }}
         />
 
         {/* Vector Icon */}
-        <div 
-          className="absolute"
+        <div
+          className="absolute w-[5%] h-auto"
           style={{
-            top: '86.7px',
-            left: '3.27px',
-            width: '16.559px',
-            height: '19.091px',
-            flexShrink: 0
+            top: '25%',
+            left: '1%'
           }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="21" viewBox="0 0 18 21" fill="none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="21" viewBox="0 0 18 21" fill="none" className="w-full h-auto">
             <path d="M1.27344 19.818L17.0916 0.727051" stroke="white"/>
             <path d="M1.27349 9.72686L16.001 10.5451" stroke="white"/>
             <path d="M7.12645 2.91747L13.2735 18.1816" stroke="white"/>
@@ -201,17 +159,14 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
         </div>
 
         {/* Second Vector Icon */}
-        <div 
-          className="absolute"
+        <div
+          className="absolute w-[4%] h-auto"
           style={{
-            top: '155px',
-            right: '168px',
-            width: '13.092px',
-            height: '15.093px',
-            flexShrink: 0
+            top: '45%',
+            right: '50%'
           }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="17" viewBox="0 0 15 17" fill="none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="17" viewBox="0 0 15 17" fill="none" className="w-full h-auto">
             <path d="M1 15.8193L13.5054 0.726562" stroke="white"/>
             <path d="M1.00084 7.84184L12.644 8.4887" stroke="white"/>
             <path d="M5.62827 2.45835L10.488 14.5257" stroke="white"/>
@@ -219,31 +174,25 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
         </div>
 
         {/* Third Vector Icon */}
-        <div 
-          className="absolute"
+        <div
+          className="absolute w-[8%] h-auto"
           style={{
-            bottom: '60.5px',
-            right: '0px',
-            width: '26.182px',
-            height: '23.499px',
-            flexShrink: 0
+            bottom: '17%',
+            right: '0%'
           }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="25" viewBox="0 0 28 25" fill="none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="25" viewBox="0 0 28 25" fill="none" className="w-full h-auto">
             <path d="M0.908203 1.04453C0.908203 1.04453 3.63548 0.499072 4.18093 3.22635C4.72639 5.95362 -1.27362 13.0445 1.99911 16.3173C5.27184 19.59 8.54457 18.2797 10.7264 17.4082C12.9082 16.5367 12.9082 13.0445 11.8173 12.4991C10.7264 11.9536 8.54457 11.2718 4.72639 14.1354C0.908203 16.9991 0.908203 18.4991 0.908203 20.6809C0.908203 22.8627 1.99911 24.4991 6.9082 24.4991C11.8173 24.4991 14.5446 20.6809 19.9991 19.0445C25.4537 17.4082 27.09 19.59 27.09 19.59" stroke="white"/>
           </svg>
         </div>
       </div>
 
       {/* Curved Background Container */}
-      <div 
-        className="absolute bottom-0 left-0 right-0"
+      <div
+        className="absolute bottom-0 left-0 right-0 w-full rounded-t-[45px]"
         style={{
-          width: '393px',
           height: '355px',
-          borderRadius: '45px 45px 0 0',
-          background: 'linear-gradient(136deg, #111 0%, #040404 64.5%)',
-          flexShrink: 0
+          background: 'linear-gradient(136deg, #111 0%, #040404 64.5%)'
         }}
       >
         {/* Content inside curved background */}
@@ -257,20 +206,16 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
 
           {/* Main Text */}
           <div className="text-center mb-8">
-            <p style={{color: '#FFF', fontFamily: '"Roboto Serif", serif', fontSize: '36px', fontStyle: 'normal', fontWeight: 600, lineHeight: 'normal', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2}}>i'm good, wby?</p>
+            <p className="text-white text-3xl sm:text-4xl font-semibold" style={{fontFamily: '"Roboto Serif", serif'}}>i'm good, wby?</p>
           </div>
 
           {/* Slide to Start */}
-          <div className="mb-6">
-            <div 
-              ref={containerRef} 
-              className="relative flex items-center px-2"
+          <div className="mb-6 w-full max-w-[365px]">
+            <div
+              ref={containerRef}
+              className="relative flex items-center px-2 w-full rounded-[45px] bg-[#161616]"
               style={{
-                width: '365.842px',
-                height: '84px',
-                borderRadius: '45px',
-                background: '#161616',
-                flexShrink: 0
+                height: '84px'
               }}
             >
               <div
@@ -311,42 +256,17 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
           </div>
 
           {/* Terms Text */}
-          <div className="absolute w-[229px] top-[296px] left-[77px] text-center">
-                         <p 
-               style={{ 
-                 color: '#2C2C2C',
-                 fontFamily: 'Inter, sans-serif',
-                 fontSize: '14px',
-                 fontStyle: 'normal',
-                 fontWeight: 500,
-                 lineHeight: '135%',
-                 textAlign: 'center',
-                 whiteSpace: 'pre-line'
-               }}
-             >
-               By signing in you accept our{" "}
-               <span style={{ 
-                 textDecorationLine: 'underline',
-                 textDecorationStyle: 'solid',
-                 textDecorationSkipInk: 'none',
-                 textDecorationThickness: 'auto',
-                 textUnderlineOffset: 'auto',
-                 textUnderlinePosition: 'from-font'
-               }}>
-                 Terms of use
-               </span>{" "}
-               and{" "}
-               <span style={{ 
-                 textDecorationLine: 'underline',
-                 textDecorationStyle: 'solid',
-                 textDecorationSkipInk: 'none',
-                 textDecorationThickness: 'auto',
-                 textUnderlineOffset: 'auto',
-                 textUnderlinePosition: 'from-font'
-               }}>
-                 Privacy policy
-               </span>
-             </p>
+          <div className="w-full max-w-[280px] text-center px-4">
+            <p className="text-[#2C2C2C] text-sm font-medium leading-[135%]" style={{fontFamily: 'Inter, sans-serif'}}>
+              By signing in you accept our{" "}
+              <span className="underline">
+                Terms of use
+              </span>{" "}
+              and{" "}
+              <span className="underline">
+                Privacy policy
+              </span>
+            </p>
           </div>
         </div>
       </div>

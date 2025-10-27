@@ -8,9 +8,7 @@ import ConnectStudentsScreen from "../../components/Onboarding/connect-students-
 import UniversitySelectionScreen from "../../components/Onboarding/university-selection-screen"
 import EmailInputScreen from "../../components/Onboarding/email-input-screen"
 import OTPInputScreen from "../../components/Onboarding/otp-input-screen"
-import NameInputScreen from "../../components/Onboarding/name-input-screen"
-import DateOfBirthScreen from "../../components/Onboarding/date-of-birth-screen"
-import SkillsetsScreen from "../../components/Onboarding/skillsets-screen"
+import GenderSelectionScreen from "../../components/Onboarding/gender-selection-screen"
 import UploadScreen from "../../components/Onboarding/UploadProfile/uploadscreen"
 import FindFriendsScreen from "../../components/Onboarding/find-friends-screen"
 import BestFriendsScreen from "../../components/Onboarding/best-friends-screen"
@@ -27,14 +25,12 @@ export default function App() {
   const [showUniversityScreen, setShowUniversityScreen] = useState(false)
   const [showEmailScreen, setShowEmailScreen] = useState(false)
   const [showOTPScreen, setShowOTPScreen] = useState(false)
-  const [showNameScreen, setShowNameScreen] = useState(false)
-  const [showDateScreen, setShowDateScreen] = useState(false)
-  const [showSkillsScreen, setShowSkillsScreen] = useState(false)
+  const [showGenderScreen, setShowGenderScreen] = useState(false)
+  const [showDegreeScreen, setShowDegreeScreen] = useState(false)
   const [showUploadScreen, setShowUploadScreen] = useState(false)
-  const [showFindFriendsScreen, setShowFindFriendsScreen] = useState(false)
+  const [showAllowScreen, setShowAllowScreen] = useState(false)
   const [showBestFriendsScreen, setShowBestFriendsScreen] = useState(false)
   const [showSuccessScreen, setShowSuccessScreen] = useState(false)
-  const [showDegreeScreen, setShowDegreeScreen] = useState(false)
   const [showLoginEmailScreen, setShowLoginEmailScreen] = useState(false)
   const [isLoginMode, setIsLoginMode] = useState(false)
   const [userEmail, setUserEmail] = useState("");
@@ -47,11 +43,60 @@ export default function App() {
     // First check if we already have a token in localStorage
     const existingToken = getAuthToken()
     if (existingToken) {
-      // User is already authenticated, redirect to main app
+      // User is already authenticated, check if they need to complete quiz
+      try {
+        const response = await fetch('/api/v1/quiz/results', {
+          headers: {
+            'Authorization': `Bearer ${existingToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        // Check if response is OK and is JSON
+        if (!response.ok) {
+          // If 401 or 404, user hasn't completed quiz or token is invalid
+          if (response.status === 401 || response.status === 404) {
+            console.log('User not authenticated or quiz not completed');
+            // Continue with onboarding flow
+            return;
+          }
+          // For 400 error (user hasn't completed quiz), redirect to quiz
+          if (response.status === 400) {
+            navigate('/quiz');
+            return;
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.error('Response is not JSON, continuing with onboarding');
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.data.hasCompletedQuiz) {
+          // User already completed quiz, redirect to main app
+          navigate('/explore');
+          return;
+        } else if (data.success && !data.data.hasCompletedQuiz) {
+          // User needs to complete quiz first
+          navigate('/quiz');
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking quiz status:', error);
+        // If error checking quiz status, continue with onboarding
+        // Don't redirect to quiz automatically on error
+        return;
+      }
+
+      // User is already authenticated and completed quiz, redirect to main app
       navigate("/explore")
       return
     }
-    
+
     // If no token, try to refresh from cookie
     try {
       const res = await refreshAccessToken()
@@ -120,6 +165,7 @@ export default function App() {
     setShowOTPScreen(true);
   };
 
+
   const handleLoginEmailComplete = (email: string) => {
     setUserEmail(email);
     setShowLoginEmailScreen(false);
@@ -151,55 +197,51 @@ export default function App() {
     }
   };
 
-  const handleNameBack = () => {
-    setShowNameScreen(false);
+  const handleGenderBack = () => {
+    setShowGenderScreen(false);
     setShowOTPScreen(true);
-  };
-
-  const handleDateBack = () => {
-    setShowDateScreen(false);
-    setShowNameScreen(true);
   };
 
   const handleDegreeBack = () => {
     setShowDegreeScreen(false);
-    setShowDateScreen(true);
+    setShowGenderScreen(true);
   };
 
-  const handleSkillsBack = () => {
-    setShowSkillsScreen(false);
-    setShowDegreeScreen(true);
-  };
-  const handleOTPComplete = () => {
-    setShowOTPScreen(false);
-    // If we came from login flow, redirect to explore
+  const handleOTPComplete = async () => {
+    // If we came from login flow, redirect directly to explore
     if (isLoginMode) {
-      navigate("/explore");
+      const token = getAuthToken();
+      console.log('🔐 Login mode - Token available:', !!token);
+
+      if (!token) {
+        console.error('❌ No token available after OTP verification');
+        alert('Authentication failed. Please try again.');
+        return;
+      }
+
+      console.log('✅ Login successful - Redirecting to /explore');
+
+      // Hide OTP screen and redirect to explore
+      setShowOTPScreen(false);
+      navigate('/explore');
     } else {
-      // If we came from signup flow, continue to name screen
-      setShowNameScreen(true);
+      // If we came from signup flow, continue to gender screen
+      setShowOTPScreen(false);
+      setShowGenderScreen(true);
     }
   };
-  const handleNameComplete = (name: string, gender: string) => {
-    console.log('Name and gender collected:', { name, gender });
-    setOnboardingData((prev: any) => ({ ...prev, name, gender }));
-    setShowNameScreen(false);
-    setShowDateScreen(true);
-  };
-  const handleDateComplete = (dob: { day: string; month: string; year: string }) => {
-    setOnboardingData((prev: any) => ({ ...prev, dob }));
-    setShowDateScreen(false);
+
+  const handleGenderComplete = (gender: string) => {
+    console.log('Gender collected:', gender);
+    setOnboardingData((prev: any) => ({ ...prev, gender }));
+    setShowGenderScreen(false);
     setShowDegreeScreen(true);
   };
+
   const handleDegreeComplete = (degree: string, year: string) => {
     console.log('Degree and year collected:', { degree, year });
     setOnboardingData((prev: any) => ({ ...prev, degree, year }));
     setShowDegreeScreen(false);
-    setShowSkillsScreen(true);
-  };
-  const handleSkillsComplete = (skills: string[]) => {
-    setOnboardingData((prev: any) => ({ ...prev, skills }));
-    setShowSkillsScreen(false);
     setShowUploadScreen(true);
   };
   
@@ -208,27 +250,33 @@ export default function App() {
       setOnboardingData((prev: any) => ({ ...prev, uploadedImages: images }));
     }
     setShowUploadScreen(false);
-    setShowFindFriendsScreen(true);
+    setShowAllowScreen(true);
   };
-  
+
   const handleUploadBack = () => {
     setShowUploadScreen(false);
-    setShowSkillsScreen(true);
+    setShowDegreeScreen(true);
   };
 
   const handleAllowContacts = () => {
-    setShowFindFriendsScreen(false);
-    // Here you would typically show a contact buffering screen
-    // For now, we'll go directly to best friends screen
+    setShowAllowScreen(false);
+    // Go to best friends screen
     setShowBestFriendsScreen(true);
   };
 
   const handleSkipContacts = async () => {
-    setShowFindFriendsScreen(false);
-    
-    // Skip contacts and best friends, go directly to success
-    const finalData = { ...onboardingData, friends: [] }; // Empty friends array since user skipped
-    
+    setShowAllowScreen(false);
+
+    // Skip best friends, go directly to success
+    // Add default values for missing fields
+    const finalData = {
+      ...onboardingData,
+      friends: [],
+      skills: onboardingData.skills || [],
+      name: onboardingData.name || '',
+      dob: onboardingData.dob || null
+    };
+
     // Debug: Log the complete data structure
     console.log('=== ONBOARDING DATA DEBUG (SKIP) ===');
     console.log('Complete onboarding data:', finalData);
@@ -245,7 +293,7 @@ export default function App() {
       friends: finalData.friends
     });
     console.log('=== END DEBUG ===');
-    
+
     // Submit all data to backend
     try {
       const result = await submitOnboardingData(finalData);
@@ -257,20 +305,27 @@ export default function App() {
         console.error('Onboarding failed:', result.message);
         alert('Onboarding failed. Please try again.');
         // Stay on the current screen to allow retry
-        setShowFindFriendsScreen(true);
+        setShowAllowScreen(true);
       }
     } catch (e: any) {
       console.error('Onboarding error:', e);
       alert('Onboarding failed. Please try again.');
       // Stay on the current screen to allow retry
-      setShowFindFriendsScreen(true);
+      setShowAllowScreen(true);
     }
   };
   const handleBestFriendsComplete = async (friends: string[]) => {
-    const finalData = { ...onboardingData, friends };
+    // Add default values for missing fields
+    const finalData = {
+      ...onboardingData,
+      friends,
+      skills: onboardingData.skills || [],
+      name: onboardingData.name || '',
+      dob: onboardingData.dob || null
+    };
     setOnboardingData((prev: any) => ({ ...prev, friends }));
     setShowBestFriendsScreen(false);
-    
+
     // Debug: Log the complete data structure
     console.log('=== ONBOARDING DATA DEBUG ===');
     console.log('Complete onboarding data:', finalData);
@@ -287,7 +342,7 @@ export default function App() {
       friends: finalData.friends
     });
     console.log('=== END DEBUG ===');
-    
+
     // Submit all data to backend
     try {
       const result = await submitOnboardingData(finalData);
@@ -309,15 +364,46 @@ export default function App() {
     }
   };
 
-  // After success, redirect to /explore after 3 seconds
+  // After success, check quiz status and redirect accordingly
   useEffect(() => {
     if (showSuccessScreen) {
-      const timer = setTimeout(() => {
-        navigate("/explore");
-      }, 3000);
-      return () => clearTimeout(timer);
+      const checkQuizAndRedirect = async () => {
+        const token = getAuthToken();
+        if (token) {
+          try {
+            const response = await fetch('/api/v1/quiz/results', {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+
+            if (response.ok) {
+              const contentType = response.headers.get('content-type');
+              if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+
+                if (data.success && data.data.hasCompletedQuiz) {
+                  // User already completed quiz, go to explore
+                  setTimeout(() => navigate('/explore'), 2000);
+                  return;
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Error checking quiz status:', error);
+          }
+        }
+
+        // If quiz not completed or error, redirect to quiz
+        setTimeout(() => navigate("/quiz"), 2000);
+      };
+
+      checkQuizAndRedirect();
     }
   }, [showSuccessScreen, navigate]);
+
+  // New Flow Order: University → Email → OTP → Gender → Degree → Upload → Allow/Skip → BestFriends → Success
 
   if (showSuccessScreen) {
     return <SuccessScreen onComplete={() => {}} />
@@ -326,39 +412,43 @@ export default function App() {
   if (showBestFriendsScreen) {
     return <BestFriendsScreen value={onboardingData.friends} onContinue={handleBestFriendsComplete} />;
   }
-  if (showFindFriendsScreen) {
+
+  if (showAllowScreen) {
     return <FindFriendsScreen onAllowContacts={handleAllowContacts} onSkip={handleSkipContacts} />;
   }
+
   if (showUploadScreen) {
     return <UploadScreen onComplete={handleUploadComplete} onBack={handleUploadBack} />;
   }
-  if (showSkillsScreen) {
-    return <SkillsetsScreen value={onboardingData.skills} onContinue={handleSkillsComplete} onBack={handleSkillsBack} />;
-  }
-  if (showDateScreen) {
-    return <DateOfBirthScreen value={onboardingData.dob} onContinue={handleDateComplete} onBack={handleDateBack} />;
-  }
-  if (showNameScreen) {
-    return <NameInputScreen value={onboardingData.name || ""} gender={onboardingData.gender} onContinue={handleNameComplete} onBack={handleNameBack} />;
-  }
-  if (showOTPScreen) {
-    return <OTPInputScreen email={userEmail} onContinue={handleOTPComplete} onBack={handleOTPBack} />;
-  }
-  if (showEmailScreen) {
-    return <EmailInputScreen value={onboardingData.email} onContinue={handleEmailComplete} onBack={handleEmailBack} />;
-  }
-  if (showLoginEmailScreen) {
-    return <LoginEmailScreen onContinue={handleLoginEmailComplete} onBack={handleLoginEmailBack} />;
-  }
-  if (showUniversityScreen) {
-    return <UniversitySelectionScreen value={onboardingData.university} onContinue={handleUniversityComplete} onBack={handleUniversityBack} />;
-  }
+
   if (showDegreeScreen) {
     return <DegreeSelection value={{ degree: onboardingData.degree, year: onboardingData.year }} onContinue={handleDegreeComplete} onBack={handleDegreeBack} />;
   }
+
+  if (showGenderScreen) {
+    return <GenderSelectionScreen value={onboardingData.gender} onContinue={handleGenderComplete} onBack={handleGenderBack} />;
+  }
+
+  if (showOTPScreen) {
+    return <OTPInputScreen email={userEmail} onContinue={handleOTPComplete} onBack={handleOTPBack} />;
+  }
+
+  if (showEmailScreen) {
+    return <EmailInputScreen value={onboardingData.email} onContinue={handleEmailComplete} onBack={handleEmailBack} />;
+  }
+
+  if (showLoginEmailScreen) {
+    return <LoginEmailScreen onContinue={handleLoginEmailComplete} onBack={handleLoginEmailBack} />;
+  }
+
+  if (showUniversityScreen) {
+    return <UniversitySelectionScreen value={onboardingData.university} onContinue={handleUniversityComplete} onBack={handleUniversityBack} />;
+  }
+
   if (showConnectScreen) {
     return <ConnectStudentsScreen onContinue={handleConnectComplete} onLogin={handleLoginClick} />;
   }
+
   if (showSlideScreen) {
     return <SlideToStartScreen onSlideComplete={handleSlideComplete} />;
   }

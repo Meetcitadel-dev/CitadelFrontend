@@ -1,5 +1,5 @@
 import { apiClient } from './apiClient';
-import { getAuthToken } from './utils';
+import { getAuthToken, setAuthToken } from './utils';
 import type { ExploreResponse, ConnectionRequest, AdjectiveSelection, AdjectiveMatchResponse, NotificationResponse, AcceptRejectRequest } from '@/types';
 
 // Fetch list of universities with optional search, limit, offset
@@ -50,8 +50,8 @@ export function sendEmailOTP(email: string) {
 }
 
 // Verify OTP (4 digits)
-export function verifyOTP(email: string, otp: string, rememberDevice?: boolean) {
-  return apiClient<{ 
+export async function verifyOTP(email: string, otp: string, rememberDevice?: boolean) {
+  const res = await apiClient<{ 
     success: boolean; 
     message?: string; 
     token?: string;
@@ -73,6 +73,12 @@ export function verifyOTP(email: string, otp: string, rememberDevice?: boolean) 
       withCredentials: true,
     }
   );
+  // Persist access token for subsequent API and socket auth
+  const token = res?.tokens?.accessToken || res?.token
+  if (token) {
+    setAuthToken(token)
+  }
+  return res
 }
 
 // Refresh access token using HttpOnly refresh cookie
@@ -118,14 +124,15 @@ export async function uploadImage(file: File, token?: string) {
   formData.append('image', file);
   
   const headers: Record<string, string> = {};
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  const authToken = token || getAuthToken();
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
   }
   // Remove Content-Type header to let browser set it with boundary for FormData
   delete headers['Content-Type'];
   
-  const base = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-  const url = base.replace(/\/$/, '') + '/api/profile/upload';
+  const base = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const url = base.replace(/\/$/, '') + '/api/v1/profile/upload';
   
   const response = await fetch(url, {
     method: 'POST',
@@ -856,6 +863,70 @@ export function fetchUserConnections(token?: string) {
       token,
     }
   );
+}
+
+// Quiz API Functions
+export function fetchQuizQuestions(token?: string) {
+  return apiClient<{
+    success: boolean;
+    data: {
+      questions: Array<{
+        id: string;
+        question: string;
+        options: string[];
+        category: string;
+        difficulty: string;
+      }>;
+      totalQuestions: number;
+    };
+  }>('/api/v1/quiz/questions', {
+    method: 'GET',
+    token,
+  });
+}
+
+export function submitQuizAnswers(data: {
+  answers: Array<{
+    quizId: string;
+    selectedAnswer: number;
+    timeSpent: number;
+  }>;
+}, token?: string) {
+  return apiClient<{
+    success: boolean;
+    data: {
+      totalQuestions: number;
+      correctAnswers: number;
+      totalPoints: number;
+      percentage: number;
+      responses: number;
+    };
+  }>('/api/v1/quiz/submit', {
+    method: 'POST',
+    body: JSON.stringify(data),
+    token,
+  });
+}
+
+export function fetchQuizResults(token?: string) {
+  return apiClient<{
+    success: boolean;
+    data: {
+      hasCompletedQuiz: boolean;
+      quizScore: number;
+      quizCompletedAt: string;
+      responses: Array<{
+        question: any;
+        selectedAnswer: number;
+        isCorrect: boolean;
+        points: number;
+        timeSpent: number;
+      }>;
+    };
+  }>('/api/v1/quiz/results', {
+    method: 'GET',
+    token,
+  });
 }
 
 export function createGroupChat(data: {

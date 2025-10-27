@@ -102,7 +102,7 @@ export default function BestFriendsScreen({ value, onContinue }: BestFriendsScre
   }
 
   const handleInputBlur = () => {
-    setTimeout(() => setShowDropdown(false), 150)
+    setTimeout(() => setShowDropdown(false), 300)
   }
 
   const isFriendsValid = selectedFriends.length >= 1 && selectedFriends.length <= 5
@@ -175,27 +175,42 @@ export default function BestFriendsScreen({ value, onContinue }: BestFriendsScre
         </div>
         {/* Dropdown */}
         {showDropdown && (
-          <div style={{ position: 'absolute', left: 0, right: 0, background: '#232323', borderRadius: 12, marginTop: 8, maxHeight: 240, overflowY: 'auto', zIndex: 10 }}>
-            {filteredContacts.map((contact, index) => (
-              <button
-                key={index}
-                onClick={() => handleFriendSelect(contact)}
-                style={{
-                  width: '100%',
-                  textAlign: 'left',
-                  padding: '16px',
-                  color: '#fff',
-                  background: 'none',
-                  border: 'none',
-                  fontFamily: "'Roboto Serif', serif",
-                  fontSize: 17,
-                  borderBottom: index !== filteredContacts.length - 1 ? '1px solid #333' : 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                {contact}
-              </button>
-            ))}
+          <div style={{ position: 'absolute', left: 16, right: 16, background: '#232323', borderRadius: 12, marginTop: 8, maxHeight: 240, overflowY: 'auto', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+            {filteredContacts.length > 0 ? (
+              filteredContacts.map((contact, index) => (
+                <button
+                  key={index}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleFriendSelect(contact);
+                  }}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '16px',
+                    color: '#fff',
+                    background: 'none',
+                    border: 'none',
+                    fontFamily: "'Roboto Serif', serif",
+                    fontSize: 17,
+                    borderBottom: index !== filteredContacts.length - 1 ? '1px solid #333' : 'none',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#2a2a2a';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'none';
+                  }}
+                >
+                  {contact}
+                </button>
+              ))
+            ) : (
+              <div style={{ padding: '16px', color: '#888', textAlign: 'center' }}>
+                No contacts found
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -14,7 +14,7 @@ import {
   getAvailableAdjectives,
   getConnectionStatus
 } from "@/lib/api"
-import { getAuthToken, prefetchImagesWithPriority } from "@/lib/utils"
+import { getAuthToken, ensureValidToken, prefetchImagesWithPriority } from "@/lib/utils"
 import sessionManager from "@/lib/sessionManager"
 import type { ExploreProfile, ConnectionRequest, AdjectiveSelection, AdjectiveDisplayData } from "@/types"
 import { 
@@ -111,10 +111,11 @@ export default function MobileProfileScreen() {
         isLoadingRef.current = true
         setLoading(true)
         setError(null)
-        
-        const token = getAuthToken()
+
+        // Try to ensure we have a valid token (will refresh if expired)
+        const token = await ensureValidToken()
         if (!token) {
-          console.error('No authentication token found')
+          console.error('No valid token available, redirecting to onboarding')
           navigate('/onboarding')
           return
         }

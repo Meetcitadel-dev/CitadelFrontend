@@ -33,97 +33,59 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6 w-full justify-items-center">
       {profiles.map((profile) => (
-        <div 
-          key={profile.id} 
-          className="overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
-          style={{ 
-            width: '173px', 
-            height: '289px',
+        <div
+          key={profile.id}
+          className="overflow-hidden cursor-pointer hover:scale-105 hover:shadow-2xl transition-all duration-300 w-full max-w-[180px] sm:max-w-[190px] md:max-w-[200px]"
+          style={{
             backgroundColor: '#111111',
-            borderRadius: '12px',
+            borderRadius: '16px',
             border: '1px solid #292929',
-            borderImage: 'none'
+            aspectRatio: '0.6'
           }}
           onClick={() => handleProfileClick(profile)}
         >
-          <div className="relative flex justify-center items-center" style={{ height: '182px' }}>
+          <div className="relative flex justify-center items-center p-3" style={{ height: '60%' }}>
             <ProfileAvatar
               profileImage={profile.image}
               userId={profile.id.toString()}
               alt={profile.name}
-              className="object-cover"
-              style={{ width: '143px', height: '152px', borderRadius: '12px' }}
+              className="object-cover w-full h-full"
+              style={{ borderRadius: '12px' }}
               loading="lazy"
               decoding="async"
             />
-            <div 
-              className="absolute"
-              style={{
-                left: '50%',
-                transform: 'translateX(-50%)',
-                bottom: '8px'
-              }}
+            <div
+              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full"
             >
-              <span 
-                style={{
-                  fontFamily: 'Inter, sans-serif',
-                  fontWeight: '600', // Semi Bold
-                  fontSize: '15px',
-                  lineHeight: 'auto',
-                  letterSpacing: '0%',
-                  color: '#FFFFFF',
-                  textAlign: 'center'
-                }}
+              <span
+                className="text-white text-sm font-semibold"
               >
                 Year {profile.year}
               </span>
             </div>
           </div>
 
-          <div className="px-3 pb-3" style={{ height: '107px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div className="text-center">
-              <h3 
-                className="mb-1"
-                style={{
-                  fontFamily: 'Inter, sans-serif',
-                  fontWeight: 'bold',
-                  fontSize: '18px',
-                  lineHeight: 'auto',
-                  letterSpacing: '0%',
-                  color: '#1BEA7B',
-                  textAlign: 'center'
-                }}
+          <div className="px-3 pb-3 flex flex-col justify-between" style={{ height: '40%' }}>
+            <div className="text-center space-y-1">
+              <h3
+                className="font-bold text-base sm:text-lg text-green-400 truncate"
               >
                 {profile.name}
               </h3>
 
-              <div className="flex items-center justify-center gap-1 mb-2">
-                <GraduationCap 
-                  className="w-3 h-3 flex-shrink-0" 
-                  style={{ color: '#FBBC05' }}
+              <div className="flex items-center justify-center gap-1">
+                <GraduationCap
+                  className="w-3 h-3 flex-shrink-0 text-yellow-400"
                 />
                 <span
-                  style={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: 'regular',
-                    fontSize: '12px',
-                    lineHeight: 'auto',
-                    letterSpacing: '0%',
-                    color: '#1BEA7B',
-                    maxWidth: '120px',
-                    display: 'inline-block',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
+                  className="text-xs sm:text-sm text-green-400 truncate max-w-[90%]"
                   title={profile.university}
                 >
                   {(() => {
                     const words = profile.university.trim().split(/\s+/);
                     if (words.length > 3) {
-                      // Truncate to first 3 words and add ellipsis
                       return words.slice(0, 3).join(' ') + '...';
                     }
                     return profile.university;
@@ -132,16 +94,18 @@ export function ProfileCardView({ profiles, onConnectionAction }: ProfileCardVie
               </div>
             </div>
 
-            <ProfileActionButton 
-              status={profile.status} 
-              onClick={(e) => {
-                e?.stopPropagation() // Prevent triggering profile navigation
-                const action = profile.status === 'connect' ? 'connect' : 
-                             profile.status === 'connected' ? 'remove' : 
-                             profile.status === 'request' ? 'accept' : 'connect'
-                handleConnectionAction(profile.id, action)
-              }}
-            />
+            <div className="mt-2">
+              <ProfileActionButton
+                status={profile.status}
+                onClick={(e) => {
+                  e?.stopPropagation()
+                  const action = profile.status === 'connect' ? 'connect' :
+                               profile.status === 'connected' ? 'remove' :
+                               profile.status === 'request' ? 'accept' : 'connect'
+                  handleConnectionAction(profile.id, action)
+                }}
+              />
+            </div>
           </div>
         </div>
       ))}

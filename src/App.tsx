@@ -9,6 +9,7 @@ import { useRoutePerformance, usePerformanceSummary } from "@/hooks/usePerforman
 import { measureWebVitals, logMemoryUsage, logBundleInfo } from "@/lib/performance";
 import { chatSocketService } from "@/lib/socket";
 import { Toaster } from 'react-hot-toast';
+import ResponsiveLayout from "@/components/Layout/ResponsiveLayout";
 import {
   LazyOnboardingPage,
   LazyExplorePage,
@@ -21,8 +22,14 @@ import {
   preloadComponents
 } from "@/lib/lazyLoading";
 
+// Import Quiz page
+import QuizPage from "./pages/quiz";
+// Import Intro page
+import IntroSequencePage from "./pages/intro";
+
 // Import non-lazy components that are critical
 import UserProfilePage from "./pages/profile";
+import EventHistoryPage from "./pages/event-history";
 
 // Import test interface for development
 import TestInterface from "@/components/Testing/TestInterface";
@@ -119,28 +126,68 @@ export default function App() {
     }
 
     // Start preloading and warming after trying refresh
+    let cleanup: () => void = () => {}
+    
     tryRefresh().finally(() => {
       preloadCriticalComponents()
       const t = setTimeout(warmImages, 50)
       cleanup = () => clearTimeout(t)
     })
 
-    let cleanup: () => void = () => {}
     return () => cleanup()
   }, [])
   return (
     <>
       <Routes>
+        <Route path="/" element={<IntroSequencePage />} />
+        <Route path="/quiz" element={<QuizPage />} />
         <Route path="/onboarding/*" element={<LazyOnboardingPage />} />
         <Route path="/edit-profile/*" element={<LazyProfilePage onSave={() => {}} />} />
-        <Route path="/explore" element={<LazyExplorePage />} />
-        <Route path="/notification" element={<LazyNotificationPage />} />
-        <Route path="/chats" element={<LazyChatsPage />} />
-        <Route path="/settings" element={<LazySettingsPage />} />
-        <Route path="/events" element={<LazyEventsPage />} />
-        <Route path="/search" element={<LazyGridviewPage />} />
-        <Route path="/gridview" element={<LazyGridviewPage />} />
-        <Route path="/profile" element={<UserProfilePage />} />
+        <Route path="/explore" element={
+          <ResponsiveLayout>
+            <LazyExplorePage />
+          </ResponsiveLayout>
+        } />
+        <Route path="/notification" element={
+          <ResponsiveLayout>
+            <LazyNotificationPage />
+          </ResponsiveLayout>
+        } />
+        <Route path="/chats" element={
+          <ResponsiveLayout>
+            <LazyChatsPage />
+          </ResponsiveLayout>
+        } />
+        <Route path="/settings" element={
+          <ResponsiveLayout>
+            <LazySettingsPage />
+          </ResponsiveLayout>
+        } />
+        <Route path="/events" element={
+          <ResponsiveLayout>
+            <LazyEventsPage />
+          </ResponsiveLayout>
+        } />
+        <Route path="/event-history" element={
+          <ResponsiveLayout>
+            <EventHistoryPage />
+          </ResponsiveLayout>
+        } />
+        <Route path="/search" element={
+          <ResponsiveLayout>
+            <LazyGridviewPage />
+          </ResponsiveLayout>
+        } />
+        <Route path="/gridview" element={
+          <ResponsiveLayout>
+            <LazyGridviewPage />
+          </ResponsiveLayout>
+        } />
+        <Route path="/profile" element={
+          <ResponsiveLayout>
+            <UserProfilePage />
+          </ResponsiveLayout>
+        } />
         {/* Catch-all route for user profiles - must be last */}
         <Route path="/:name" element={<UserProfileScreen />} />
         {/* Default route: redirect to onboarding */}

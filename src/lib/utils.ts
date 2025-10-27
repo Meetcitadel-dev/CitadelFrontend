@@ -39,6 +39,78 @@ export function removeAuthToken(): void {
   }
 }
 
+function getApiBase(): string {
+  const base = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001'
+  return base.replace(/\/$/, '')
+}
+
+function parseJwt(token: string): any | null {
+  try {
+    const base64Url = token.split('.')[1]
+    if (!base64Url) return null
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+    }).join(''))
+    return JSON.parse(jsonPayload)
+  } catch {
+    return null
+  }
+}
+
+export function isTokenExpired(token: string, clockSkewSeconds: number = 30): boolean {
+  const payload = parseJwt(token)
+  if (!payload || !payload.exp) return true
+  const nowSeconds = Math.floor(Date.now() / 1000)
+  return nowSeconds >= (payload.exp - clockSkewSeconds)
+}
+
+export async function ensureValidToken(): Promise<string | null> {
+  // If running server-side, skip
+  if (typeof window === 'undefined') return null
+  let token = getAuthToken()
+
+  // If token exists and is not expired, return it
+  if (token && !isTokenExpired(token)) {
+    console.log('Token is valid, no refresh needed')
+    return token
+  }
+
+  // Token is expired or missing, attempt refresh
+  console.log('Token expired or missing, attempting refresh...')
+
+  try {
+    const res = await fetch(getApiBase() + '/api/v1/auth/refresh', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    })
+
+    if (!res.ok) {
+      console.error('Token refresh failed with status:', res.status)
+      removeAuthToken()
+      return null
+    }
+
+    const json = await res.json().catch(() => ({} as any))
+    const newToken: string | undefined = json?.tokens?.accessToken || json?.accessToken
+
+    if (newToken) {
+      console.log('Token refreshed successfully')
+      setAuthToken(newToken)
+      return newToken
+    } else {
+      console.error('Token refresh response missing accessToken')
+      removeAuthToken()
+      return null
+    }
+  } catch (error) {
+    console.error('Token refresh error:', error)
+    removeAuthToken()
+    return null
+  }
+}
+
 // Temporary function for testing - remove this in production
 export function setTestToken(): void {
   // This is a test token - replace with a real one from your backend

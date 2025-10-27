@@ -1,74 +1,53 @@
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import IndiaGate from "@/assets/unsplash_va77t8vGbJ8.png"
+import MumbaiGateway from "@/assets/gateway of mumbai stylized image.png"
+import BangaloreMonument from "@/assets/bangalore monument.png"
 import Navbar from "@/components/Common/navbar";
-import { Search, Calendar, MessageCircle, Bell, User } from "lucide-react";
+import { Search, Calendar, MessageCircle, Bell, User, Settings, History } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { CitySelection } from "@/components/Events/city-selection"
-import { AreaSelection } from "@/components/Events/area-selection"
-import { PreferencesDisplay } from "@/components/Events/preferences-display"
-import { EditPreferences } from "@/components/Events/edit-preferences"
-import { AdditionalPreferences } from "@/components/Events/additional-preferences"
-import { BookingConfirmation } from "@/components/Events/booking-confirmation"
-import { PaymentSuccess } from "@/components/Events/payment-success"
 import { LocationHeader } from "@/components/Events/location-header"
 import { BookingHeader } from "@/components/Events/booking-header"
 import { TimeSlot } from "@/components/Events/time-slot"
 import { BookButton } from "@/components/Events/book-button"
-import ScaledCanvas from "@/components/Onboarding/ScaledCanvas"
+import SetupModal from "@/components/Events/DinnerSetup/SetupModal"
+import PaymentModal from "@/components/Events/PaymentModal"
+import BookingConfirmationModal from "@/components/Events/BookingConfirmationModal"
+import { getAuthToken } from "@/lib/utils"
+import { apiClient } from "@/lib/apiClient"
 
+// City background images mapping
+const cityBackgrounds: Record<string, string> = {
+  'New Delhi': IndiaGate,
+  'Mumbai': MumbaiGateway,
+  'Bangalore': BangaloreMonument,
+  'Delhi': IndiaGate, // Fallback
+};
 
-interface TimeSlotData {
-  id: string
-  date: string
-  time: string
+interface DinnerEvent {
+  id: string;
+  eventDate: Date;
+  eventTime: string;
+  city: string;
+  area: string;
+  maxAttendees: number;
+  currentAttendees: number;
+  availableSeats: number;
+  bookingFee: number;
+  status: string;
+  isBooked: boolean;
+  isFull: boolean;
 }
-
-function getUpcomingWednesdays(count: number = 3): TimeSlotData[] {
-  const results: TimeSlotData[] = []
-  const today = new Date()
-  const todayDay = today.getDay() // 0=Sun, 1=Mon, ..., 3=Wed
-  const targetDay = 3 // Wednesday
-  let daysUntilNext = (targetDay - todayDay + 7) % 7
-  if (daysUntilNext === 0) {
-    daysUntilNext = 7 // if today is Wednesday, start from next Wednesday
-  }
-
-  for (let i = 0; i < count; i++) {
-    const date = new Date(today)
-    date.setDate(today.getDate() + daysUntilNext + i * 7)
-    const formatted = date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric'
-    })
-    results.push({ id: String(i + 1), date: formatted, time: '8:00 PM' })
-  }
-  return results
-}
-
-const timeSlots: TimeSlotData[] = getUpcomingWednesdays(3)
-
-type Screen =
-  | "booking"
-  | "city-selection"
-  | "area-selection"
-  | "preferences"
-  | "edit-preferences"
-  | "additional-preferences"
-  | "booking-confirmation"
-  | "payment-success"
 
 export default function DinnerBooking() {
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
-  const [currentScreen, setCurrentScreen] = useState<Screen>("booking")
-  const [selectedCity, setSelectedCity] = useState({ id: "delhi", name: "New Delhi" })
-  const [selectedArea, setSelectedArea] = useState({ id: "chanakyapuri", name: "Chanakyapuri" })
-  const [userPreferences, setUserPreferences] = useState({
-    languages: ["English"],
-    budget: "$",
-    vegetarianOnly: false,
-  })
+  const [showSetupModal, setShowSetupModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<DinnerEvent | null>(null);
+  const [events, setEvents] = useState<DinnerEvent[]>([]);
+  const [preferences, setPreferences] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [backgroundImage, setBackgroundImage] = useState(IndiaGate);
+  
   const navigate = useNavigate();
   const location = useLocation();
   const navItems = [
@@ -79,263 +58,226 @@ export default function DinnerBooking() {
     { icon: User, label: "Profile", onClick: () => navigate("/profile"), active: location.pathname === "/profile" },
   ];
 
-  // Dynamic booking details based on selected values
-  const getBookingDetails = () => {
-    const selectedTimeSlot = timeSlots.find(slot => slot.id === selectedSlot)
-    const selectedBudget = parseInt(userPreferences.budget) || 500
-    const bookingFee = Math.round(selectedBudget * 0.15) // 15% of selected budget
-    
-    return {
-      guests: 6,
-      date: selectedTimeSlot?.date || "02 July 2025",
-      time: selectedTimeSlot?.time || "8:00 PM",
-      location: `${selectedArea.name}, ${selectedCity.name}`,
-      price: bookingFee,
+  useEffect(() => {
+    checkPreferencesAndLoadEvents();
+  }, []);
+
+  const checkPreferencesAndLoadEvents = async () => {
+    try {
+      const token = getAuthToken();
+      
+      // Check if user has completed setup
+      const prefsResponse = await apiClient<{
+        success: boolean;
+        data: { hasCompletedSetup: boolean; preferences: any };
+      }>('/api/v1/dinner-preferences', {
+        method: 'GET',
+        token
+      });
+
+      if (prefsResponse.success) {
+        if (!prefsResponse.data.hasCompletedSetup) {
+          // Show setup modal for first-time users
+          setShowSetupModal(true);
+          setLoading(false);
+          return;
+        }
+
+        setPreferences(prefsResponse.data.preferences);
+
+        // Update background image based on city
+        const userCity = prefsResponse.data.preferences.city;
+        if (userCity && cityBackgrounds[userCity]) {
+          setBackgroundImage(cityBackgrounds[userCity]);
+        }
+
+        // Load events based on preferences
+        await loadEvents(userCity);
+      }
+    } catch (error) {
+      console.error('Error checking preferences:', error);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  const bookingDetails = getBookingDetails()
+  const loadEvents = async (city?: string) => {
+    try {
+      const token = getAuthToken();
+      const queryCity = city || preferences?.city || 'New Delhi';
+      
+      const response = await apiClient<{
+        success: boolean;
+        data: { events: DinnerEvent[]; totalEvents: number };
+      }>(`/api/v1/dinner-events/upcoming?city=${encodeURIComponent(queryCity)}`, {
+        method: 'GET',
+        token
+      });
 
-  const handleSlotSelect = (slotId: string) => {
-    setSelectedSlot(slotId)
-  }
+      if (response.success) {
+        setEvents(response.data.events);
+      }
+    } catch (error) {
+      console.error('Error loading events:', error);
+    }
+  };
+
+  const handleSetupComplete = async () => {
+    setShowSetupModal(false);
+    await checkPreferencesAndLoadEvents();
+  };
+
+  const handleEventSelect = (event: DinnerEvent) => {
+    if (event.isBooked) {
+      alert('You have already booked this event!');
+      return;
+    }
+    if (event.isFull) {
+      alert('This event is full!');
+      return;
+    }
+    setSelectedEvent(event);
+  };
 
   const handleBookSeat = () => {
-    if (selectedSlot) {
-      setCurrentScreen("city-selection")
+    if (selectedEvent) {
+      setShowPaymentModal(true);
     }
-  }
-
-  const handleCitySelect = (cityId: string) => {
-    // Map city ID to name
-    const cityNames: { [key: string]: string } = {
-      "delhi": "New Delhi",
-      "bangalore": "Bangalore", 
-      "mumbai": "Mumbai"
-    }
-    setSelectedCity({ id: cityId, name: cityNames[cityId] || cityId })
-    setCurrentScreen("area-selection")
-  }
-
-  const handleAreaSelect = (areaId: string) => {
-    // Map area ID to name
-    const areaNames: { [key: string]: string } = {
-      "dwarka": "Dwarka",
-      "chanakyapuri": "Chanakyapuri",
-      "gurgaon": "Gurgaon",
-      "vasant-kunj": "Vasant Kunj",
-      "faridabad": "Faridabad",
-      "hauz-khas": "Hauz Khas"
-    }
-    setSelectedArea({ id: areaId, name: areaNames[areaId] || areaId })
-    setCurrentScreen("preferences")
-  }
-
-  const handleCloseSelection = () => {
-    setCurrentScreen("booking")
-  }
-
-  const handleCloseToMain = () => {
-    setCurrentScreen("booking")
-  }
-
-  const handleBackToCity = () => {
-    setCurrentScreen("city-selection")
-  }
-
-  const handleEditPreferences = () => {
-    setCurrentScreen("edit-preferences")
-  }
-
-  const handleSavePreferences = (preferences: any) => {
-    setUserPreferences(preferences)
-    setCurrentScreen("additional-preferences")
-  }
-
-  const handleAdditionalPreferences = (additionalPrefs: any) => {
-    setUserPreferences((prev: any) => ({ ...prev, ...additionalPrefs }))
-    setCurrentScreen("booking-confirmation")
-  }
-
-  const handlePreferencesContinue = () => {
-    setCurrentScreen("booking-confirmation")
-  }
-
-  const handleBackToArea = () => {
-    setCurrentScreen("area-selection")
-  }
-
-  const handleBackToPreferences = () => {
-    setCurrentScreen("preferences")
-  }
-
-  const handleBackToEditPreferences = () => {
-    setCurrentScreen("edit-preferences")
-  }
-
-
-  const handlePayment = () => {
-    // Payment will be handled by the BookingConfirmation component
-    console.log("Payment initiated...")
-  }
+  };
 
   const handlePaymentSuccess = () => {
-    setCurrentScreen("payment-success")
-  }
+    setShowPaymentModal(false);
+    setShowConfirmationModal(true);
+    setSelectedEvent(null);
+    // Reload events to update booking status
+    loadEvents();
+  };
 
-  const handlePaymentFailure = (error: string) => {
-    alert(`Payment failed: ${error}`)
-  }
-
-  const handlePaymentCancel = () => {
-    console.log("Payment cancelled by user")
-  }
-
-  // City Selection Screen
-  if (currentScreen === "city-selection") {
-    return <CitySelection onClose={handleCloseSelection} onCitySelect={handleCitySelect} />
-  }
-
-  // Area Selection Screen
-  if (currentScreen === "area-selection") {
+  if (loading) {
     return (
-      <AreaSelection
-        onBack={handleBackToCity}
-        onClose={handleCloseSelection}
-        onAreaSelect={handleAreaSelect}
-        cityName={selectedCity.name}
-      />
-    )
-  }
-
-  // Preferences Display Screen
-  if (currentScreen === "preferences") {
-    return (
-      <PreferencesDisplay
-        onBack={handleBackToArea}
-        onEditPreferences={handleEditPreferences}
-        onContinue={handlePreferencesContinue}
-        onClose={handleCloseToMain}
-      />
-    )
-  }
-
-  // Edit Preferences Screen
-  if (currentScreen === "edit-preferences") {
-    return <EditPreferences onBack={handleBackToPreferences} onSave={handleSavePreferences} onClose={handleCloseToMain} />
-  }
-
-  // Additional Preferences Screen
-  if (currentScreen === "additional-preferences") {
-    return <AdditionalPreferences onBack={handleBackToEditPreferences} onContinue={handleAdditionalPreferences} onClose={handleCloseToMain} />
-  }
-
-  // Booking Confirmation Screen
-  if (currentScreen === "booking-confirmation") {
-    return (
-      <BookingConfirmation
-        onBack={handleBackToPreferences}
-        onPayment={handlePayment}
-        onClose={handleCloseToMain}
-        bookingDetails={bookingDetails}
-        onPaymentSuccess={handlePaymentSuccess}
-        onPaymentFailure={handlePaymentFailure}
-        onPaymentCancel={handlePaymentCancel}
-      />
-    )
-  }
-
-  // Payment Success Screen
-  if (currentScreen === "payment-success") {
-    return (
-      <PaymentSuccess
-        bookingDetails={bookingDetails}
-        onClose={() => setCurrentScreen("booking")}
-      />
-    )
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-green-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/70">Loading events...</p>
+        </div>
+      </div>
+    );
   }
 
   // Main Booking Screen
   return (
-    <div className="relative bg-black h-screen overflow-hidden">
-    <ScaledCanvas>
-      <div className="w-[390px] h-[844px] flex flex-col relative">
-      {/* Top Section - Image Background - fixed 330px height */}
-      <div 
-        className="relative overflow-hidden" 
-        style={{ 
-          height: '330px',
-          background: `url(${IndiaGate}) lightgray -29px -40px / 115.013% 100.192% no-repeat`
-        }}
-      >
-        {/* Dark Overlay for better text readability */}
-        <div className="absolute inset-0 bg-black/40"></div>
-
-        {/* Location Header Content */}
-        <div className="relative z-10 h-full flex flex-col">
-          <LocationHeader city="New Delhi" venue="Select Location" />
-        </div>
-      </div>
-
-      {/* Bottom Section Wrapper */}
-      <div 
-        style={{ 
-          position: 'absolute',
-          top: '260px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 15
-        }}
-      >
-        {/* Black Background Section - positioned 260px from top, 473px height */}
-        <div 
-          style={{
-            width: '393px',
-            height: '473px',
-            flexShrink: 0,
-            borderRadius: '15px',
-            background: '#000000',
-            padding: '24px 24px 0px',
-            position: 'relative'
-          }}
-        >
-          <BookingHeader waitingCount={5} />
-
-          {/* Time Slots */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-            {timeSlots.map((slot) => (
-              <TimeSlot
-                key={slot.id}
-                date={slot.date}
-                time={slot.time}
-                isSelected={selectedSlot === slot.id}
-                onSelect={() => handleSlotSelect(slot.id)}
-              />
-            ))}
-          </div>
-
-          {/* Book Button - positioned 16px from navbar, centered */}
-          <div 
+    <>
+      <div className="relative bg-black min-h-screen overflow-y-auto pb-24">
+        <div className="w-full mx-auto flex flex-col">
+          {/* Top Section - Image Background */}
+          <div
+            key={backgroundImage}
+            className="relative w-full h-[400px] sm:h-[450px] md:h-[500px] animate-fadeIn"
             style={{
-              position: 'absolute',
-              bottom: '16px',
-              left: '24px',
-              right: '24px',
-              height: '50px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              backgroundImage: `url(${backgroundImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              animation: 'fadeIn 0.8s ease-in-out'
             }}
           >
-            <BookButton isEnabled={selectedSlot !== null} onClick={handleBookSeat} />
+            {/* Dark Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/90"></div>
+
+            {/* Top Right Buttons */}
+            <div className="absolute top-4 right-4 z-10 flex gap-2">
+              <button
+                onClick={() => navigate('/event-history')}
+                className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                title="My Bookings"
+              >
+                <History className="w-5 h-5 text-white" />
+              </button>
+              <button
+                onClick={() => navigate('/settings')}
+                className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                title="Settings"
+              >
+                <Settings className="w-5 h-5 text-white" />
+              </button>
+            </div>
+
+            {/* Location Header Content */}
+            <div className="relative z-10 h-full flex flex-col justify-center items-center px-4">
+              <LocationHeader
+                city={preferences?.city || "New Delhi"}
+                venue="Select Location"
+                onChangeLocation={() => setShowSetupModal(true)}
+              />
+            </div>
+          </div>
+
+          {/* Bottom Section Wrapper */}
+          <div className="relative -mt-32 z-20 px-4 sm:px-6 md:px-8 pb-8">
+            {/* Black Background Section */}
+            <div className="w-full max-w-md mx-auto bg-black rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/5">
+              <BookingHeader waitingCount={events.reduce((acc, e) => acc + e.currentAttendees, 0)} />
+
+              {/* Event Slots */}
+              <div className="flex flex-col gap-4 mb-8 mt-6">
+                {events.length === 0 ? (
+                  <div className="text-center py-10">
+                    <p className="text-white/70">No upcoming events available</p>
+                  </div>
+                ) : (
+                  events.map((event) => (
+                    <TimeSlot
+                      key={event.id}
+                      date={new Date(event.eventDate).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                      time={event.eventTime}
+                      isSelected={selectedEvent?.id === event.id}
+                      onSelect={() => handleEventSelect(event)}
+                    />
+                  ))
+                )}
+              </div>
+
+              {/* Book Button */}
+              <div className="flex items-center justify-center mt-6">
+                <BookButton 
+                  isEnabled={selectedEvent !== null} 
+                  onClick={handleBookSeat} 
+                />
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Navbar */}
+        <Navbar navItems={navItems} />
       </div>
 
-      </div>
-    </ScaledCanvas>
-    {/* Navbar outside scaler to keep consistent icon size */}
-    <Navbar navItems={navItems} />
-    </div>
+      {/* Modals */}
+      {showSetupModal && (
+        <SetupModal
+          onComplete={handleSetupComplete}
+          onClose={() => setShowSetupModal(false)}
+        />
+      )}
+
+      {showPaymentModal && selectedEvent && (
+        <PaymentModal
+          event={selectedEvent}
+          onSuccess={handlePaymentSuccess}
+          onClose={() => setShowPaymentModal(false)}
+        />
+      )}
+
+      {showConfirmationModal && (
+        <BookingConfirmationModal
+          onClose={() => setShowConfirmationModal(false)}
+        />
+      )}
+    </>
   )
 }
+

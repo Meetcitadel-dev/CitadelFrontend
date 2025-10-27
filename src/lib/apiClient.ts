@@ -1,6 +1,6 @@
 // Enhanced API client with performance tracking and caching
 import { performanceMonitor } from './performance';
-import { setAuthToken } from './utils';
+import { setAuthToken, ensureValidToken, getAuthToken } from './utils';
 export type ApiClientOptions = {
   method?: string;
   headers?: Record<string, string>;
@@ -14,13 +14,13 @@ export type ApiClientOptions = {
 };
 
 function getApiUrl(url: string) {
-  const base = import.meta.env.VITE_API_URL;
+  //const base = import.meta.env.VITE_API_URL;
   
   // If url is absolute (starts with http), return as is
   if (/^https?:\/\//.test(url)) return url;
   
-  // If base is not defined, use localhost:3000 as default
-  const apiBase = base || 'http://localhost:3000';
+  // If base is not defined, use localhost:3001 as default (backend port)
+  const apiBase = 'http://localhost:3001';
   
   // Otherwise, prepend base URL
   return apiBase.replace(/\/$/, '') + (url.startsWith('/') ? url : '/' + url);
@@ -101,8 +101,10 @@ export async function apiClient<T = any>(
       ...options.headers,
     };
 
-    if (options.token) {
-      headers['Authorization'] = `Bearer ${options.token}`;
+    // Automatically include auth token if available
+    const authToken = options.token || getAuthToken();
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
     }
 
     const fetchOptions: RequestInit = {
@@ -131,6 +133,13 @@ export async function apiClient<T = any>(
   };
 
   try {
+    // Only attempt token refresh if we have an existing token (user was logged in)
+    if (!options.token) {
+      const existingToken = getAuthToken();
+      if (existingToken) {
+        await ensureValidToken();
+      }
+    }
     let hasRefreshed = false;
     const exec = async (): Promise<Response> => {
       try {
@@ -140,7 +149,7 @@ export async function apiClient<T = any>(
         );
       } catch (e: any) {
         // If unauthorized, attempt a single refresh then retry once
-        if (!hasRefreshed && (e?.status === 401 || e?.message?.includes('401'))) {
+        if (!hasRefreshed && (e?.status === 401 || e?.status === 403 || e?.message?.includes('401') || e?.message?.includes('403'))) {
           try {
             // Attempt refresh using a direct fetch to avoid circular imports
             const refreshUrl = getApiUrl('/api/v1/auth/refresh');

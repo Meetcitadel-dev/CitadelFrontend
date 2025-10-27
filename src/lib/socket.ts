@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { getAuthToken } from './utils';
+import { getAuthToken, ensureValidToken } from './utils';
 
 class ChatSocketService {
   private socket: Socket | null = null;
@@ -9,12 +9,13 @@ class ChatSocketService {
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private isConnecting = false;
 
-  connect() {
+  async connect() {
     // Prevent multiple simultaneous connection attempts
     if (this.socket?.connected || this.isConnecting) {
       return;
     }
 
+    // Get token (don't force refresh if no token exists)
     const token = getAuthToken();
     if (!token) {
       console.error('No authentication token found for WebSocket connection');
@@ -24,7 +25,7 @@ class ChatSocketService {
     this.isConnecting = true;
 
     // Connect to your backend WebSocket endpoint with better configuration
-    const baseUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000';
+    const baseUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001';
     this.socket = io(baseUrl, {
       auth: {
         token: token
@@ -65,13 +66,26 @@ class ChatSocketService {
       }
     });
 
-    this.socket.on('connect_error', (error) => {
+    this.socket.on('connect_error', async (error) => {
       console.error('Chat WebSocket connection error:', error.message);
       this.isConnected = false;
       this.isConnecting = false;
       
-      // Don't reconnect for authentication errors
-      if (error.message.includes('Authentication') || error.message.includes('401')) {
+      // For authentication errors, try a single token refresh and reconnect once
+      if (error.message.includes('Authentication') || error.message.includes('401') || error.message.includes('403')) {
+        const newToken = await ensureValidToken();
+        if (newToken) {
+          try {
+            // Update auth and try to reconnect quickly
+            if (this.socket?.auth) {
+              (this.socket.auth as any).token = newToken;
+            }
+            this.socket?.connect();
+            return;
+          } catch (_) {
+            // fallthrough to no reconnect
+          }
+        }
         console.error('Authentication failed, not attempting reconnection');
         return;
       }
@@ -426,7 +440,7 @@ class ChatSocketService {
   // Check if backend is available
   async checkBackendAvailability(): Promise<boolean> {
     try {
-      const baseUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000';
+      const baseUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001';
       const response = await fetch(baseUrl + '/health', {
         method: 'GET',
         timeout: 5000

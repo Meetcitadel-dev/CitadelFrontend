@@ -11,53 +11,52 @@ export function TimeSlot({ date, time, isSelected, onSelect }: TimeSlotProps) {
   return (
     <button
       onClick={onSelect}
-      className="transition-all duration-200"
+      className="w-full transition-all duration-200 hover:bg-white/5"
       style={{
-        width: '345px', // Adjusted to fit within container (393px - 48px padding)
-        height: '80px',
-        flexShrink: 0,
+        maxWidth: '100%',
+        minHeight: '80px',
         borderRadius: '15px',
         background: '#111111',
         border: 'none',
-        padding: '16px',
-        cursor: 'pointer',
-        margin: '0 auto' // Center align each row
+        padding: '20px',
+        cursor: 'pointer'
       }}
     >
-      <div className="flex items-center justify-between">
-        <div className="text-left">
-          <div 
+      <div className="flex items-center justify-between w-full">
+        <div className="text-left flex-1">
+          <div
             style={{
               color: '#FFFFFF',
               fontFamily: 'Inter',
               fontSize: '16px',
               fontStyle: 'normal',
               fontWeight: 600,
-              lineHeight: '135%', // 21.6px
-              marginBottom: '2px'
+              lineHeight: '135%',
+              marginBottom: '4px'
             }}
           >
             {date}
           </div>
-          <div 
+          <div
             style={{
               color: '#FFFFFF',
               fontFamily: 'Inter',
               fontSize: '14px',
               fontStyle: 'normal',
               fontWeight: 400,
-              lineHeight: '135%' // 18.9px
+              lineHeight: '135%',
+              opacity: 0.8
             }}
           >
             {time}
           </div>
         </div>
         <div
-          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
             isSelected ? "border-green-400 bg-green-400" : "border-white"
           }`}
         >
-          {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
+          {isSelected && <div className="w-2 h-2 bg-black rounded-full"></div>}
         </div>
       </div>
     </button>

@@ -17,13 +17,20 @@ export default function EmailInputScreen({ value, onContinue, onBack }: EmailInp
   const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
 
+  // Whitelist of specific emails that are allowed
+  const WHITELISTED_EMAILS = ['mdtousifalam85@gmail.com'];
+
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
   }
 
-  // Now: .edu or .org can be anywhere in the email
+  // Now: .edu or .org can be anywhere in the email, or whitelisted emails
   const isCollegeEmail = (email: string) => {
+    // Check if email is whitelisted first
+    if (WHITELISTED_EMAILS.includes(email.toLowerCase())) {
+      return true;
+    }
     return isValidEmail(email) && (email.includes('.edu') || email.includes('.org'))
   }
 

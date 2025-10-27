@@ -190,20 +190,23 @@ export default function MobileProfileScreen() {
   console.log('Render - Slot 4 URL:', profile.slots?.[4]?.url)
 
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden">
+    <div className="relative w-full min-h-screen bg-black overflow-hidden">
       {/* Hide scrollbar globally for this page */}
       <style>{`
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
       `}</style>
       {/* Scrollable Content Container */}
-      <div className="h-full overflow-y-auto pb-20 hide-scrollbar">
+      <div className="h-full overflow-y-auto pb-20 lg:pb-8 hide-scrollbar">
         {/* Profile Image with Gradient Overlay and Info Block */}
-        <div className="relative w-full" style={{ height: '586px' }}>
+        <div className="relative w-full h-[500px] sm:h-[550px] md:h-[600px] lg:h-[650px]">
           {/* Settings Icon - overlay, does not affect layout */}
           <div className="absolute top-4 right-4 z-20">
-            <button onClick={() => navigate("/settings")}> 
-              <Settings className="w-6 h-6 text-white" />
+            <button
+              onClick={() => navigate("/settings")}
+              className="bg-black/50 backdrop-blur-md p-2.5 rounded-full hover:bg-black/70 transition-all"
+            >
+              <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </button>
           </div>
           <ProfileAvatar
@@ -217,40 +220,40 @@ export default function MobileProfileScreen() {
             onError={(e) => console.error('Profile image failed to load:', e)}
           />
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black" />
 
           {/* Profile Info Block */}
-          <div className="absolute bottom-0 left-0 right-0 z-10">
-            <div className="w-full flex flex-col px-4" style={interFont}>
+          <div className="absolute bottom-0 left-0 right-0 z-10 pb-4 sm:pb-6">
+            <div className="w-full flex flex-col px-4 sm:px-6 md:px-8" style={interFont}>
               {/* Name and Year Row */}
-              <div className="flex justify-between items-start">
-                <div className="flex-1 pr-4">
-                  <h1 className="text-white text-2xl font-bold leading-tight">{profile.name}</h1>
+              <div className="flex justify-between items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3">{profile.name}</h1>
                   {/* Skills */}
                   <div className="flex items-center gap-2 mt-2">
-                    <Briefcase className="w-4 h-4 text-white/80" />
-                  <span className="text-white/90" style={{ fontSize: '12px' }}>
-                    {profile.skills && profile.skills.length > 0 
-                      ? profile.skills.join(', ') 
-                      : 'No skills listed'
-                    }
-                  </span>
+                    <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
+                    <span className="text-white/90 text-xs sm:text-sm truncate">
+                      {profile.skills && profile.skills.length > 0
+                        ? profile.skills.slice(0, 3).join(', ') + (profile.skills.length > 3 ? '...' : '')
+                        : 'No skills listed'
+                      }
+                    </span>
                   </div>
                   {/* Education */}
-                  <div className="flex items-center gap-2 mt-1">
-                    <GraduationCap className="w-4 h-4 text-white/80" />
-                  <span className="text-white/90" style={{ fontSize: '12px' }}>
-                    {profile.university || 'Unknown University'} • {profile.degree || 'Unknown Degree'}
-                  </span>
+                  <div className="flex items-center gap-2 mt-2">
+                    <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />
+                    <span className="text-white/90 text-xs sm:text-sm truncate">
+                      {profile.university || 'Unknown University'} • {profile.degree || 'Unknown Degree'}
+                    </span>
                   </div>
                 </div>
                 {/* Year Badge */}
-                <div className="flex flex-col">
-                  <div className="px-4 flex items-center justify-center" style={{ width: '57px', height: '19px', backgroundColor: '#ffffff', borderRadius: '14px 14px 0 0' }}>
-                    <div className="text-black text-center" style={{ fontSize: '10px', fontFamily: 'Inter', fontWeight: '700' }}>Year</div>
+                <div className="flex flex-col flex-shrink-0">
+                  <div className="px-3 sm:px-4 flex items-center justify-center bg-white rounded-t-2xl" style={{ minWidth: '50px', height: '18px' }}>
+                    <div className="text-black text-center text-[9px] sm:text-[10px] font-bold">Year</div>
                   </div>
-                  <div className="px-4 flex items-center justify-center" style={{ width: '57px', height: '50px', borderRadius: '0 0 14px 14px', backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
-                    <div className="text-white text-center" style={{ fontSize: '36px', fontFamily: 'Inter', fontWeight: '800' }}>{convertOrdinalToNumber(profile.year) || '--'}</div>
+                  <div className="px-3 sm:px-4 flex items-center justify-center rounded-b-2xl bg-white/20 backdrop-blur-sm" style={{ minWidth: '50px', height: '48px' }}>
+                    <div className="text-white text-center text-3xl sm:text-4xl font-extrabold">{convertOrdinalToNumber(profile.year) || '--'}</div>
                   </div>
                 </div>
               </div>
@@ -259,25 +262,25 @@ export default function MobileProfileScreen() {
         </div>
 
         {/* Scrollable Bottom Content Section */}
-        <div className="px-4 pt-4 space-y-4" style={interFont}>
+        <div className="px-4 sm:px-6 md:px-8 pt-4 sm:pt-6 space-y-4 sm:space-y-6" style={interFont}>
           {/* Three Dots Menu, Edit Profile Button, and Friends Count */}
           <div className="flex items-center gap-3">
             {/* Three Dots Menu */}
-            <button className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20">
+            <button className="bg-white/10 backdrop-blur-sm rounded-2xl p-2.5 sm:p-3 border border-white/20 hover:bg-white/20 transition-all">
               <MoreVertical className="w-5 h-5 text-white" />
             </button>
 
             {/* Edit Profile Button */}
-            <button 
-              className="flex-1 bg-green-500 rounded-2xl py-3 px-6"
+            <button
+              className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-2xl py-3 px-6 transition-all shadow-lg shadow-green-500/20"
               onClick={() => navigate("/edit-profile")}
             >
-              <span className="text-black text-base font-semibold">Edit Profile</span>
+              <span className="text-black text-sm sm:text-base font-semibold">Edit Profile</span>
             </button>
 
             {/* Friends Count */}
             <div className="text-right">
-              <div className="text-white text-xl font-bold">{connectionsCount}</div>
+              <div className="text-white text-lg sm:text-xl font-bold">{connectionsCount}</div>
               <div className="text-white/60 text-sm">Friends</div>
             </div>
           </div>
