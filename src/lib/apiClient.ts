@@ -20,7 +20,7 @@ function getApiUrl(url: string) {
   if (/^https?:\/\//.test(url)) return url;
   
   // If base is not defined, use localhost:3001 as default (backend port)
-  const apiBase = 'http://localhost:3001';
+  const apiBase = 'https://citadelbackend-3.onrender.com';
   
   // Otherwise, prepend base URL
   return apiBase.replace(/\/$/, '') + (url.startsWith('/') ? url : '/' + url);
