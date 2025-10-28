@@ -30,6 +30,7 @@ import IntroSequencePage from "./pages/intro";
 // Import non-lazy components that are critical
 import UserProfilePage from "./pages/profile";
 import EventHistoryPage from "./pages/event-history";
+import SettingsMobilePage from "./pages/settings-mobile";
 
 // Import test interface for development
 import TestInterface from "@/components/Testing/TestInterface";
@@ -158,11 +159,7 @@ export default function App() {
             <LazyChatsPage />
           </ResponsiveLayout>
         } />
-        <Route path="/settings" element={
-          <ResponsiveLayout>
-            <LazySettingsPage />
-          </ResponsiveLayout>
-        } />
+        <Route path="/settings" element={<SettingsMobilePage />} />
         <Route path="/events" element={
           <ResponsiveLayout>
             <LazyEventsPage />
@@ -183,7 +180,8 @@ export default function App() {
             <LazyGridviewPage />
           </ResponsiveLayout>
         } />
-        <Route path="/profile" element={
+        <Route path="/profile" element={<SettingsMobilePage />} />
+        <Route path="/my-profile" element={
           <ResponsiveLayout>
             <UserProfilePage />
           </ResponsiveLayout>

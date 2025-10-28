@@ -47,7 +47,7 @@ export default function PreferencesSelection({ onSelect, onBack }: PreferencesSe
       </div>
 
       {/* Dietary Preferences */}
-      <div>
+      {/* <div>
         <label className="block text-white font-medium mb-4">
           Dietary preferences
         </label>
@@ -70,7 +70,7 @@ export default function PreferencesSelection({ onSelect, onBack }: PreferencesSe
             )}
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* Language */}
       <div>

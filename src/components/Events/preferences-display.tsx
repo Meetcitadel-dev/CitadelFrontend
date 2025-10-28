@@ -85,7 +85,7 @@ export function PreferencesDisplay({ onBack, onEditPreferences, onContinue, onCl
           </div>
 
           {/* Dietary Preferences */}
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <h3 
               style={{
                 color: '#1BEA7B',
@@ -111,7 +111,7 @@ export function PreferencesDisplay({ onBack, onEditPreferences, onContinue, onCl
             >
               No restrictions
             </p>
-          </div>
+          </div> */}
 
           {/* Language */}
           <div>

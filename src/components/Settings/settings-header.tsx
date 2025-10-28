@@ -5,11 +5,12 @@ import { ChevronLeft } from "lucide-react"
 interface SettingsHeaderProps {
   title: string
   onBack?: () => void
+  showBackButton?: boolean
 }
 
-export default function SettingsHeader({ title, onBack }: SettingsHeaderProps) {
+export default function SettingsHeader({ title, onBack, showBackButton = true }: SettingsHeaderProps) {
   return (
-    <div 
+    <div
       className="flex items-center bg-black text-white"
       style={{
         marginTop: '28px',
@@ -18,11 +19,13 @@ export default function SettingsHeader({ title, onBack }: SettingsHeaderProps) {
         paddingRight: '16px'
       }}
     >
-      <button onClick={onBack} className="p-1">
-          <ChevronLeft className="w-6 h-6 text-white" />
-      </button>
-      <h1 
-        className="ml-[25px]"
+      {showBackButton && (
+        <button onClick={onBack} className="p-1">
+            <ChevronLeft className="w-6 h-6 text-white" />
+        </button>
+      )}
+      <h1
+        className={showBackButton ? "ml-[25px]" : ""}
         style={{
           display: '-webkit-box',
           WebkitBoxOrient: 'vertical',
@@ -34,7 +37,8 @@ export default function SettingsHeader({ title, onBack }: SettingsHeaderProps) {
           fontSize: '24px',
           fontStyle: 'normal',
           fontWeight: 600,
-          lineHeight: 'normal'
+          lineHeight: 'normal',
+          textTransform: 'lowercase'
         }}
       >
         {title}

@@ -1,5 +1,6 @@
 
 import ProfileAvatar from "@/components/Common/ProfileAvatar"
+import { Plus } from "lucide-react"
 
 interface ProfileSectionProps {
   name: string
@@ -8,34 +9,60 @@ interface ProfileSectionProps {
   userId: string
 }
 
+// Generate user ID tag from name (e.g., "Nisarg Patel" -> "#NP7F2")
+function generateUserIdTag(name: string, userId: string): string {
+  const nameParts = name.trim().split(' ')
+  const initials = nameParts
+    .slice(0, 2)
+    .map(part => part[0]?.toUpperCase() || '')
+    .join('')
+
+  // Use last 3 characters of userId for uniqueness
+  const uniqueCode = userId.slice(-3).toUpperCase()
+
+  return `#${initials}${uniqueCode}`
+}
+
 export default function ProfileSection({ name, subtitle, profileImage, userId }: ProfileSectionProps) {
+  const hasProfileImage = profileImage && profileImage !== "/placeholder.svg"
+  const userIdTag = generateUserIdTag(name, userId)
+
   return (
     <div className="flex flex-col items-center bg-black px-4" style={{ marginTop: '30px' }}>
-      <div 
+      <div
         style={{
           width: '130px',
           height: '130px',
           flexShrink: 0,
           aspectRatio: '1/1',
           borderRadius: '5px',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          border: hasProfileImage ? 'none' : '2px dashed rgba(255, 255, 255, 0.3)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: hasProfileImage ? 'transparent' : 'rgba(255, 255, 255, 0.05)'
         }}
       >
-        <ProfileAvatar
-          profileImage={profileImage}
-          userId={userId}
-          alt={name}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover'
-          }}
-          loading="lazy"
-          decoding="async"
-          fetchPriority="low"
-        />
+        {hasProfileImage ? (
+          <ProfileAvatar
+            profileImage={profileImage}
+            userId={userId}
+            alt={name}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
+          />
+        ) : (
+          <Plus className="w-8 h-8 text-green-400" />
+        )}
       </div>
-      <h2 
+      <h2
         style={{
           display: '-webkit-box',
           WebkitBoxOrient: 'vertical',
@@ -55,11 +82,11 @@ export default function ProfileSection({ name, subtitle, profileImage, userId }:
       >
         {name}
       </h2>
-      <p 
+      <p
         style={{
           display: '-webkit-box',
           WebkitBoxOrient: 'vertical',
-          WebkitLineClamp: 2,
+          WebkitLineClamp: 1,
           overflow: 'hidden',
           color: '#1BEA7B',
           textAlign: 'center',
@@ -71,7 +98,7 @@ export default function ProfileSection({ name, subtitle, profileImage, userId }:
           lineHeight: 'normal'
         }}
       >
-        {subtitle}
+        {userIdTag}
       </p>
     </div>
   )

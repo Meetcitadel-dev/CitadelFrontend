@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Calendar, Bell, UserX, HelpCircle, Shield, LogOut, Trash2 } from "lucide-react"
+import { Calendar, HelpCircle, Shield, FileText, LogOut, Trash2 } from "lucide-react"
 // Remove the hardcoded profile image import
 import SettingsHeader from "./settings-header"
 import ProfileSection from "./profile-section"
@@ -12,19 +12,17 @@ import { getAuthToken, removeAuthToken } from "@/lib/utils"
 
 // Use Lucide icons for all menu items
 const EventBookingsIcon = Calendar
-const NotificationsIcon = Bell
-const BlockedUsersIcon = UserX
 const HelpSupportIcon = HelpCircle
 const PrivacyPolicyIcon = Shield
+const TermsConditionsIcon = FileText
 const LogOutIcon = LogOut
 const DeleteAccountIcon = Trash2
 
 interface SettingsScreenProps {
   onNavigateToEventBookings?: () => void
-  onNavigateToNotifications?: () => void
-  onNavigateToBlockedUsers?: () => void
   onNavigateToHelpSupport?: () => void
   onNavigateToPrivacyPolicy?: () => void
+  onNavigateToTermsConditions?: () => void
   onBack?: () => void
 }
 
@@ -37,10 +35,9 @@ interface UserProfile {
 
 export default function SettingsScreen({
   onNavigateToEventBookings,
-  onNavigateToNotifications,
-  onNavigateToBlockedUsers,
   onNavigateToHelpSupport,
   onNavigateToPrivacyPolicy,
+  onNavigateToTermsConditions,
   onBack,
 }: SettingsScreenProps) {
   const navigate = useNavigate()
@@ -147,10 +144,9 @@ export default function SettingsScreen({
 
   const menuItems = [
     { icon: EventBookingsIcon, title: "Event Bookings", onClick: onNavigateToEventBookings },
-    { icon: NotificationsIcon, title: "Notifications", onClick: onNavigateToNotifications },
-    { icon: BlockedUsersIcon, title: "Blocked users", onClick: onNavigateToBlockedUsers },
     { icon: HelpSupportIcon, title: "Help & Support", onClick: onNavigateToHelpSupport },
-    { icon: PrivacyPolicyIcon, title: "Privacy policy and T&C", onClick: onNavigateToPrivacyPolicy },
+    { icon: PrivacyPolicyIcon, title: "Privacy policy", onClick: onNavigateToPrivacyPolicy },
+    { icon: TermsConditionsIcon, title: "Terms & Conditions", onClick: onNavigateToTermsConditions },
     { icon: LogOutIcon, title: "Log Out", onClick: handleLogout },
     { icon: DeleteAccountIcon, title: "Delete account", onClick: handleDeleteAccount, isDestructive: true },
   ]
@@ -158,11 +154,11 @@ export default function SettingsScreen({
   return (
     <div className="w-full min-h-screen bg-black flex flex-col">
       <div className="flex-1">
-        <SettingsHeader title="Settings" onBack={onBack} />
-        <ProfileSection 
-          name={userProfile.name} 
-          subtitle={userProfile.university} 
-          profileImage={userProfile.profileImage} 
+        <SettingsHeader title="settings" onBack={onBack} showBackButton={false} />
+        <ProfileSection
+          name={userProfile.name}
+          subtitle={userProfile.university}
+          profileImage={userProfile.profileImage}
           userId={userProfile.id}
         />
       </div>
