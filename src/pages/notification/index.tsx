@@ -1,4 +1,3 @@
-import React from "react"
 import ResponsiveNotificationList from "@/components/Notification/ResponsiveNotificationList"
 
 export default function NotificationsScreen() {

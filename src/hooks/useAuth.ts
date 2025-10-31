@@ -16,7 +16,7 @@ export function useAuth() {
     checkAuth();
   }, []);
 
-  const login = (token: string) => {
+  const login = (_token: string) => {
     setIsAuthenticated(true);
   };
 

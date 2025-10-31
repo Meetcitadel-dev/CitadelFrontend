@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import ResponsiveCard from '../UI/ResponsiveCard';
-import ResponsiveButton from '../UI/ResponsiveButton';
-import LoadingSpinner from '../UI/LoadingSpinner';
+import { useState, useEffect } from 'react';
+import ResponsiveCard from '../ui/ResponsiveCard';
+import ResponsiveButton from '../ui/ResponsiveButton';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { 
   CheckCircleIcon, 
   XCircleIcon,
-  ClockIcon,
   ArrowRightIcon,
   ArrowLeftIcon
 } from '@heroicons/react/24/outline';
@@ -36,7 +35,7 @@ export default function QuizInterface({ onComplete, onSkip }: QuizInterfaceProps
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [startTime, setStartTime] = useState<number>(Date.now());
+  // Track question start time only
   const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now());
 
   useEffect(() => {
@@ -104,7 +103,6 @@ export default function QuizInterface({ onComplete, onSkip }: QuizInterfaceProps
       setSelectedAnswer(null);
     } else {
       // Quiz completed
-      const totalTime = Math.floor((Date.now() - startTime) / 1000);
       onComplete(newAnswers, 0, 0); // Score will be calculated by backend
     }
   };

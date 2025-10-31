@@ -1,29 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import ResponsiveCard from '../UI/ResponsiveCard';
-import ResponsiveButton from '../UI/ResponsiveButton';
-import LoadingSpinner from '../UI/LoadingSpinner';
+import { useState, useEffect } from 'react';
+import ResponsiveCard from '../ui/ResponsiveCard';
+import ResponsiveButton from '../ui/ResponsiveButton';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { fetchExploreProfiles } from '@/lib/api';
-import { getAuthToken, ensureValidToken } from '@/lib/utils';
+import { ensureValidToken } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
+type ImageInfo = { id?: string; cloudfrontUrl: string };
 interface Profile {
-  id: string;
+  id: string | number;
   name: string;
   email: string;
-  university?: {
-    name: string;
-  };
+  university?: { name: string };
   degree?: string;
   year?: string;
   skills?: string[];
   aboutMe?: string;
-  images?: Array<{
-    id: string;
-    cloudfrontUrl: string;
-  }>;
-  connectionState?: {
-    status: string;
-  };
+  images?: ImageInfo[];
+  connectionState?: { status: string };
 }
 
 interface ResponsiveProfileGridProps {
@@ -72,12 +66,12 @@ export default function ResponsiveProfileGrid({
       });
 
       if (response.success) {
-        const newProfiles = response.profiles || [];
-        setProfiles(prev => reset ? newProfiles : [...prev, ...newProfiles]);
+        const newProfiles = (response as any).profiles || [] as Profile[];
+        setProfiles(prev => (reset ? newProfiles : [...prev, ...newProfiles]) as Profile[]);
         setHasMore(newProfiles.length === limit);
         setPage(pageNum);
       } else {
-        setError(response.message || 'Failed to load profiles');
+        setError((response as any).message || 'Failed to load profiles');
       }
     } catch (err) {
       setError('Failed to load profiles. Please try again.');
@@ -221,7 +215,7 @@ export default function ResponsiveProfileGrid({
                   variant="primary"
                   size="sm"
                   className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-                  onClick={() => handleConnect(profile.id)}
+                  onClick={() => handleConnect(String(profile.id))}
                 >
                   Connect
                 </ResponsiveButton>

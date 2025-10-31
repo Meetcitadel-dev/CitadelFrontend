@@ -16,7 +16,6 @@ import {
   LazyEventsPage,
   LazyChatsPage,
   LazyProfilePage,
-  LazySettingsPage,
   LazyGridviewPage,
   LazyNotificationPage,
   preloadComponents

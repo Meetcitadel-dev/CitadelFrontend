@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import ResponsiveCard from '../UI/ResponsiveCard';
-import ResponsiveButton from '../UI/ResponsiveButton';
-import LoadingSpinner from '../UI/LoadingSpinner';
+import { useState, useEffect } from 'react';
+import ResponsiveCard from '../ui/ResponsiveCard';
+import ResponsiveButton from '../ui/ResponsiveButton';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { 
   BellIcon, 
   UserPlusIcon, 
   HeartIcon,
   CheckIcon,
-  XMarkIcon,
-  ClockIcon
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { fetchNotifications, handleConnectionRequest, markNotificationAsRead } from '@/lib/api';
 import { getAuthToken } from '@/lib/utils';
@@ -52,9 +51,9 @@ export default function ResponsiveNotificationList() {
 
       const response = await fetchNotifications(token);
       if (response.success) {
-        setNotifications(response.notifications || []);
+        setNotifications((response as any).notifications || []);
       } else {
-        setError(response.message || 'Failed to load notifications');
+        setError((response as any).message || 'Failed to load notifications');
       }
     } catch (err) {
       setError('Failed to load notifications. Please try again.');
@@ -77,13 +76,13 @@ export default function ResponsiveNotificationList() {
       const response = await handleConnectionRequest({
         connectionId: notification.data.connectionId,
         action
-      }, token);
+      } as any, token);
 
       if (response.success) {
         // Remove the notification
         setNotifications(prev => prev.filter(n => n.id !== notificationId));
       } else {
-        setError(response.message || 'Failed to process request');
+        setError((response as any).message || 'Failed to process request');
       }
     } catch (err) {
       setError('Failed to process request. Please try again.');

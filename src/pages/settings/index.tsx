@@ -1,4 +1,3 @@
-import React from "react"
 import ResponsiveSettingsPanel from "@/components/Settings/ResponsiveSettingsPanel"
 
 export default function SettingsPage() {

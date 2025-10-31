@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import ResponsiveCard from '../UI/ResponsiveCard';
-import ResponsiveInput from '../UI/ResponsiveInput';
-import LoadingSpinner from '../UI/LoadingSpinner';
+import { useState, useEffect } from 'react';
+import ResponsiveCard from '../ui/ResponsiveCard';
+import ResponsiveInput from '../ui/ResponsiveInput';
+import ResponsiveButton from '../ui/ResponsiveButton';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { 
   MagnifyingGlassIcon, 
   UserCircleIcon,

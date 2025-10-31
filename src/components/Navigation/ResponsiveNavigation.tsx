@@ -1,33 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import type { ComponentType } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  HomeIcon,
-  UserGroupIcon,
-  BellIcon,
-  ChatBubbleLeftRightIcon,
   CalendarIcon,
   MagnifyingGlassIcon,
-  Cog6ToothIcon,
   Bars3Icon,
   XMarkIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
 import {
-  HomeIcon as HomeIconSolid,
-  UserGroupIcon as UserGroupIconSolid,
-  BellIcon as BellIconSolid,
-  ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
   CalendarIcon as CalendarIconSolid,
   MagnifyingGlassIcon as MagnifyingGlassIconSolid,
-  Cog6ToothIcon as Cog6ToothIconSolid,
   UserIcon as UserIconSolid
 } from '@heroicons/react/24/solid';
 
 interface NavigationItem {
   name: string;
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  iconSolid: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
+  iconSolid: ComponentType<{ className?: string }>;
   badge?: number;
 }
 
@@ -54,18 +45,9 @@ const navigationItems: NavigationItem[] = [
 
 export default function ResponsiveNavigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
 
-  // Handle scroll for mobile nav background
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // (Removed isScrolled logic to satisfy unused variable rule)
 
   // Close mobile menu on route change
   useEffect(() => {

@@ -157,7 +157,6 @@ export default function SettingsScreen({
         <SettingsHeader title="settings" onBack={onBack} showBackButton={false} />
         <ProfileSection
           name={userProfile.name}
-          subtitle={userProfile.university}
           profileImage={userProfile.profileImage}
           userId={userProfile.id}
         />

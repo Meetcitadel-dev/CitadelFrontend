@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ResponsiveProfileGrid from '@/components/Explore/ResponsiveProfileGrid';
-import ResponsiveInput from '@/components/UI/ResponsiveInput';
-import ResponsiveButton from '@/components/UI/ResponsiveButton';
+import ResponsiveInput from '@/components/ui/ResponsiveInput';
+import ResponsiveButton from '@/components/ui/ResponsiveButton';
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 
 export default function Explore() {

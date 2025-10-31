@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "../ui/button"
 
 interface ProfileActionButtonProps {
   status: "connect" | "remove" | "request" | "requested" | "connected"

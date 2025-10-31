@@ -1,5 +1,5 @@
 import { MessageSquare, Minus } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "../../ui/button"
 import ProfileAvatar from "@/components/Common/ProfileAvatar"
 
 interface Member {

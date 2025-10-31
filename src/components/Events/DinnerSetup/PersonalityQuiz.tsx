@@ -36,7 +36,7 @@ export default function PersonalityQuiz({ setupData, onComplete, onBack }: Perso
         data: { questions: QuizQuestion[]; totalQuestions: number };
       }>('/api/v1/dinner-preferences/personality-quiz', {
         method: 'GET',
-        token
+        token: token || undefined
       });
 
       if (response.success) {
@@ -107,7 +107,7 @@ export default function PersonalityQuiz({ setupData, onComplete, onBack }: Perso
       // Then submit quiz
       const quizResponse = await apiClient('/api/v1/dinner-preferences/personality-quiz', {
         method: 'POST',
-        token,
+        token: token || undefined,
         body: { answers: finalAnswers }
       });
 

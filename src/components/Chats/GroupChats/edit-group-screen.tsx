@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { ArrowLeft, Search, MoreVertical, Edit2 } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Input } from "../../ui/input"
+import { Button } from "../../ui/button"
 import GroupOptionsMenu from "./group-options-menu"
 import MemberItem from "./member-item"
 import { fetchGroupChat, updateGroupChat, removeGroupMember, leaveGroupChat } from "@/lib/api"

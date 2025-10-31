@@ -4,7 +4,6 @@ import { Plus } from "lucide-react"
 
 interface ProfileSectionProps {
   name: string
-  subtitle: string
   profileImage: string
   userId: string
 }
@@ -23,7 +22,7 @@ function generateUserIdTag(name: string, userId: string): string {
   return `#${initials}${uniqueCode}`
 }
 
-export default function ProfileSection({ name, subtitle, profileImage, userId }: ProfileSectionProps) {
+export default function ProfileSection({ name, profileImage, userId }: ProfileSectionProps) {
   const hasProfileImage = profileImage && profileImage !== "/placeholder.svg"
   const userIdTag = generateUserIdTag(name, userId)
 

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QuizWelcome from '@/components/Quiz/QuizWelcome';
 import QuizInterface from '@/components/Quiz/QuizInterface';
 import QuizResults from '@/components/Quiz/QuizResults';
-import LoadingSpinner from '@/components/UI/LoadingSpinner';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { getAuthToken } from '@/lib/utils';
 
 type QuizStep = 'welcome' | 'quiz' | 'results' | 'loading';
@@ -17,7 +17,7 @@ interface QuizAnswer {
 export default function QuizPage() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<QuizStep>('loading');
-  const [answers, setAnswers] = useState<QuizAnswer[]>([]);
+  // removed unused answers state
   const [results, setResults] = useState<{
     totalQuestions: number;
     correctAnswers: number;
@@ -90,7 +90,6 @@ export default function QuizPage() {
 
   const handleQuizComplete = async (quizAnswers: QuizAnswer[]) => {
     setCurrentStep('loading');
-    setAnswers(quizAnswers);
 
     const token = localStorage.getItem('token');
     
@@ -109,7 +108,7 @@ export default function QuizPage() {
         const data = await response.json();
 
         if (data.success) {
-          setResults({
+    setResults({
             totalQuestions: data.data.totalQuestions,
             correctAnswers: data.data.correctAnswers,
             totalPoints: data.data.totalPoints,
@@ -164,7 +163,6 @@ export default function QuizPage() {
 
   const handleRetake = () => {
     setCurrentStep('welcome');
-    setAnswers([]);
     setResults(null);
   };
 

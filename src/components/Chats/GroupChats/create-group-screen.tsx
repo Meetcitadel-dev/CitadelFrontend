@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { ArrowLeft, Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "../../ui/button"
+import { Input } from "../../ui/input"
 import ConnectionItem from "./connection-item"
 import SelectedMember from "./selected-member"
 import { fetchUserConnections, createGroupChat } from "@/lib/api"

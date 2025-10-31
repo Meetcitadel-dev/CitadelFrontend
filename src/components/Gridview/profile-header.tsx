@@ -1,7 +1,7 @@
 "use client"
 
 import { ArrowLeft, Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import { Input } from "../ui/input"
 // import { SortIcon } from "./sort-icon"
 
 interface ProfileHeaderProps {

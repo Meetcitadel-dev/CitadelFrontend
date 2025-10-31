@@ -1,5 +1,6 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import ResponsiveButton from '../UI/ResponsiveButton';
+import { Component } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
+import ResponsiveButton from '../ui/ResponsiveButton';
 
 interface Props {
   children: ReactNode;

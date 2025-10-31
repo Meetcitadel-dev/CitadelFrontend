@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import ResponsiveCard from '../UI/ResponsiveCard';
-import ResponsiveButton from '../UI/ResponsiveButton';
-import ResponsiveInput from '../UI/ResponsiveInput';
-import LoadingSpinner from '../UI/LoadingSpinner';
+import { useState, useEffect, useRef } from 'react';
+import type { FormEvent } from 'react';
+// ResponsiveCard import is unused; remove to satisfy TS6133
+import ResponsiveButton from '../ui/ResponsiveButton';
+import ResponsiveInput from '../ui/ResponsiveInput';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
+
 import { chatSocketService } from '@/lib/socket';
 import { 
   PaperAirplaneIcon, 
@@ -124,7 +126,7 @@ export default function ResponsiveChatInterface({
     };
   }, [conversationId]);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = async (e: FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || sending) return;
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LoadingSpinner from '@/components/UI/LoadingSpinner';
-import ResponsiveButton from '@/components/UI/ResponsiveButton';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import ResponsiveButton from '@/components/ui/ResponsiveButton';
 import { cn } from '@/lib/utils';
 
 type IntroStep = 'initial_loading' | 'splash_screen' | 'chat_sequence';

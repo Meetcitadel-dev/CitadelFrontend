@@ -2,6 +2,21 @@
 @import "tw-animate-css";
 /* Google Fonts are linked in index.html to avoid PostCSS @import ordering issues */
 
+/* SVG Icon Fix - Ensure Heroicons render properly */
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+/* Ensure SVG paths inherit stroke */
+svg path {
+  stroke: inherit;
+  fill: inherit;
+}
+
 /* Loading spinner animation */
 @keyframes spin {
   0% { transform: rotate(0deg); }

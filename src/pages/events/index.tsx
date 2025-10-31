@@ -2,12 +2,7 @@ import { useState, useEffect } from "react"
 import IndiaGate from "@/assets/unsplash_va77t8vGbJ8.png"
 import MumbaiGateway from "@/assets/gateway of mumbai stylized image.png"
 import BangaloreMonument from "@/assets/bangalore monument.png"
-import { Settings, History } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { LocationHeader } from "@/components/Events/location-header"
-import { BookingHeader } from "@/components/Events/booking-header"
-import { TimeSlot } from "@/components/Events/time-slot"
-import { BookButton } from "@/components/Events/book-button"
 import SetupModal from "@/components/Events/DinnerSetup/SetupModal"
 import PaymentModal from "@/components/Events/PaymentModal"
 import BookingConfirmationModal from "@/components/Events/BookingConfirmationModal"
@@ -46,25 +41,13 @@ export default function DinnerBooking() {
   const [preferences, setPreferences] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [backgroundImage, setBackgroundImage] = useState(IndiaGate);
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [setupMode, setSetupMode] = useState<'full' | 'location-only'>('full');
 
   const navigate = useNavigate();
 
-  // Update time every second
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // Removed unused time ticker
 
-  // Format time as HH:MM
-  const formatTime = (date: Date) => {
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  };
+  // Note: unused helpers removed to satisfy lints
 
   useEffect(() => {
     checkPreferencesAndLoadEvents();
@@ -80,7 +63,7 @@ export default function DinnerBooking() {
         data: { hasCompletedSetup: boolean; preferences: any };
       }>('/api/v1/dinner-preferences', {
         method: 'GET',
-        token
+        token: token || undefined
       });
 
       if (prefsResponse.success) {
@@ -119,7 +102,7 @@ export default function DinnerBooking() {
         data: { events: DinnerEvent[]; totalEvents: number };
       }>(`/api/v1/dinner-events/upcoming?city=${encodeURIComponent(queryCity)}`, {
         method: 'GET',
-        token
+        token: token || undefined
       });
 
       if (response.success) {

@@ -1,17 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import ResponsiveCard from '../UI/ResponsiveCard';
-import ResponsiveButton from '../UI/ResponsiveButton';
-import ResponsiveInput from '../UI/ResponsiveInput';
-import LoadingSpinner from '../UI/LoadingSpinner';
+import { useState, useEffect } from 'react';
+import ResponsiveCard from '../ui/ResponsiveCard';
+import ResponsiveButton from '../ui/ResponsiveButton';
+import ResponsiveInput from '../ui/ResponsiveInput';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { 
   UserIcon, 
-  BellIcon, 
-  ShieldCheckIcon, 
   Cog6ToothIcon,
   TrashIcon,
-  ArrowRightOnRectangleIcon,
-  EyeIcon,
-  EyeSlashIcon
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 import { getCurrentUserProfile, updateUserProfile, deleteUserAccount, logoutSession } from '@/lib/api';
 import { getAuthToken, removeAuthToken } from '@/lib/utils';
@@ -33,7 +29,6 @@ export default function ResponsiveSettingsPanel() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   // Form state

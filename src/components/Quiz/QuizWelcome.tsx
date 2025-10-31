@@ -1,6 +1,5 @@
-import React from 'react';
-import ResponsiveCard from '../UI/ResponsiveCard';
-import ResponsiveButton from '../UI/ResponsiveButton';
+import ResponsiveCard from '../ui/ResponsiveCard';
+import ResponsiveButton from '../ui/ResponsiveButton';
 import { 
   AcademicCapIcon,
   LightBulbIcon,

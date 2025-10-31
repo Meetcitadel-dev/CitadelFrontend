@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import ResponsiveChatList from "@/components/Chat/ResponsiveChatList"
 import ResponsiveChatInterface from "@/components/Chat/ResponsiveChatInterface"
-import ResponsiveButton from "@/components/UI/ResponsiveButton"
+import ResponsiveButton from "@/components/ui/ResponsiveButton"
 import { 
   ChatBubbleLeftRightIcon, 
   UserGroupIcon,
@@ -26,7 +26,6 @@ interface ChatConversation {
 export default function ChatApp() {
   const [selectedConversation, setSelectedConversation] = useState<ChatConversation | null>(null)
   const [showChatList, setShowChatList] = useState(true)
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   // Get current user
   useEffect(() => {
@@ -37,7 +36,6 @@ export default function ChatApp() {
 
         const response = await getCurrentUserProfile(token)
         if (response.success) {
-          setCurrentUserId(response.data.id.toString())
           // Join user room for global notifications
           chatSocketService.joinUserRoom(response.data.id.toString())
         }
