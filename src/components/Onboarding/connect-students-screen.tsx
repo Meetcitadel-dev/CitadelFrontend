@@ -11,16 +11,14 @@ interface ConnectStudentsScreenProps {
 
 export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectStudentsScreenProps) {
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
-      {/* Responsive Container */}
-      <div className="w-full max-w-md mx-auto h-screen flex flex-col relative">
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Main vertical layout */}
+      <div className="mx-auto h-screen w-full max-w-md flex flex-col items-center justify-between px-4 pt-6 pb-36 sm:pb-40">
       {/* Profile Images Container */}
       <div
-        className="absolute left-1/2 transform -translate-x-1/2 w-[73%] max-w-[286px]"
+        className="relative w-[73%] max-w-[286px]"
         style={{
-          top: '52px',
           height: '345px',
-          position: 'relative',
           zIndex: 10
         }}
       >
@@ -96,16 +94,9 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
       </div>
 
       {/* Text Container */}
-      <div
-        className="absolute left-1/2 transform -translate-x-1/2 w-full max-w-[344px] px-4"
-        style={{
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 10
-        }}
-      >
-        {/* <h1
-          className="text-white text-center text-3xl sm:text-4xl font-bold leading-tight"
+      <div className="w-full max-w-[344px] text-center z-10">
+        <h1
+          className="text-white text-center text-[28px] sm:text-4xl font-bold leading-[1.1]"
           style={{
             fontFamily: '"Roboto Serif"',
             margin: 0,
@@ -115,17 +106,13 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
           Connect with<br />
           students across<br />
           universities
-        </h1> */}
+        </h1>
       </div>
 
-      {/* Login Link */}
-      <div
-        className="absolute left-1/2 transform -translate-x-1/2 text-center"
-        style={{
-          bottom: '180px',
-          zIndex: 10
-        }}
-      >
+      {/* Bottom CTA */}
+      <div className="w-full max-w-[344px] flex flex-col items-center gap-4 z-10">
+        {/* Login Link */}
+        <div className="text-center">
         <span
           className="text-white/70 text-sm font-semibold"
           style={{
@@ -143,34 +130,25 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
             Login
           </button>
         </span>
-      </div>
+        </div>
 
-      {/* Let's go Button */}
-      <div
-        className="absolute left-1/2 transform -translate-x-1/2 w-full max-w-[238px] px-4"
-        style={{
-          bottom: '110px',
-          zIndex: 10
-        }}
-      >
-        <button
-          onClick={onContinue}
-          className="w-full h-[50px] rounded-[48px] bg-[#1BEA7B] text-black text-base font-semibold flex items-center justify-center cursor-pointer border-none hover:bg-[#17d66e] transition-colors"
-          style={{
-            fontFamily: 'Inter'
-          }}
-        >
-          Let's go
-        </button>
+        {/* Let's go Button */}
+        <div className="w-full max-w-[238px]">
+          <button
+            onClick={onContinue}
+            className="w-full h-[50px] rounded-[48px] bg-[#1BEA7B] text-black text-base font-semibold flex items-center justify-center cursor-pointer border-none hover:bg-[#17d66e] transition-colors"
+            style={{
+              fontFamily: 'Inter'
+            }}
+          >
+            Let's go
+          </button>
+        </div>
       </div>
 
       {/* Wavy Pattern at Bottom */}
       <div
-        className="absolute bottom-0 left-0 w-full"
-        style={{
-          height: '150px',
-          overflow: 'hidden'
-        }}
+        className="pointer-events-none absolute bottom-0 left-0 w-full h-[150px]"
       >
         <img
           src={wavy2Svg}

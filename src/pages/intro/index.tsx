@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import ResponsiveButton from '@/components/ui/ResponsiveButton';
 import { cn } from '@/lib/utils';
+import videoSource from '@/assets/app-onboarding.mp4';
+import starImage from '@/assets/Star 1 (1).png';
 
 type IntroStep = 'initial_loading' | 'splash_screen' | 'chat_sequence';
 
@@ -10,24 +12,27 @@ interface ChatMessage {
   id: number;
   text: string;
   sender: 'user' | 'other';
+  videoTime: number; // Time in seconds when this message should appear
 }
 
 const chatMessages: ChatMessage[] = [
-  { id: 1, text: 'Hey! Deepesh or Anamul?', sender: 'other' },
-  { id: 2, text: 'Anamul... don\'t hate me 😅', sender: 'other' },
-  { id: 3, text: 'Deepesh! How\'s this week?', sender: 'user' },
-  { id: 4, text: 'Not bad! You?', sender: 'other' },
-  { id: 5, text: 'You too! 👍', sender: 'user' },
-  { id: 6, text: 'Let\'s catch up soon!', sender: 'other' },
-  { id: 7, text: 'Sure! Let\'s do it! 😊', sender: 'user' },
+  { id: 1, text: 'Hey! How are you?', sender: 'user', videoTime: 2 },
+  { id: 2, text: 'I’m good... don’t hate me 😅', sender: 'other', videoTime: 5 },
+  { id: 3, text: 'How’s this week going?', sender: 'user', videoTime: 8 },
+  { id: 4, text: 'Not bad! You?', sender: 'other', videoTime: 11 },
+  { id: 5, text: 'You too! 👍', sender: 'user', videoTime: 14 },
+  { id: 6, text: 'Let’s catch up soon!', sender: 'other', videoTime: 17 },
+  { id: 7, text: 'Sure! Let’s do it! 😊', sender: 'user', videoTime: 20 },
 ];
+
 
 export default function IntroSequencePage() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<IntroStep>('initial_loading');
   const [displayedMessages, setDisplayedMessages] = useState<ChatMessage[]>([]);
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isChatComplete, setIsChatComplete] = useState(false);
 
   // Update time every second
   useEffect(() => {
@@ -46,24 +51,91 @@ export default function IntroSequencePage() {
     } else if (currentStep === 'splash_screen') {
       const timer = setTimeout(() => {
         setCurrentStep('chat_sequence');
-        // Start displaying the first chat message immediately after splash
-        if (chatMessages.length > 0) {
-          setDisplayedMessages([chatMessages[0]]);
-          setCurrentMessageIndex(1);
-        }
       }, 2000); // Delay for splash screen
       return () => clearTimeout(timer);
     }
   }, [currentStep]);
 
+  // Auto-display messages based on video time - one at a time
+  useEffect(() => {
+    if (currentStep !== 'chat_sequence' || !videoRef.current) return;
+
+    const video = videoRef.current;
+
+    const checkAndShowMessage = (currentVideoTime: number) => {
+      setDisplayedMessages((prev) => {
+        // Find the next message that should be displayed based on video time
+        const nextMessage = chatMessages.find(
+          (msg) => currentVideoTime >= msg.videoTime && !prev.find((m) => m.id === msg.id)
+        );
+
+        if (nextMessage) {
+          const newMessages = [...prev, nextMessage].sort((a, b) => a.id - b.id);
+          
+          // Check if all messages are displayed
+          if (newMessages.length === chatMessages.length) {
+            setIsChatComplete(true);
+          }
+          
+          return newMessages;
+        }
+
+        return prev;
+      });
+    };
+
+    const checkVideoTime = () => {
+      const currentVideoTime = video.currentTime;
+      checkAndShowMessage(currentVideoTime);
+    };
+
+    // When video ends, show remaining messages one by one
+    const handleVideoEnd = () => {
+      setDisplayedMessages((prev) => {
+        if (prev.length < chatMessages.length) {
+          // Show remaining messages one by one with delays
+          const remainingMessages = chatMessages
+            .filter(msg => !prev.find(m => m.id === msg.id))
+            .sort((a, b) => a.id - b.id);
+
+          remainingMessages.forEach((msg, index) => {
+            setTimeout(() => {
+              setDisplayedMessages((current) => {
+                if (!current.find(m => m.id === msg.id)) {
+                  const updated = [...current, msg].sort((a, b) => a.id - b.id);
+                  
+                  // Check if this is the last message
+                  if (updated.length === chatMessages.length) {
+                    setIsChatComplete(true);
+                  }
+                  
+                  return updated;
+                }
+                return current;
+              });
+            }, index * 800); // 800ms delay between each message
+          });
+        }
+        return prev;
+      });
+    };
+
+    const interval = setInterval(checkVideoTime, 100); // Check every 100ms
+    video.addEventListener('timeupdate', checkVideoTime);
+    video.addEventListener('ended', handleVideoEnd);
+
+    return () => {
+      clearInterval(interval);
+      video.removeEventListener('timeupdate', checkVideoTime);
+      video.removeEventListener('ended', handleVideoEnd);
+    };
+  }, [currentStep]);
+
   const handleContinue = () => {
-    if (currentMessageIndex < chatMessages.length) {
-      // Display next message
-      setDisplayedMessages((prev) => [...prev, chatMessages[currentMessageIndex]]);
-      setCurrentMessageIndex((prev) => prev + 1);
-    } else {
+    if (isChatComplete) {
       // All messages displayed, navigate to quiz
-      navigate('/quiz');
+      navigate('/onboarding');
+
     }
   };
 
@@ -78,56 +150,100 @@ export default function IntroSequencePage() {
     } else if (currentStep === 'splash_screen') {
       return (
         <div className="flex flex-col items-center justify-center h-full bg-black text-white">
-          <svg className="w-24 h-24 text-green-500 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-          </svg>
+          <img
+            src={starImage}
+            alt="Citadel Star"
+            className="mx-auto w-[227px] h-[227px]"
+          />
           <h1 className="mt-4 text-4xl font-bold">Citadel</h1>
         </div>
       );
     } else if (currentStep === 'chat_sequence') {
-      const isLastMessage = currentMessageIndex === chatMessages.length;
-      const buttonVariant = isLastMessage ? 'primary' : 'secondary';
-
       return (
         <div className="relative flex flex-col h-full bg-black text-white overflow-hidden">
-          {/* Green dotted background pattern */}
-          <div className="absolute inset-0 z-0 opacity-20" style={{
-            backgroundImage: `radial-gradient(circle, #10B981 1px, transparent 1px)`,
-            backgroundSize: '20px 20px',
-            maskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)'
-          }} />
-
-          <div className="flex-grow p-4 space-y-3 overflow-y-auto z-10">
-            {displayedMessages.map((msg) => (
-              <div
-                key={msg.id}
-                className={cn(
-                  'flex',
-                  msg.sender === 'user' ? 'justify-end' : 'justify-start'
-                )}
-              >
-                <div
-                  className={cn(
-                    'max-w-[70%] p-3 rounded-lg',
-                    msg.sender === 'user'
-                      ? 'bg-gray-700 text-white'
-                      : 'bg-gray-800 text-white'
-                  )}
-                >
-                  {msg.text}
-                </div>
-              </div>
-            ))}
+          {/* Video Player - Top Section (where star was) */}
+          <div className="relative w-full flex-shrink-0" style={{ height: '50%', minHeight: '300px' }}>
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+              onLoadedMetadata={() => {
+                // Check video duration
+                if (videoRef.current) {
+                  const duration = videoRef.current.duration;
+                  const lastMessageTime = Math.max(...chatMessages.map(m => m.videoTime));
+                  console.log('Video duration:', duration, 'Last message time:', lastMessageTime);
+                }
+              }}
+              onLoadedData={() => {
+                // Start video playback
+                if (videoRef.current) {
+                  videoRef.current.play().catch(console.error);
+                }
+              }}
+            >
+              <source src={videoSource} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
           </div>
 
-          <div className="p-4 bg-black z-10">
-            <ResponsiveButton
-              onClick={handleContinue}
-              fullWidth
-              variant={buttonVariant}
-            >
-              {isLastMessage ? 'Continue to Quiz' : 'Continue'}
-            </ResponsiveButton>
+          {/* Chat Section with Green Dotted Background */}
+          <div className="relative flex-1 flex flex-col overflow-hidden">
+            {/* Green dotted background pattern - behind chat */}
+            <div className="absolute inset-0 z-0" style={{
+              backgroundColor: 'black',
+              backgroundSize: '20px 20px',
+            }} />
+
+            {/* Chat Messages */}
+            <div className="relative flex-1 p-4 space-y-3 overflow-y-auto z-10">
+              {displayedMessages.length === 0 && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                  <LoadingSpinner />
+                  <p className="text-gray-400 text-sm">Loading...</p>
+                </div>
+              )}
+              {displayedMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={cn(
+                    'flex',
+                    msg.sender === 'user' ? 'justify-end' : 'justify-start'
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'max-w-[75%] px-4 py-3 rounded-2xl',
+                      msg.sender === 'user'
+                        ? 'bg-gray-700 text-white'
+                        : 'bg-gray-800 text-white'
+                    )}
+                  >
+                    <p className="text-sm leading-relaxed">{msg.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Continue Button - Always visible, disabled until chat complete */}
+            <div className="p-4 bg-black z-10 flex-shrink-0">
+              <ResponsiveButton
+                onClick={handleContinue}
+                fullWidth
+                variant={isChatComplete ? 'primary' : 'secondary'}
+                disabled={!isChatComplete}
+                className={cn(
+                  'transition-all duration-300 rounded-full',
+                  !isChatComplete 
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
+                    : 'bg-green-500 text-black hover:bg-green-600'
+                )}
+              >
+                Continue
+              </ResponsiveButton>
+            </div>
           </div>
         </div>
       );

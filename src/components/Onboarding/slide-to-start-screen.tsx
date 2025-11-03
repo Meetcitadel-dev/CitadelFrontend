@@ -5,6 +5,7 @@ import Rectangle3 from '@/assets/Rectangle 3.png'
 
 
 import { useState, useRef, useEffect } from "react"
+import StarFilled from '@/assets/Star 1 (1).png'
 
 interface SlideToStartScreenProps {
   onSlideComplete: () => void
@@ -197,11 +198,9 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
       >
         {/* Content inside curved background */}
         <div className="relative h-full flex flex-col items-center justify-center px-6">
-          {/* Citadel Icon */}
+          {/* Citadel Icon - filled star image to ensure solid center */}
           <div className="flex items-center justify-center mb-[5px] h-[61px] w-[61px]">
-            <svg xmlns="http://www.w3.org/2000/svg" width="47" height="47" viewBox="0 0 47 47" fill="none">
-              <path d="M21.5491 1.63649C22.0188 -0.44262 24.9812 -0.442626 25.4508 1.63649L27.3342 9.97426C27.6386 11.3217 29.1849 11.9622 30.3529 11.2247L37.5804 6.66071C39.3826 5.52264 41.4774 7.61738 40.3393 9.41962L35.7753 16.6471C35.0378 17.8151 35.6783 19.3614 37.0257 19.6658L45.3635 21.5491C47.4426 22.0188 47.4426 24.9812 45.3635 25.4508L37.0257 27.3342C35.6783 27.6386 35.0378 29.1849 35.7753 30.3529L40.3393 37.5804C41.4774 39.3826 39.3826 41.4774 37.5804 40.3393L30.3529 35.7753C29.1849 35.0378 27.6386 35.6783 27.3342 37.0257L25.4509 45.3635C24.9812 47.4426 22.0188 47.4426 21.5492 45.3635L19.6658 37.0257C19.3614 35.6783 17.8151 35.0378 16.6471 35.7753L9.41962 40.3393C7.61739 41.4774 5.52263 39.3826 6.6607 37.5804L11.2247 30.3529C11.9622 29.1849 11.3217 27.6386 9.97426 27.3342L1.63649 25.4509C-0.44262 24.9812 -0.442626 22.0188 1.63649 21.5492L9.97426 19.6658C11.3217 19.3614 11.9622 17.8151 11.2247 16.6471L6.6607 9.41962C5.52264 7.61738 7.61738 5.52263 9.41962 6.6607L16.6471 11.2247C17.8151 11.9622 19.3614 11.3217 19.6658 9.97426L21.5491 1.63649Z" fill="#1BEA7B"/>
-            </svg>
+            <img src={StarFilled} alt="star" className="w-[47px] h-[47px]" />
           </div>
 
           {/* Main Text */}

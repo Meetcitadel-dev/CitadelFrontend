@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import SplashScreen1 from "../../components/Onboarding/splash-screen-1"
-import SplashScreen2 from "../../components/Onboarding/splash-screen-2"
-import SplashScreen3 from "../../components/Onboarding/splash-screen-3"
+// Removed splash screens per requirement
 import SlideToStartScreen from "../../components/Onboarding/slide-to-start-screen"
 import ConnectStudentsScreen from "../../components/Onboarding/connect-students-screen"
 import UniversitySelectionScreen from "../../components/Onboarding/university-selection-screen"
@@ -19,8 +17,9 @@ import { submitOnboardingData, refreshAccessToken } from "@/lib/api";
 import { getAuthToken } from "@/lib/utils";
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState(0)
-  const [showSlideScreen, setShowSlideScreen] = useState(false)
+  // Start directly from Slide screen
+  // (no splash sequencing)
+  const [showSlideScreen, setShowSlideScreen] = useState(true)
   const [showConnectScreen, setShowConnectScreen] = useState(false)
   const [showUniversityScreen, setShowUniversityScreen] = useState(false)
   const [showEmailScreen, setShowEmailScreen] = useState(false)
@@ -38,7 +37,7 @@ export default function App() {
 
   const navigate = useNavigate();
 
-  // Check authentication after splash screens complete
+  // Check authentication early
   const checkAuthAfterSplash = async () => {
     // First check if we already have a token in localStorage
     const existingToken = getAuthToken()
@@ -62,7 +61,7 @@ export default function App() {
           }
           // For 400 error (user hasn't completed quiz), redirect to quiz
           if (response.status === 400) {
-            navigate('/quiz');
+            navigate('/onboarding');
             return;
           }
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -82,7 +81,7 @@ export default function App() {
           return;
         } else if (data.success && !data.data.hasCompletedQuiz) {
           // User needs to complete quiz first
-          navigate('/quiz');
+          navigate('/onboarding');
           return;
         }
       } catch (error) {
@@ -110,31 +109,15 @@ export default function App() {
     }
   }
 
+  // Immediately check auth on mount (no splash)
   useEffect(() => {
-    if (currentScreen < 3) {
-      const timer = setTimeout(() => {
-        if (currentScreen === 2) {
-          setShowSlideScreen(true)
-        } else {
-          setCurrentScreen(currentScreen + 1)
-        }
-      }, 3000)
+    const timer = setTimeout(() => {
+      checkAuthAfterSplash()
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [])
 
-      return () => clearTimeout(timer)
-    }
-  }, [currentScreen])
-
-  // Check authentication after all splash screens complete
-  useEffect(() => {
-    if (currentScreen === 2) {
-      // After splash screens, check if user is authenticated
-      const timer = setTimeout(() => {
-        checkAuthAfterSplash()
-      }, 100) // Small delay to let splash screen finish
-      
-      return () => clearTimeout(timer)
-    }
-  }, [currentScreen])
+  // (Removed splash-dependent check)
 
   const handleSlideComplete = () => {
     setShowSlideScreen(false);
@@ -453,7 +436,6 @@ export default function App() {
     return <SlideToStartScreen onSlideComplete={handleSlideComplete} />;
   }
 
-  const screens = [<SplashScreen1 key="screen1" />, <SplashScreen2 key="screen2" />, <SplashScreen3 key="screen3" />]
-
-  return <div className="min-h-screen bg-black">{screens[currentScreen]}</div>
+  // No splash screens: default to slide screen
+  return <div className="min-h-screen bg-black"><SlideToStartScreen onSlideComplete={handleSlideComplete} /></div>
 }
