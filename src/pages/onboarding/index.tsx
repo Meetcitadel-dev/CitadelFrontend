@@ -379,7 +379,7 @@ export default function App() {
         }
 
         // If quiz not completed or error, redirect to quiz
-        setTimeout(() => navigate("/login"), 2000);
+        setTimeout(() => navigate("/events"), 2000);
       };
 
       checkQuizAndRedirect();
