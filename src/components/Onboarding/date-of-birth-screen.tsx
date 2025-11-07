@@ -1,10 +1,4 @@
-"use client"
-
-import type React from "react"
-
 import { useState } from "react"
-import ScaledCanvas from './ScaledCanvas'
-// ... existing code ...
 
 interface DateOfBirthScreenProps {
   value?: { day: string; month: string; year: string }
@@ -56,129 +50,117 @@ export default function DateOfBirthScreen({ value, onContinue, onBack }: DateOfB
     )
   }
 
+  const isReady = isDateValid()
+
   return (
-    <ScaledCanvas>
-      <div style={{ width: 390, height: 844, background: '#000', color: '#fff', position: 'relative', fontFamily: "'Roboto Serif', serif" }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', padding: '0 0 0 24px', paddingTop: 35, height: 56 }}>
-                <button 
-          onClick={onBack}
-          style={{ background: 'none', border: 'none', padding: 0, marginRight: 0 }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
-            <path d="M10.5 20L1 10.5M1 10.5L10.5 1M1 10.5L20 10.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
+    <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="w-full max-w-[393px] mx-auto h-screen flex flex-col relative" style={{ fontFamily: "'Inter', sans-serif" }}>
+        {/* Header */}
+        <div className="flex items-center px-6 pt-8 h-14">
+          <button
+            onClick={onBack}
+            className="bg-transparent border-none p-0 cursor-pointer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
+              <path d="M10.5 20L1 10.5M1 10.5L10.5 1M1 10.5L20 10.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
 
-      {/* Title */}
-      <div style={{ padding: '0 16px 0 24px', marginBottom: 16, marginTop: 28 }}>
-        <h1 style={{ fontFamily: "'Roboto Serif', serif", fontWeight: 700, fontSize: 32, margin: 0, textAlign: 'left', letterSpacing: '-0.5px' }}>Date of birth</h1>
-      </div>
+        {/* Title */}
+        <div className="px-6 mt-6 mb-6">
+          <h1 className="text-3xl font-bold m-0 text-left" style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '-0.5px' }}>
+            Date of birth
+          </h1>
+        </div>
 
-      {/* Date Input Fields */}
-      <div style={{ padding: '0 16px', marginBottom: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-start', gap: 16 }}>
-          <input
-            type="text"
-            placeholder="DD"
-            value={day}
-            onChange={handleDayChange}
-            maxLength={2}
+        {/* Date Input Fields */}
+        <div className="px-6">
+          <div className="flex items-center gap-4">
+            <input
+              type="text"
+              placeholder="DD"
+              value={day}
+              onChange={handleDayChange}
+              maxLength={2}
+              className="text-white placeholder:text-white/50"
+              style={{
+                width: 80,
+                height: 56,
+                background: '#1E1E1E',
+                borderRadius: 18,
+                border: '1px solid #2F2F2F',
+                textAlign: 'center',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 18,
+                fontWeight: 400,
+                outline: 'none',
+                padding: 0,
+              }}
+            />
+            <input
+              type="text"
+              placeholder="MM"
+              value={month}
+              onChange={handleMonthChange}
+              maxLength={2}
+              className="text-white placeholder:text-white/50"
+              style={{
+                width: 80,
+                height: 56,
+                background: '#1E1E1E',
+                borderRadius: 18,
+                border: '1px solid #2F2F2F',
+                textAlign: 'center',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 18,
+                fontWeight: 400,
+                outline: 'none',
+                padding: 0,
+              }}
+            />
+            <input
+              type="text"
+              placeholder="YYYY"
+              value={year}
+              onChange={handleYearChange}
+              maxLength={4}
+              className="text-white placeholder:text-white/50"
+              style={{
+                width: 120,
+                height: 56,
+                background: '#1E1E1E',
+                borderRadius: 18,
+                border: '1px solid #2F2F2F',
+                textAlign: 'center',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 18,
+                fontWeight: 400,
+                outline: 'none',
+                padding: 0,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Continue Button */}
+        <div className="absolute bottom-6 left-4 right-4">
+          <button
+            onClick={() => onContinue({ day, month, year })}
+            disabled={!isReady}
+            className="w-full py-4 rounded-full text-lg font-semibold border-none transition-all"
             style={{
-              width: 56,
-              height: 56,
-              background: '#232323',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 16,
-              textAlign: 'center',
-              fontSize: 17,
-              fontWeight: 600,
-              fontFamily: "'Roboto Serif', serif",
-              outline: 'none',
-              boxShadow: 'none',
-              margin: 0,
-              padding: 0,
-              letterSpacing: '0',
+              fontFamily: "'Inter', sans-serif",
+              background: isReady ? '#22C55E' : '#232323',
+              color: isReady ? '#000' : '#888',
+              opacity: isReady ? 1 : 0.7,
+              cursor: isReady ? 'pointer' : 'not-allowed',
             }}
-          />
-          <input
-            type="text"
-            placeholder="MM"
-            value={month}
-            onChange={handleMonthChange}
-            maxLength={2}
-            style={{
-              width: 56,
-              height: 56,
-              background: '#232323',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 16,
-              textAlign: 'center',
-              fontSize: 17,
-              fontWeight: 600,
-              fontFamily: "'Roboto Serif', serif",
-              outline: 'none',
-              boxShadow: 'none',
-              margin: 0,
-              padding: 0,
-              letterSpacing: '0',
-            }}
-          />
-          <input
-            type="text"
-            placeholder="YYYY"
-            value={year}
-            onChange={handleYearChange}
-            maxLength={4}
-            style={{
-              width: 80,
-              height: 56,
-              background: '#232323',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 16,
-              textAlign: 'center',
-              fontSize: 17,
-              fontWeight: 600,
-              fontFamily: "'Roboto Serif', serif",
-              outline: 'none',
-              boxShadow: 'none',
-              margin: 0,
-              padding: 0,
-              letterSpacing: '0',
-            }}
-          />
+          >
+            Continue
+          </button>
         </div>
       </div>
-
-      {/* Continue Button */}
-      <div style={{ position: 'absolute', bottom: 24, left: 16, right: 16 }}>
-        <button
-          onClick={() => onContinue({ day, month, year })}
-          disabled={!isDateValid()}
-          style={{
-            width: '100%',
-            padding: '16px 0',
-            borderRadius: 999,
-            fontSize: 18,
-            fontWeight: 600,
-            fontFamily: "'Roboto Serif', serif",
-            background: isDateValid() ? '#22FF88' : '#232323',
-            color: isDateValid() ? '#000' : '#888',
-            border: 'none',
-            opacity: isDateValid() ? 1 : 0.7,
-            transition: 'background 0.2s',
-            cursor: isDateValid() ? 'pointer' : 'not-allowed',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          }}
-        >
-          Continue
-        </button>
-      </div>
-      </div>
-    </ScaledCanvas>
+    </div>
   )
 }

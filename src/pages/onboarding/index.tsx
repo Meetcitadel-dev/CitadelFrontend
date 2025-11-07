@@ -7,6 +7,7 @@ import UniversitySelectionScreen from "../../components/Onboarding/university-se
 import EmailInputScreen from "../../components/Onboarding/email-input-screen"
 import OTPInputScreen from "../../components/Onboarding/otp-input-screen"
 import GenderSelectionScreen from "../../components/Onboarding/gender-selection-screen"
+import DateOfBirthScreen from "../../components/Onboarding/date-of-birth-screen"
 import UploadScreen from "../../components/Onboarding/UploadProfile/uploadscreen"
 import FindFriendsScreen from "../../components/Onboarding/find-friends-screen"
 import BestFriendsScreen from "../../components/Onboarding/best-friends-screen"
@@ -25,6 +26,7 @@ export default function App() {
   const [showEmailScreen, setShowEmailScreen] = useState(false)
   const [showOTPScreen, setShowOTPScreen] = useState(false)
   const [showGenderScreen, setShowGenderScreen] = useState(false)
+  const [showDateOfBirthScreen, setShowDateOfBirthScreen] = useState(false)
   const [showDegreeScreen, setShowDegreeScreen] = useState(false)
   const [showUploadScreen, setShowUploadScreen] = useState(false)
   const [showAllowScreen, setShowAllowScreen] = useState(false)
@@ -185,9 +187,14 @@ export default function App() {
     setShowOTPScreen(true);
   };
 
+  const handleDateOfBirthBack = () => {
+    setShowDateOfBirthScreen(false);
+    setShowGenderScreen(true);
+  };
+
   const handleDegreeBack = () => {
     setShowDegreeScreen(false);
-    setShowGenderScreen(true);
+    setShowDateOfBirthScreen(true);
   };
 
   const handleOTPComplete = async () => {
@@ -214,10 +221,18 @@ export default function App() {
     }
   };
 
-  const handleGenderComplete = (gender: string) => {
-    console.log('Gender collected:', gender);
-    setOnboardingData((prev: any) => ({ ...prev, gender }));
+  const handleGenderComplete = ({ name, gender }: { name: string; gender: string }) => {
+    console.log('Gender collected:', gender, 'Name collected:', name);
+    setOnboardingData((prev: any) => ({ ...prev, gender, name }));
     setShowGenderScreen(false);
+    setShowDateOfBirthScreen(true);
+  };
+
+  const handleDateOfBirthComplete = ({ day, month, year }: { day: string; month: string; year: string }) => {
+    const dob = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    console.log('Date of birth collected:', dob);
+    setOnboardingData((prev: any) => ({ ...prev, dob }));
+    setShowDateOfBirthScreen(false);
     setShowDegreeScreen(true);
   };
 
@@ -409,7 +424,21 @@ export default function App() {
   }
 
   if (showGenderScreen) {
-    return <GenderSelectionScreen value={onboardingData.gender} onContinue={handleGenderComplete} onBack={handleGenderBack} />;
+    return <GenderSelectionScreen value={onboardingData.gender} nameValue={onboardingData.name} onContinue={handleGenderComplete} onBack={handleGenderBack} />;
+  }
+
+  if (showDateOfBirthScreen) {
+    const dobValue = onboardingData.dob 
+      ? (() => {
+          const date = new Date(onboardingData.dob);
+          return {
+            day: String(date.getDate()).padStart(2, '0'),
+            month: String(date.getMonth() + 1).padStart(2, '0'),
+            year: String(date.getFullYear())
+          };
+        })()
+      : undefined;
+    return <DateOfBirthScreen value={dobValue} onContinue={handleDateOfBirthComplete} onBack={handleDateOfBirthBack} />;
   }
 
   if (showOTPScreen) {

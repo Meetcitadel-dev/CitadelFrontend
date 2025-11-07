@@ -70,7 +70,7 @@ export default function UniversitySelectionScreen({ value, onContinue, onBack }:
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md mx-auto h-screen flex flex-col relative" style={{ fontFamily: "'Roboto Serif', serif" }}>
+      <div className="w-full max-w-[393px] mx-auto h-screen flex flex-col relative" style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
       <div className="flex items-center px-2 pt-8 h-14">
         <button
@@ -84,41 +84,45 @@ export default function UniversitySelectionScreen({ value, onContinue, onBack }:
       </div>
 
       {/* Title */}
-      <div className="px-2 mt-8 mb-6">
-        <h1 className="text-4xl font-bold m-0 text-left bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent" style={{ fontFamily: "'Roboto Serif', serif", letterSpacing: '-1px' }}>
+      <div className="px-2 mt-6 mb-5">
+        <h1 className="m-0 text-left" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 36, lineHeight: '44px', color: '#FFFFFF' }}>
           Your university
         </h1>
-        <p className="text-gray-400 text-sm mt-2 mb-0">Search and select your institution</p>
+        {/* <p className="text-gray-400 text-sm mt-2 mb-0">Search and select your institution</p> */}
       </div>
 
       {/* Search Input */}
       <div className="px-2 mb-4">
-        <div className="relative">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-            <Search size={22} color="#22C55E" strokeWidth={2.5} />
+        <div className="relative w-full h-[76px] bg-[#000000] rounded-[0px] flex items-center">
+          <div className="absolute left-6 top-1/2 -translate-y-1/2 pointer-events-none">
+            <Search size={22} color="rgba(255,255,255,0.7)" strokeWidth={2.2} />
           </div>
           <input
             ref={inputRef}
             type="text"
-            placeholder="Type to search..."
+            placeholder="Search colleges"
             value={searchTerm}
             onChange={handleInputChange}
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
-            className="w-full bg-[#1a1a1a] rounded-2xl border-2 border-gray-800 py-4 px-5 pl-14 text-white text-base outline-none transition-all duration-200 focus:border-green-500 focus:bg-[#232323] placeholder:text-gray-500"
+            className="w-full h-[56px] rounded-[24px] bg-[#2B2B2B] outline-none border-0 text-white placeholder-white/70 pl-14 pr-4 mx-2"
             style={{
-              fontFamily: "'Roboto Serif', serif",
-              fontSize: 16,
+              border: 'none',
+              outline: 'none',
+              boxSizing: 'border-box',
+              fontFamily: "'Inter', sans-serif",
+              fontSize: 20,
               fontWeight: 400,
-              letterSpacing: '-0.3px',
+              letterSpacing: '0px',
+              borderRadius: 10,
             }}
           />
         </div>
         {/* Dropdown */}
         {showDropdown && (
-          <div className="absolute left-2 right-2 bg-[#1a1a1a] border-2 border-gray-800 rounded-2xl mt-2 max-h-96 overflow-y-auto z-20 shadow-2xl backdrop-blur-sm">
+          <div className="absolute left-2 right-2 bg-[#101010] border border-[#1F1F1F] rounded-2xl mt-2 max-h-96 overflow-y-auto z-20 shadow-lg">
             {isLoading && (
-              <div className="flex items-center gap-3 p-5 text-gray-400">
+              <div className="flex items-center gap-3 p-5 text-gray-400" style={{ fontFamily: "'Inter', sans-serif", borderBottom: '1px solid #2F2F2F' }}>
                 <div className="w-5 h-5 border-2 border-gray-600 border-t-green-500 rounded-full animate-spin"></div>
                 <span className="text-sm">Searching universities...</span>
               </div>
@@ -147,7 +151,7 @@ export default function UniversitySelectionScreen({ value, onContinue, onBack }:
                 <p className="text-gray-400 text-sm">Type at least 2 characters to search</p>
               </div>
             )}
-            <div className="divide-y divide-gray-800">
+            <div>
               {universities.map((university: any) => (
                 <button
                   key={university.id}
@@ -155,57 +159,36 @@ export default function UniversitySelectionScreen({ value, onContinue, onBack }:
                     e.preventDefault()
                     handleUniversitySelect(university)
                   }}
-                  className="w-full text-left py-4 px-5 text-white bg-transparent border-none cursor-pointer hover:bg-green-500/10 transition-all duration-200 group"
+                  className="w-full text-left py-3 px-4 text-white bg-transparent border-none cursor-pointer hover:bg-white/10 transition-all duration-150"
                   style={{
-                    fontFamily: "'Roboto Serif', serif",
+                    fontFamily: "'Inter', sans-serif",
+                    borderBottom: '1px solid #2F2F2F'
                   }}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm">
-                        {university.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="text-base font-semibold m-0 group-hover:text-green-400 transition-colors">{university.name}</p>
-                        {university.location && (
-                          <p className="text-xs text-gray-500 m-0 mt-1">{university.location}</p>
-                        )}
-                      </div>
-                    </div>
-                    <svg className="opacity-0 group-hover:opacity-100 transition-opacity" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <path d="M7 10L9 12L13 8" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
+                  <p className="text-base font-semibold m-0">{university.name}</p>
                 </button>
               ))}
+              <div style={{ height: 1, backgroundColor: '#2F2F2F' }} />
             </div>
           </div>
         )}
       </div>
 
       {/* Selected University Display */}
-      {selectedUniversity && (
+      {/* {selectedUniversity && (
         <div className="px-2 mt-6">
-          <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-2 border-green-500/50 rounded-2xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                {selectedUniversity.name.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-green-400 font-semibold mb-1">SELECTED</p>
-                <p className="text-white font-bold text-base m-0">{selectedUniversity.name}</p>
-                {selectedUniversity.location && (
-                  <p className="text-gray-400 text-xs m-0 mt-1">{selectedUniversity.location}</p>
-                )}
-              </div>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" fill="#22C55E"/>
-                <path d="M8 12L11 15L16 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
+          <div className="border border-[#1F1F1F] rounded-2xl p-4 bg-[#101010]">
+            <p className="text-white font-semibold text-base m-0" style={{ fontFamily: "'Inter', sans-serif" }}>
+              {selectedUniversity.name}
+            </p>
+            {selectedUniversity.location && (
+              <p className="text-gray-500 text-sm m-0 mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                {selectedUniversity.location}
+              </p>
+            )}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Continue Button */}
       <div className="absolute bottom-6 left-2 right-2">
@@ -214,18 +197,19 @@ export default function UniversitySelectionScreen({ value, onContinue, onBack }:
           disabled={!selectedUniversity}
           className="w-full py-5 rounded-2xl text-lg font-bold border-none transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
           style={{
-            fontFamily: "'Roboto Serif', serif",
+            fontFamily: "'Inter', sans-serif",
             background: selectedUniversity
               ? 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)'
               : '#1a1a1a',
-            color: selectedUniversity ? '#000' : '#555',
+            color: selectedUniversity ? '#000' : 'black',
             cursor: selectedUniversity ? 'pointer' : 'not-allowed',
             boxShadow: selectedUniversity
               ? '0 8px 24px rgba(34, 197, 94, 0.4)'
               : '0 4px 12px rgba(0,0,0,0.2)',
+            borderRadius: 50,
           }}
         >
-          {selectedUniversity ? '✓ Continue' : 'Select a university'}
+          Continue
         </button>
       </div>
       </div>

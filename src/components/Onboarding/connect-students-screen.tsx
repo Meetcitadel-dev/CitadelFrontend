@@ -11,14 +11,14 @@ interface ConnectStudentsScreenProps {
 
 export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectStudentsScreenProps) {
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
+    <div className="min-h-screen bg-black relative overflow-hidden flex justify-center">
       {/* Main vertical layout */}
-      <div className="mx-auto h-screen w-full max-w-md flex flex-col items-center justify-between px-4 pt-6 pb-36 sm:pb-40">
+      <div className="relative h-screen w-full max-w-[393px] flex flex-col items-center justify-between px-6 pt-6 pb-36 sm:pb-40">
       {/* Profile Images Container */}
       <div
         className="relative w-[73%] max-w-[286px]"
         style={{
-          height: '345px',
+          aspectRatio: '286 / 345',
           zIndex: 10
         }}
       >
@@ -94,13 +94,14 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
       </div>
 
       {/* Text Container */}
-      <div className="w-full max-w-[344px] text-center z-10">
+      <div className="w-full max-w-[344px] text-center z-10 px-2">
         <h1
           className="text-white text-center text-[28px] sm:text-4xl font-bold leading-[1.1]"
           style={{
             fontFamily: '"Roboto Serif"',
             margin: 0,
-            padding: 0
+            padding: 0,
+            fontSize: '28px'
           }}
         >
           Connect with<br />
@@ -110,7 +111,19 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
       </div>
 
       {/* Bottom CTA */}
-      <div className="w-full max-w-[344px] flex flex-col items-center gap-4 z-10">
+      <div className="w-full max-w-[344px] flex flex-col items-center gap-4 z-10 px-6">
+        {/* Let's go Button */}
+        <div className="w-full">
+          <button
+            onClick={onContinue}
+            className="w-full h-[50px] rounded-[48px] bg-[#1BEA7B] text-black text-base font-semibold flex items-center justify-center cursor-pointer border-none hover:bg-[#17d66e] transition-colors"
+            style={{
+              fontFamily: 'Inter'
+            }}
+          >
+            Let's go
+          </button>
+        </div>
         {/* Login Link */}
         <div className="text-center">
         <span
@@ -132,18 +145,7 @@ export default function ConnectStudentsScreen({ onContinue, onLogin }: ConnectSt
         </span>
         </div>
 
-        {/* Let's go Button */}
-        <div className="w-full max-w-[238px]">
-          <button
-            onClick={onContinue}
-            className="w-full h-[50px] rounded-[48px] bg-[#1BEA7B] text-black text-base font-semibold flex items-center justify-center cursor-pointer border-none hover:bg-[#17d66e] transition-colors"
-            style={{
-              fontFamily: 'Inter'
-            }}
-          >
-            Let's go
-          </button>
-        </div>
+        
       </div>
 
       {/* Wavy Pattern at Bottom */}
