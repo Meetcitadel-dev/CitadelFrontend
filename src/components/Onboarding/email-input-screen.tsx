@@ -7,11 +7,12 @@ import { sendEmailOTP } from '@/lib/api'
 
 interface EmailInputScreenProps {
   value?: string
+  university?: { name: string; domain: string } | null
   onContinue: (email: string) => void
   onBack?: () => void
 }
 
-export default function EmailInputScreen({ value, onContinue, onBack }: EmailInputScreenProps) {
+export default function EmailInputScreen({ value, university, onContinue, onBack }: EmailInputScreenProps) {
   const [email, setEmail] = useState(value || "")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -25,13 +26,39 @@ export default function EmailInputScreen({ value, onContinue, onBack }: EmailInp
     return emailRegex.test(email)
   }
 
-  // Now: .edu or .org can be anywhere in the email, or whitelisted emails
-  const isCollegeEmail = (email: string) => {
+  // Extract domain from email
+  const getEmailDomain = (email: string): string | null => {
+    if (!isValidEmail(email)) return null
+    const parts = email.split('@')
+    return parts.length === 2 ? parts[1].toLowerCase() : null
+  }
+
+  // Check if email domain matches university domain
+  const doesEmailMatchUniversity = (email: string): boolean => {
     // Check if email is whitelisted first
     if (WHITELISTED_EMAILS.includes(email.toLowerCase())) {
       return true;
     }
-    return isValidEmail(email) && (email.includes('.edu') || email.includes('.org'))
+    
+    // If no university selected, fall back to old validation
+    if (!university || !university.domain) {
+      return isValidEmail(email) && (email.includes('.edu') || email.includes('.org'))
+    }
+
+    // Validate email format
+    if (!isValidEmail(email)) {
+      return false
+    }
+
+    // Extract domain from email
+    const emailDomain = getEmailDomain(email)
+    if (!emailDomain) {
+      return false
+    }
+
+    // Compare email domain with university domain (case-insensitive)
+    const universityDomain = university.domain.toLowerCase().trim()
+    return emailDomain === universityDomain
   }
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,12 +70,19 @@ export default function EmailInputScreen({ value, onContinue, onBack }: EmailInp
   const handleContinue = async () => {
     setError("")
     setSuccess("")
-    if (!isCollegeEmail(email)) {
-      setError("Please use your university email (.edu or .org)")
+    
+    if (!doesEmailMatchUniversity(email)) {
+      if (university && university.domain) {
+        setError(`Please use your ${university.name} email (${university.domain})`)
+      } else {
+        setError("Please use your university email (.edu or .org)")
+      }
       return
     }
+    
     setLoading(true)
     try {
+      // Try to send OTP - backend will check if email is already registered
       const res = await sendEmailOTP(email)
       if (res.success) {
         setSuccess("OTP sent to your university email.")
@@ -60,13 +94,29 @@ export default function EmailInputScreen({ value, onContinue, onBack }: EmailInp
         setError(res.message || "Failed to send OTP. Try again.")
       }
     } catch (err: any) {
-      setError(err.message || "Failed to send OTP. Try again.")
+      // Parse error message if it's JSON
+      let errorMessage = err.message || "Failed to send OTP. Try again."
+      try {
+        const parsedError = JSON.parse(errorMessage)
+        if (parsedError.message) {
+          errorMessage = parsedError.message
+        }
+      } catch {
+        // Error message is not JSON, use as is
+      }
+      
+      // Backend returns 409 if email is already registered
+      if (err.status === 409 || errorMessage.includes('already registered')) {
+        setError("This email is already registered. Please use login instead.")
+      } else {
+        setError(errorMessage)
+      }
     } finally {
       setLoading(false)
     }
   }
 
-  const isEmailComplete = email && isCollegeEmail(email)
+  const isEmailComplete = email && doesEmailMatchUniversity(email)
 
   return (
     <ScaledCanvas>
@@ -92,7 +142,7 @@ export default function EmailInputScreen({ value, onContinue, onBack }: EmailInp
       <div style={{ padding: '0 16px', marginBottom: 0 }}>
         <input
           type="email"
-          placeholder="Sign up with your university email ID"
+          placeholder={university && university.domain ? `Enter your ${university.name} email` : "Sign up with your university email ID"}
           value={email}
           onChange={handleEmailChange}
           style={{
@@ -111,6 +161,12 @@ export default function EmailInputScreen({ value, onContinue, onBack }: EmailInp
             letterSpacing: '-0.2px',
           }}
         />
+        {/* Hint about expected domain */}
+        {/* {university && university.domain && !error && !success && (
+          <div style={{ color: '#888', marginTop: 8, fontSize: 14 }}>
+            Expected domain: <span style={{ color: '#fff' }}>{university.domain}</span>
+          </div>
+        )} */}
         {/* Notification */}
         {error && <div style={{ color: '#ff5555', marginTop: 8 }}>{error}</div>}
         {success && <div style={{ color: '#22c55e', marginTop: 8 }}>{success}</div>}

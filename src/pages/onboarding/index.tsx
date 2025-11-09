@@ -446,7 +446,7 @@ export default function App() {
   }
 
   if (showEmailScreen) {
-    return <EmailInputScreen value={onboardingData.email} onContinue={handleEmailComplete} onBack={handleEmailBack} />;
+    return <EmailInputScreen value={onboardingData.email} university={onboardingData.university} onContinue={handleEmailComplete} onBack={handleEmailBack} />;
   }
 
   if (showLoginEmailScreen) {
