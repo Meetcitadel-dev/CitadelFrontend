@@ -9,9 +9,11 @@ import StarFilled from '@/assets/Star 1 (1).png'
 
 interface SlideToStartScreenProps {
   onSlideComplete: () => void
+  showLetsGoButton?: boolean
+  onLetsGoClick?: () => void
 }
 
-export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScreenProps) {
+export default function SlideToStartScreen({ onSlideComplete, showLetsGoButton = false, onLetsGoClick }: SlideToStartScreenProps) {
   const [slidePosition, setSlidePosition] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const sliderRef = useRef<HTMLDivElement>(null)
@@ -208,50 +210,63 @@ export default function SlideToStartScreen({ onSlideComplete }: SlideToStartScre
             <p className="text-white text-3xl sm:text-4xl font-semibold" style={{fontFamily: '"Roboto Serif", serif'}}>i'm good, wby?</p>
           </div>
 
-          {/* Slide to Start */}
+          {/* Slide to Start or Let's Go Button */}
           <div className="mb-6 w-full max-w-[365px]">
-            <div
-              ref={containerRef}
-              className="relative flex items-center px-2 w-full rounded-[45px] bg-[#161616]"
-              style={{
-                height: '84px'
-              }}
-            >
-              <div
-                ref={sliderRef}
-                className="absolute w-[75px] h-[75px] bg-green-400 rounded-full flex items-center justify-center cursor-pointer transition-transform duration-200 z-10"
-                style={{ transform: `translateX(${slidePosition}px)` }}
-                onMouseDown={handleMouseDown}
-                onTouchStart={handleTouchStart}
+            {showLetsGoButton ? (
+              <button
+                onClick={onLetsGoClick}
+                className="w-full py-5 rounded-[45px] bg-green-400 text-black font-semibold text-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 600
+                }}
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path
-                    d="M7.5 5L12.5 10L7.5 15"
-                    stroke="black"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                Let's Go
+              </button>
+            ) : (
+              <div
+                ref={containerRef}
+                className="relative flex items-center px-2 w-full rounded-[45px] bg-[#161616]"
+                style={{
+                  height: '84px'
+                }}
+              >
+                <div
+                  ref={sliderRef}
+                  className="absolute w-[75px] h-[75px] bg-green-400 rounded-full flex items-center justify-center cursor-pointer transition-transform duration-200 z-10"
+                  style={{ transform: `translateX(${slidePosition}px)` }}
+                  onMouseDown={handleMouseDown}
+                  onTouchStart={handleTouchStart}
+                >
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path
+                      d="M7.5 5L12.5 10L7.5 15"
+                      stroke="black"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <div className="flex-1 text-center">
+                  <span 
+                    style={{
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: '18px',
+                      fontStyle: 'normal',
+                      fontWeight: 500,
+                      lineHeight: '135%',
+                      background: 'linear-gradient(90deg, #CACACA 0%, #9A9A9A 100%)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent'
+                    }}
+                  >
+                    Slide to start
+                  </span>
+                </div>
               </div>
-                             <div className="flex-1 text-center">
-                 <span 
-                   style={{
-                     fontFamily: 'Inter, sans-serif',
-                     fontSize: '18px',
-                     fontStyle: 'normal',
-                     fontWeight: 500,
-                     lineHeight: '135%',
-                     background: 'linear-gradient(90deg, #CACACA 0%, #9A9A9A 100%)',
-                     backgroundClip: 'text',
-                     WebkitBackgroundClip: 'text',
-                     WebkitTextFillColor: 'transparent'
-                   }}
-                 >
-                   Slide to start
-                 </span>
-               </div>
-            </div>
+            )}
           </div>
 
           {/* Terms Text */}

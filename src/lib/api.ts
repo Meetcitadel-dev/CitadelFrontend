@@ -118,6 +118,38 @@ export function submitOnboardingData(data: any, token?: string) {
   );
 }
 
+// Get onboarding status
+export function getOnboardingStatus(token?: string) {
+  const authToken = token || getAuthToken();
+  return apiClient<{
+    success: boolean;
+    data: {
+      isProfileComplete: boolean;
+      onboardingStep?: string;
+      onboardingData?: any;
+    };
+  }>(
+    '/api/v1/onboarding/status',
+    {
+      method: 'GET',
+      token: authToken || undefined,
+    }
+  );
+}
+
+// Save onboarding progress
+export function saveOnboardingProgress(step: string, data?: any, token?: string) {
+  const authToken = token || getAuthToken();
+  return apiClient<{ success: boolean; message?: string }>(
+    '/api/v1/onboarding/progress',
+    {
+      method: 'POST',
+      body: { step, data },
+      token: authToken || undefined,
+    }
+  );
+}
+
 // Upload image to S3
 export async function uploadImage(file: File, token?: string) {
   const formData = new FormData();

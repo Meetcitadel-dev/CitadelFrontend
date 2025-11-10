@@ -14,7 +14,7 @@ import BestFriendsScreen from "../../components/Onboarding/best-friends-screen"
 import SuccessScreen from "../../components/Onboarding/success-screen"
 import DegreeSelection from "../../components/Onboarding/degree-selection"
 import LoginEmailScreen from "../../components/Onboarding/login-email-screen"
-import { submitOnboardingData, refreshAccessToken } from "@/lib/api";
+import { submitOnboardingData, refreshAccessToken, getOnboardingStatus, saveOnboardingProgress } from "@/lib/api";
 import { getAuthToken } from "@/lib/utils";
 
 export default function App() {
@@ -36,6 +36,8 @@ export default function App() {
   const [isLoginMode, setIsLoginMode] = useState(false)
   const [userEmail, setUserEmail] = useState("");
   const [onboardingData, setOnboardingData] = useState<any>({});
+  const [hasIncompleteOnboarding, setHasIncompleteOnboarding] = useState(false);
+  const [showLetsGoButton, setShowLetsGoButton] = useState(false);
 
   const navigate = useNavigate();
 
@@ -111,6 +113,33 @@ export default function App() {
     }
   }
 
+  // Check for incomplete onboarding
+  useEffect(() => {
+    const checkIncompleteOnboarding = async () => {
+      const token = getAuthToken();
+      if (!token) {
+        return;
+      }
+
+      try {
+        const status = await getOnboardingStatus(token);
+        if (status.success && status.data.onboardingStep && !status.data.isProfileComplete) {
+          // User has incomplete onboarding
+          setHasIncompleteOnboarding(true);
+          setShowLetsGoButton(true);
+          // Restore saved data
+          if (status.data.onboardingData) {
+            setOnboardingData(status.data.onboardingData);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+      }
+    };
+
+    checkIncompleteOnboarding();
+  }, []);
+
   // Immediately check auth on mount (no splash)
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -123,10 +152,81 @@ export default function App() {
 
   const handleSlideComplete = () => {
     setShowSlideScreen(false);
-    setShowConnectScreen(true);
-  }
+    if (hasIncompleteOnboarding) {
+      // Resume from saved step
+      resumeOnboarding();
+    } else {
+      setShowConnectScreen(true);
+    }
+  };
+
+  const handleLetsGoClick = () => {
+    setShowLetsGoButton(false);
+    resumeOnboarding();
+  };
+
+  const resumeOnboarding = () => {
+    const token = getAuthToken();
+    if (!token) {
+      setShowConnectScreen(true);
+      return;
+    }
+
+    // Get saved onboarding status
+    getOnboardingStatus(token).then(status => {
+      if (status.success && status.data.onboardingStep) {
+        const step = status.data.onboardingStep;
+        const savedData = status.data.onboardingData || {};
+
+        // Restore saved data
+        setOnboardingData(savedData);
+
+        // Navigate to the saved step
+        switch (step) {
+          case 'connect':
+            setShowConnectScreen(true);
+            break;
+          case 'university':
+            setShowUniversityScreen(true);
+            break;
+          case 'email':
+            setShowEmailScreen(true);
+            break;
+          case 'otp':
+            setUserEmail(savedData.email || '');
+            setShowOTPScreen(true);
+            break;
+          case 'gender':
+            setShowGenderScreen(true);
+            break;
+          case 'dob':
+            setShowDateOfBirthScreen(true);
+            break;
+          case 'degree':
+            setShowDegreeScreen(true);
+            break;
+          case 'upload':
+            setShowUploadScreen(true);
+            break;
+          case 'friends':
+            setShowAllowScreen(true);
+            break;
+          case 'bestFriends':
+            setShowBestFriendsScreen(true);
+            break;
+          default:
+            setShowConnectScreen(true);
+        }
+      } else {
+        setShowConnectScreen(true);
+      }
+    }).catch(() => {
+      setShowConnectScreen(true);
+    });
+  };
 
   const handleConnectComplete = () => {
+    saveProgress('university');
     setShowConnectScreen(false);
     setShowUniversityScreen(true);
   }
@@ -137,14 +237,30 @@ export default function App() {
     setShowLoginEmailScreen(true);
   }
 
+  // Helper function to save progress
+  const saveProgress = async (step: string, data?: any) => {
+    const token = getAuthToken();
+    if (token) {
+      try {
+        await saveOnboardingProgress(step, data || onboardingData, token);
+      } catch (error) {
+        console.error('Error saving progress:', error);
+      }
+    }
+  };
+
   // Update handlers to collect data from each step
   const handleUniversityComplete = (university: any) => {
-    setOnboardingData((prev: any) => ({ ...prev, university }));
+    const newData = { ...onboardingData, university };
+    setOnboardingData(newData);
+    saveProgress('email', newData);
     setShowUniversityScreen(false);
     setShowEmailScreen(true);
   };
   const handleEmailComplete = (email: string) => {
-    setOnboardingData((prev: any) => ({ ...prev, email }));
+    const newData = { ...onboardingData, email };
+    setOnboardingData(newData);
+    saveProgress('otp', newData);
     setShowEmailScreen(false);
     setUserEmail(email);
     setShowOTPScreen(true);
@@ -216,6 +332,7 @@ export default function App() {
       navigate('/explore');
     } else {
       // If we came from signup flow, continue to gender screen
+      saveProgress('gender');
       setShowOTPScreen(false);
       setShowGenderScreen(true);
     }
@@ -223,7 +340,9 @@ export default function App() {
 
   const handleGenderComplete = ({ name, gender }: { name: string; gender: string }) => {
     console.log('Gender collected:', gender, 'Name collected:', name);
-    setOnboardingData((prev: any) => ({ ...prev, gender, name }));
+    const newData = { ...onboardingData, gender, name };
+    setOnboardingData(newData);
+    saveProgress('dob', newData);
     setShowGenderScreen(false);
     setShowDateOfBirthScreen(true);
   };
@@ -231,22 +350,28 @@ export default function App() {
   const handleDateOfBirthComplete = ({ day, month, year }: { day: string; month: string; year: string }) => {
     const dob = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     console.log('Date of birth collected:', dob);
-    setOnboardingData((prev: any) => ({ ...prev, dob }));
+    const newData = { ...onboardingData, dob };
+    setOnboardingData(newData);
+    saveProgress('degree', newData);
     setShowDateOfBirthScreen(false);
     setShowDegreeScreen(true);
   };
 
   const handleDegreeComplete = (degree: string, year: string) => {
     console.log('Degree and year collected:', { degree, year });
-    setOnboardingData((prev: any) => ({ ...prev, degree, year }));
+    const newData = { ...onboardingData, degree, year };
+    setOnboardingData(newData);
+    saveProgress('upload', newData);
     setShowDegreeScreen(false);
     setShowUploadScreen(true);
   };
   
   const handleUploadComplete = (images?: any[]) => {
+    const newData = images ? { ...onboardingData, uploadedImages: images } : onboardingData;
     if (images) {
-      setOnboardingData((prev: any) => ({ ...prev, uploadedImages: images }));
+      setOnboardingData(newData);
     }
+    saveProgress('friends', newData);
     setShowUploadScreen(false);
     setShowAllowScreen(true);
   };
@@ -462,7 +587,13 @@ export default function App() {
   }
 
   if (showSlideScreen) {
-    return <SlideToStartScreen onSlideComplete={handleSlideComplete} />;
+    return (
+      <SlideToStartScreen 
+        onSlideComplete={handleSlideComplete}
+        showLetsGoButton={showLetsGoButton}
+        onLetsGoClick={handleLetsGoClick}
+      />
+    );
   }
 
   // No splash screens: default to slide screen
