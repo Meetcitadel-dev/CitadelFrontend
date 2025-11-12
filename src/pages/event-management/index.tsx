@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
 import { getAuthToken } from "@/lib/utils"
 import { 
   getAllEvents, 
@@ -11,10 +10,9 @@ import {
   type EventAttendee
 } from "@/lib/api"
 import { Calendar, MapPin, Users, DollarSign, Plus, Edit, Trash2, Eye, X, Check } from "lucide-react"
-import toast from "react-hot-toast"
+import { toast } from "react-hot-toast"
 
 export default function EventManagementPage() {
-  const navigate = useNavigate()
   const [events, setEvents] = useState<EventManagementEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
