@@ -11,9 +11,10 @@ interface OTPInputScreenProps {
   email: string
   onContinue: () => void
   onBack?: () => void
+  isLogin?: boolean
 }
 
-export default function OTPInputScreen({ email, onContinue, onBack }: OTPInputScreenProps) {
+export default function OTPInputScreen({ email, onContinue, onBack, isLogin }: OTPInputScreenProps) {
   const [otp, setOtp] = useState(["", "", "", ""])
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -56,7 +57,7 @@ export default function OTPInputScreen({ email, onContinue, onBack }: OTPInputSc
     setLoading(true)
     try {
       const code = otp.join("")
-      const res = await verifyOTP(email, code, false)
+      const res = await verifyOTP(email, code, { isLogin, rememberDevice: false })
       if (res.success) {
         // Store the access token from the tokens object
         if (res.tokens && res.tokens.accessToken) {
@@ -98,7 +99,7 @@ export default function OTPInputScreen({ email, onContinue, onBack }: OTPInputSc
     setError("")
     setSuccess("")
     try {
-      const res = await sendEmailOTP(email)
+      const res = await sendEmailOTP(email, { isLogin })
       if (!res.success) {
         throw new Error(res.message || 'Unable to resend OTP right now.')
       }

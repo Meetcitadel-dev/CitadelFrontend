@@ -30,6 +30,7 @@ import IntroSequencePage from "./pages/intro";
 import UserProfilePage from "./pages/profile";
 import EventHistoryPage from "./pages/event-history";
 import SettingsMobilePage from "./pages/settings-mobile";
+import EventManagementPage from "./pages/event-management";
 
 // Import test interface for development
 import TestInterface from "@/components/Testing/TestInterface";
@@ -167,6 +168,11 @@ export default function App() {
         <Route path="/event-history" element={
           <ResponsiveLayout>
             <EventHistoryPage />
+          </ResponsiveLayout>
+        } />
+        <Route path="/event-management" element={
+          <ResponsiveLayout>
+            <EventManagementPage />
           </ResponsiveLayout>
         } />
         <Route path="/search" element={

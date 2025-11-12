@@ -21,7 +21,7 @@ function getApiUrl(url: string) {
   
   // If base is not defined, use localhost:3001 as default (backend port)
   const apiBase = 'https://citadelbackend-3.onrender.com';
-  //const apiBase = 'http://localhost:3001';
+  // const apiBase = 'http://localhost:3001';
   
   // Otherwise, prepend base URL
   return apiBase.replace(/\/$/, '') + (url.startsWith('/') ? url : '/' + url);
@@ -126,8 +126,23 @@ export async function apiClient<T = any>(
     const res = await fetch(apiUrl, fetchOptions);
     if (!res.ok) {
       const errorText = await res.text();
-      const err: any = new Error(errorText || res.statusText);
+      let parsedError: any;
+      try {
+        parsedError = errorText ? JSON.parse(errorText) : undefined;
+      } catch (_) {
+        parsedError = undefined;
+      }
+      const message =
+        parsedError?.message ||
+        parsedError?.error ||
+        errorText ||
+        res.statusText ||
+        'Request failed';
+      const err: any = new Error(message);
       err.status = res.status;
+      if (parsedError) {
+        err.data = parsedError;
+      }
       throw err;
     }
     return res;

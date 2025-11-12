@@ -567,7 +567,7 @@ export default function App() {
   }
 
   if (showOTPScreen) {
-    return <OTPInputScreen email={userEmail} onContinue={handleOTPComplete} onBack={handleOTPBack} />;
+    return <OTPInputScreen email={userEmail} onContinue={handleOTPComplete} onBack={handleOTPBack} isLogin={isLoginMode} />;
   }
 
   if (showEmailScreen) {

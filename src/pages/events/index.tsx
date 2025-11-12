@@ -56,7 +56,14 @@ export default function DinnerBooking() {
   const checkPreferencesAndLoadEvents = async () => {
     try {
       const token = getAuthToken();
-      
+
+      if (!token) {
+        // If not logged in, still load events with default city
+        console.log('No token found, loading events with default city');
+        await loadEvents('New Delhi');
+        return;
+      }
+
       // Check if user has completed setup
       const prefsResponse = await apiClient<{
         success: boolean;
@@ -70,6 +77,8 @@ export default function DinnerBooking() {
         if (!prefsResponse.data.hasCompletedSetup) {
           // Show setup modal for first-time users
           setShowSetupModal(true);
+          // Still load events with default city
+          await loadEvents('New Delhi');
           setLoading(false);
           return;
         }
@@ -83,19 +92,22 @@ export default function DinnerBooking() {
         }
 
         // Load events based on preferences
-        await loadEvents(userCity);
+        await loadEvents(userCity, prefsResponse.data.preferences?.preferredAreas);
       }
     } catch (error) {
       console.error('Error checking preferences:', error);
+      // On error, still try to load events with default city
+      await loadEvents('New Delhi');
     } finally {
       setLoading(false);
     }
   };
 
-  const loadEvents = async (city?: string) => {
+  const loadEvents = async (city?: string, preferredAreasOverride?: string[] | null) => {
     try {
       const token = getAuthToken();
       const queryCity = city || preferences?.city || 'New Delhi';
+      const preferredAreasToUse = preferredAreasOverride ?? preferences?.preferredAreas ?? [];
       
       const response = await apiClient<{
         success: boolean;
@@ -106,7 +118,12 @@ export default function DinnerBooking() {
       });
 
       if (response.success) {
-        setEvents(response.data.events);
+        const fetchedEvents = response.data.events;
+        const filteredEvents =
+          preferredAreasToUse && preferredAreasToUse.length > 0
+            ? fetchedEvents.filter(event => preferredAreasToUse.includes(event.area))
+            : fetchedEvents;
+        setEvents(filteredEvents);
       }
     } catch (error) {
       console.error('Error loading events:', error);
@@ -136,11 +153,18 @@ export default function DinnerBooking() {
   };
 
   const handleBookSeat = () => {
-    if (selectedEvent) {
-      // Always show full setup flow when booking
-      setSetupMode('full');
-      setShowSetupModal(true);
+    if (!selectedEvent) {
+      return;
     }
+
+    if (selectedEvent.isBooked) {
+      alert('You have already booked this event!');
+      return;
+    }
+
+    // Always show full setup flow when booking
+    setSetupMode('full');
+    setShowSetupModal(true);
   };
 
   const handleChangeLocation = () => {
@@ -167,6 +191,9 @@ export default function DinnerBooking() {
       </div>
     );
   }
+
+  const selectedCity = preferences?.city || "Bangalore";
+  const primaryArea = preferences?.preferredAreas?.[0];
 
   // Main Booking Screen
   return (
@@ -202,8 +229,13 @@ export default function DinnerBooking() {
 
               {/* City Name */}
               <h2 className="text-white text-4xl font-bold text-center" style={{ fontFamily: 'serif' }}>
-                {preferences?.city || "Bangalore"}
+                {selectedCity}
               </h2>
+              {primaryArea && (
+                <p className="text-white/80 text-sm" style={{ fontFamily: 'Inter' }}>
+                  {primaryArea}
+                </p>
+              )}
 
               {/* Change Location */}
               <button
@@ -243,10 +275,13 @@ export default function DinnerBooking() {
                   <button
                     key={event.id}
                     onClick={() => handleEventSelect(event)}
+                    disabled={event.isBooked}
                     className={`w-full p-4 rounded-xl text-left transition-all ${
-                      selectedEvent?.id === event.id
-                        ? 'bg-white/10 border-2 border-white'
-                        : 'bg-white/5 border border-white/20'
+                      event.isBooked
+                        ? 'bg-white/5 border border-white/10 opacity-60 cursor-not-allowed'
+                        : selectedEvent?.id === event.id
+                          ? 'bg-white/10 border-2 border-white'
+                          : 'bg-white/5 border border-white/20'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -259,6 +294,11 @@ export default function DinnerBooking() {
                           })}
                         </div>
                         <div className="text-white/70 text-sm">{event.eventTime}</div>
+                        {event.isBooked && (
+                          <div className="mt-1 text-xs font-medium text-[#1BEA7B]">
+                            Already booked
+                          </div>
+                        )}
                       </div>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                         selectedEvent?.id === event.id ? 'border-white bg-white' : 'border-white/50'
@@ -333,6 +373,8 @@ export default function DinnerBooking() {
           mode={setupMode}
           onComplete={handleSetupComplete}
           onClose={() => setShowSetupModal(false)}
+          initialCity={preferences?.city}
+          initialAreas={preferences?.preferredAreas}
         />
       )}
 

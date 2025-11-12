@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import IndiaGate from '@/assets/unsplash_va77t8vGbJ8.png';
 import MumbaiGateway from '@/assets/gateway of mumbai stylized image.png';
 import BangaloreMonument from '@/assets/bangalore monument.png';
 
 interface CitySelectionProps {
   onSelect: (city: string) => void;
+  initialCity?: string;
 }
 
 const cities = [
@@ -13,8 +14,17 @@ const cities = [
   { id: 'mumbai', name: 'Mumbai', image: MumbaiGateway, available: false }
 ];
 
-export default function CitySelection({ onSelect }: CitySelectionProps) {
-  const [selectedCity, setSelectedCity] = useState('');
+export default function CitySelection({ onSelect, initialCity }: CitySelectionProps) {
+  const [selectedCity, setSelectedCity] = useState(initialCity || '');
+
+  useEffect(() => {
+    if (!initialCity) {
+      setSelectedCity('');
+      return;
+    }
+    const exists = cities.some(city => city.name === initialCity);
+    setSelectedCity(exists ? initialCity : '');
+  }, [initialCity]);
 
   const handleCityClick = (cityName: string) => {
     setSelectedCity(cityName);

@@ -47,23 +47,51 @@ export default function LoginEmailScreen({ onContinue, onBack }: LoginEmailScree
     setLoading(true)
     try {
       const res = await checkUserExists(email)
-      if (res.success && res.user) {
+      const message = res?.message?.toLowerCase() || ""
+      const userExists = (res.success && res.user) || message.includes("already registered")
+      if (userExists) {
         setSuccess("User found! Sending OTP...")
         // Send OTP after confirming user exists
-        const otpRes = await sendEmailOTP(email)
+        const otpRes = await sendEmailOTP(email, { isLogin: true })
         if (otpRes.success) {
           setTimeout(() => {
             setSuccess("")
             onContinue(email)
           }, 1000)
         } else {
-          setError(otpRes.message || "Failed to send OTP. Try again.")
+          const otpMessage = otpRes.message || "Failed to send OTP. Try again."
+          const lowerOtpMessage = otpMessage.toLowerCase()
+          if (lowerOtpMessage.includes("too many requests")) {
+            setError("We just sent you an OTP. Please wait a minute before requesting another one.")
+          } else if (lowerOtpMessage.includes("not found")) {
+            setError("We couldn't find an account with this email. Please sign up first.")
+          } else {
+            setError(otpMessage)
+          }
+          setSuccess("")
         }
       } else {
-        setError("No account found with this email. Please sign up instead.")
+        setError("We couldn't find an account with this email. Please sign up first.")
+        setSuccess("")
       }
     } catch (err: any) {
-      setError(err.message || "Failed to check user. Try again.")
+      let message = err?.message || err?.data?.message || "Failed to check user. Try again."
+      if (typeof message === "string" && message.trim().startsWith("{")) {
+        try {
+          const parsed = JSON.parse(message)
+          message = parsed?.message || parsed?.error || message
+        } catch (_) {
+          // ignore
+        }
+      }
+      const normalized = typeof message === "string" ? message : "Failed to check user. Try again."
+      const lowered = normalized.toLowerCase()
+      if (lowered.includes("too many requests")) {
+        setError("We just sent you an OTP. Please wait a minute before requesting another one.")
+      } else {
+        setError(normalized)
+      }
+      setSuccess("")
     } finally {
       setLoading(false)
     }

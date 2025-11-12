@@ -39,18 +39,34 @@ export function checkUserExists(email: string) {
 }
 
 // Send email for OTP
-export function sendEmailOTP(email: string) {
+export function sendEmailOTP(email: string, options?: { isLogin?: boolean }) {
+  const body: Record<string, any> = { email };
+  if (options?.isLogin) {
+    body.isLogin = true;
+  }
   return apiClient<{ success: boolean; message?: string }>(
     '/api/v1/auth/send-otp',
     {
       method: 'POST',
-      body: { email },
+      body,
     }
   );
 }
 
 // Verify OTP (4 digits)
-export async function verifyOTP(email: string, otp: string, rememberDevice?: boolean) {
+export async function verifyOTP(
+  email: string,
+  otp: string,
+  options?: { rememberDevice?: boolean; isLogin?: boolean }
+) {
+  const body: Record<string, any> = {
+    email,
+    otp,
+    rememberDevice: !!options?.rememberDevice,
+  };
+  if (options?.isLogin) {
+    body.isLogin = true;
+  }
   const res = await apiClient<{ 
     success: boolean; 
     message?: string; 
@@ -69,7 +85,7 @@ export async function verifyOTP(email: string, otp: string, rememberDevice?: boo
     {
       method: 'POST',
       // Pass rememberDevice to set trusted-device cookie for 7 days (backend-controlled)
-      body: { email, otp, rememberDevice: !!rememberDevice },
+      body,
       withCredentials: true,
     }
   );
@@ -1081,4 +1097,147 @@ export function leaveGroupChat(groupId: string, token?: string) {
       token,
     }
   );
-} 
+}
+
+/* ----------------------------- EVENT MANAGEMENT APIs ---------------------------- */
+
+export interface EventManagementEvent {
+  id: string;
+  eventDate: string;
+  eventTime: string;
+  city: string;
+  area: string;
+  venue?: string;
+  venueAddress?: string;
+  venueDetails?: string;
+  maxAttendees: number;
+  currentAttendees: number;
+  bookingFee: number;
+  status: 'upcoming' | 'full' | 'completed' | 'cancelled';
+  groupChatId?: string;
+  groupChatCreated: boolean;
+  createdAt: string;
+  updatedAt: string;
+  confirmedBookings?: number;
+}
+
+export interface EventAttendee {
+  bookingId: string;
+  userId: string;
+  userName: string;
+  userEmail?: string;
+  userPhone?: string;
+  bookingDate: string;
+  paymentAmount: number;
+  paymentMethod: string;
+  paymentGateway: string;
+  paymentStatus: string;
+}
+
+// Get all events with filters
+export function getAllEvents(params?: {
+  status?: string;
+  city?: string;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
+}, token?: string) {
+  const query = new URLSearchParams();
+  if (params?.status) query.append('status', params.status);
+  if (params?.city) query.append('city', params.city);
+  if (params?.startDate) query.append('startDate', params.startDate);
+  if (params?.endDate) query.append('endDate', params.endDate);
+  if (params?.page) query.append('page', params.page.toString());
+  if (params?.limit) query.append('limit', params.limit.toString());
+
+  const url = '/api/v1/event-management' + (query.toString() ? `?${query.toString()}` : '');
+
+  return apiClient<{
+    success: boolean;
+    data: {
+      events: EventManagementEvent[];
+      pagination: {
+        currentPage: number;
+        totalPages: number;
+        totalEvents: number;
+        eventsPerPage: number;
+      };
+    };
+  }>(url, { token });
+}
+
+// Create a new event
+export function createEvent(eventData: {
+  eventDate: string;
+  eventTime: string;
+  city: string;
+  area: string;
+  venue?: string;
+  venueAddress?: string;
+  venueDetails?: string;
+  maxAttendees?: number;
+  bookingFee: number;
+}, token?: string) {
+  return apiClient<{
+    success: boolean;
+    message: string;
+    data: EventManagementEvent;
+  }>('/api/v1/event-management', {
+    method: 'POST',
+    body: eventData,
+    token,
+  });
+}
+
+// Update an event
+export function updateEvent(eventId: string, eventData: {
+  eventDate?: string;
+  eventTime?: string;
+  city?: string;
+  area?: string;
+  venue?: string;
+  venueAddress?: string;
+  venueDetails?: string;
+  maxAttendees?: number;
+  bookingFee?: number;
+  status?: string;
+}, token?: string) {
+  return apiClient<{
+    success: boolean;
+    message: string;
+    data: EventManagementEvent;
+  }>(`/api/v1/event-management/${eventId}`, {
+    method: 'PUT',
+    body: eventData,
+    token,
+  });
+}
+
+// Delete an event
+export function deleteEvent(eventId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    message: string;
+  }>(`/api/v1/event-management/${eventId}`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
+// Get event attendees
+export function getEventAttendees(eventId: string, token?: string) {
+  return apiClient<{
+    success: boolean;
+    data: {
+      eventId: string;
+      eventDate: string;
+      eventTime: string;
+      city: string;
+      area: string;
+      maxAttendees: number;
+      currentAttendees: number;
+      attendees: EventAttendee[];
+    };
+  }>(`/api/v1/event-management/${eventId}/attendees`, { token });
+}

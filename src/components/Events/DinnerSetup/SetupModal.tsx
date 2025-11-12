@@ -11,15 +11,17 @@ interface SetupModalProps {
   mode: 'full' | 'location-only';
   onComplete: () => void;
   onClose: () => void;
+  initialCity?: string | null;
+  initialAreas?: string[] | null;
 }
 
 type SetupStep = 'city' | 'area' | 'preferences' | 'matching';
 
-export default function SetupModal({ mode, onComplete, onClose }: SetupModalProps) {
+export default function SetupModal({ mode, onComplete, onClose, initialCity, initialAreas }: SetupModalProps) {
   const [currentStep, setCurrentStep] = useState<SetupStep>('city');
   const [setupData, setSetupData] = useState({
-    city: '',
-    preferredAreas: [] as string[],
+    city: initialCity || '',
+    preferredAreas: (initialAreas || []) as string[],
     budget: '',
     language: [] as string[],
     dietaryRestriction: '',
@@ -28,11 +30,11 @@ export default function SetupModal({ mode, onComplete, onClose }: SetupModalProp
   });
 
   const handleCitySelect = (city: string) => {
-    setSetupData(prev => ({ ...prev, city }));
+    setSetupData(prev => ({ ...prev, city, preferredAreas: [] }));
     setCurrentStep('area');
   };
 
-  const handleAreaSelect = async (areas: string[]) => {
+  const handleAreaSelect = async (areas: string[], cityOverride?: string) => {
     setSetupData(prev => ({ ...prev, preferredAreas: areas }));
 
     // If mode is 'location-only', update location and complete
@@ -46,11 +48,13 @@ export default function SetupModal({ mode, onComplete, onClose }: SetupModalProp
         }
 
         // Update user preferences with new city and areas
+        const cityToUse = cityOverride || setupData.city;
+
         const response = await apiClient('/api/v1/dinner-preferences', {
           method: 'PATCH',
           token,
           body: {
-            city: setupData.city,
+            city: cityToUse,
             preferredAreas: areas
           }
         });
@@ -104,13 +108,14 @@ export default function SetupModal({ mode, onComplete, onClose }: SetupModalProp
         {/* Content */}
         <div className="p-6">
           {currentStep === 'city' && (
-            <CitySelection onSelect={handleCitySelect} />
+            <CitySelection onSelect={handleCitySelect} initialCity={setupData.city} />
           )}
           {currentStep === 'area' && (
             <AreaSelection
               city={setupData.city}
-              onSelect={handleAreaSelect}
+              onSelect={(areas) => handleAreaSelect(areas, setupData.city)}
               onBack={handleBack}
+              initialSelectedAreas={setupData.preferredAreas}
             />
           )}
           {currentStep === 'preferences' && (
