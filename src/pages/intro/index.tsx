@@ -212,8 +212,12 @@ export default function IntroSequencePage() {
   
 
   return (
-    <div className="h-screen w-screen flex flex-col">
-      {renderContent()}
+    <div className="min-h-screen w-full bg-black flex items-center justify-center p-4">
+      <div className="w-[390px] h-[844px] bg-black rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
+        <div className="flex flex-col h-full">
+          {renderContent()}
+        </div>
+      </div>
     </div>
   );
 }
